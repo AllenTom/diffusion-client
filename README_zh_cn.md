@@ -1,20 +1,19 @@
 # Diffusion
-[English](#) | [简体中文](./README_zh_cn.md)
+[English](README.md) | [简体中文](#)
 
+支持 Android 的功能丰富Stable-diffusion-webui 客户端
 
-a powerful stable-diffusion-webui client for android
-
-## Feature
-- text to image
-- image to image
+## 功能
+- 文生图
+- 图生图
 - control net
 - lora
-- history management
-- model management
-- tag from image
-- extra image
-- link model to civitai model
-## Preview
+- 生成历史记录管理
+- 模型管理
+- 图片反推
+- 超分
+- 从 civitai 下载元信息
+## 预览
 <p float="left">
   <img src="./assets/preview_draw.jpg" width="100" />
   <img src="./assets/preview_history.jpg" width="100" /> 
@@ -23,12 +22,12 @@ a powerful stable-diffusion-webui client for android
   <img src="./assets/preview_tools.jpg" width="100" /> 
 </p>
 
-## Enhance (Optional)
-install stable diffusion web ui plugin for more auto match model with civitai model.
+## 增强 (可选)
+配合使用 stable-diffusion-webui 插件可以使用更多功能
 
 [diffusion-extension](https://github.com/AllenTom/diffusion-extension.git)
 
-in stable-diffusion-webui extensions run command
+在相应的插件目录中执行命令进行下载
 
 ```bash
 git clone https://github.com/AllenTom/diffusion-extension.git
