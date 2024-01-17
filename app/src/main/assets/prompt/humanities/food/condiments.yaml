@@ -1,0 +1,71 @@
+name: 调味料
+category:
+  - 人文景观
+  - 食物
+content:
+  furikake:
+    name: 拌饭素
+    wikiURL: https://danbooru.donmai.us/wiki_pages/furikake.html
+  honey:
+    name: 蜂蜜
+    wikiURL: https://danbooru.donmai.us/wiki_pages/honey.html
+  jam:
+    name: 果酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/jam.html
+  marmalade:
+    name: 果酱/橘子酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/marmalade.html
+  ketchup:
+    name: 番茄酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/ketchup.html
+    image: a6ea43347f3deccb815d858087c8d79dea2847f7240b6a9ac680bff8f0b94212
+  mayonnaise:
+    name: 蛋黄酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/mayonnaise.html
+  mustard:
+    name: 芥末
+    wikiURL: https://danbooru.donmai.us/wiki_pages/mustard.html
+  peanut butter:
+    name: 花生酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/peanut_butter.html
+    image: 588c657bf50b87f1e741e87ac33c3c097e74a7318b081e586259cbab676faff9
+  pepper shaker:
+    name: 胡椒
+    alias:
+      - black pepper
+    wikiURL: https://danbooru.donmai.us/wiki_pages/pepper_shaker.html
+    image: fa36f6aa33b24e43ebcb184c56c93d38648e74501d23c03672defc3d88c4c4de
+  salt shaker:
+    name: 撒盐瓶子
+    wikiURL: https://danbooru.donmai.us/wiki_pages/salt_shaker.html
+  sauce:
+    name: 酱汁
+    wikiURL: https://danbooru.donmai.us/wiki_pages/sauce.html
+  hot sauce:
+    name: 辣酱
+  soy sauce:
+    name: 酱油
+    wikiURL: https://danbooru.donmai.us/wiki_pages/soy_sauce.html
+  sugar (food):
+    name: 粉状糖（食物）
+    wikiURL: https://danbooru.donmai.us/wiki_pages/sugar_(food).html
+  sugar cube:
+    name: 方糖
+    wikiURL: https://danbooru.donmai.us/wiki_pages/sugar_cube.html
+    alias:
+      - sugar cubes
+      - sugar cube (object)
+  wasabi:
+    name: 芥末
+    wikiURL: https://danbooru.donmai.us/wiki_pages/wasabi.html
+  syrup:
+    name: 果酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/syrup.html
+  chocolate syrup:
+    name: 巧克力酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/chocolate_syrup.html
+    image: 785eaf45b56f521345ad6afe1f77298f0ea4bf97818e44d95ae33b1e670680bb
+  strawberry syrup:
+    name: 草莓酱
+    wikiURL: https://danbooru.donmai.us/wiki_pages/strawberry_syrup.html
+    image: 3f889ec9d0930c5033f282b6562f9385a633285e7f3840d124a5c651b8eafff5
