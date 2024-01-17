@@ -22,6 +22,9 @@
   <img src="./assets/preview_tools.jpg" width="100" /> 
 </p>
 
+## 下载
+可以从 [release page](https://github.com/AllenTom/diffusion-client/releases)下载
+
 ## 增强 (可选)
 配合使用 stable-diffusion-webui 插件可以使用更多功能
 

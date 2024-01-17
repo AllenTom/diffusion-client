@@ -23,6 +23,9 @@ a powerful stable-diffusion-webui client for android
   <img src="./assets/preview_tools.jpg" width="100" /> 
 </p>
 
+## Download
+download from [release page](https://github.com/AllenTom/diffusion-client/releases)
+
 ## Enhance (Optional)
 install stable diffusion web ui plugin for more auto match model with civitai model.
 
