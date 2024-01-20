@@ -25,6 +25,8 @@ object LoraDetailViewModel {
 
     var civitaiModel by mutableStateOf<CivitaiModel?>(null)
 
+    var isCivitaiModelLoading by mutableStateOf(false)
+
     var selectedTabIndex by mutableStateOf(0)
 
     fun asNew() {

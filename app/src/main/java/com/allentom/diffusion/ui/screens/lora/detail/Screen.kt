@@ -86,9 +86,6 @@ fun LoraDetailScreen(
         mutableStateOf(false)
     }
     val filterIcon = ImageVector.vectorResource(id = R.drawable.ic_filter)
-    var isCivitaiModelLoading by remember {
-        mutableStateOf(false)
-    }
     var civitaiModelLoadingError by remember {
         mutableStateOf<String?>(null)
     }
@@ -124,12 +121,12 @@ fun LoraDetailScreen(
         if (LoraDetailViewModel.civitaiModel != null) {
             return
         }
+        LoraDetailViewModel.isCivitaiModelLoading = true
         scope.launch(Dispatchers.IO) {
             currentPreviewIndex = 0
             LoraDetailViewModel.loraModel = PromptStore.getLoraPromptWithRelate(context, id)
             LoraDetailViewModel.loraModel?.loraPrompt?.civitaiId?.let {
                 try {
-                    isCivitaiModelLoading = true
                     getCivitaiApiClient().getModelVersionById(it.toString()).let {
                         LoraDetailViewModel.civitaiModel = it.body()
                         val modelId = it.body()?.modelId
@@ -145,7 +142,7 @@ fun LoraDetailScreen(
                         Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                     }
                 } finally {
-                    isCivitaiModelLoading = false
+                    LoraDetailViewModel.isCivitaiModelLoading = false
                 }
 
             }
@@ -544,7 +541,8 @@ fun LoraDetailScreen(
                             ) {
                                 CivitaiModelView(
                                     navController = navController,
-                                    civitaiModel = LoraDetailViewModel.civitaiModel
+                                    civitaiModel = LoraDetailViewModel.civitaiModel,
+                                    isLoading = LoraDetailViewModel.isCivitaiModelLoading,
                                 )
                             }
 

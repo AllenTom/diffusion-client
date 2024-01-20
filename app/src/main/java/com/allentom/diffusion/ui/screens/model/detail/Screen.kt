@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -107,6 +108,7 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
         if (ModelDetailViewModel.civitaiModel != null) {
             return
         }
+        ModelDetailViewModel.isCivitaiModelLoading = true
         scope.launch(Dispatchers.IO) {
             currentPreviewIndex = 0
             ModelDetailViewModel.model = ModelStore.getByID(context, id)
@@ -120,6 +122,7 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
                     }
                 }
             }
+            ModelDetailViewModel.isCivitaiModelLoading = false
         }
     }
     LaunchedEffect(Unit) {
@@ -163,15 +166,6 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
             ModelDetailViewModel.selectedTabIndex = pagerState.currentPage
         }
     }
-//    LaunchedEffect(ModelDetailViewModel.filter) {
-//        if (ModelDetailViewModel.civitaiModel == null) {
-//            return@LaunchedEffect
-//        }
-//        refreshCivitaiImage(
-//            ModelDetailViewModel.civitaiModel?.modelId ?: 0,
-//            ModelDetailViewModel.civitaiModel?.id ?: 0
-//        )
-//    }
     if (isFilterModalShow) {
         ModalBottomSheet(onDismissRequest = {
             isFilterModalShow = false
@@ -214,7 +208,9 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Model") },
+                title = {
+                    Text(text = ModelDetailViewModel.model?.name ?: stringResource(id = R.string.model), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
@@ -377,7 +373,8 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
                             ) {
                                 CivitaiModelView(
                                     navController = navController,
-                                    civitaiModel = ModelDetailViewModel.civitaiModel
+                                    civitaiModel = ModelDetailViewModel.civitaiModel,
+                                    isLoading = ModelDetailViewModel.isCivitaiModelLoading
                                 )
                             }
 

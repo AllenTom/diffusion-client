@@ -25,6 +25,7 @@ object ModelDetailViewModel {
     var civitaiModel by mutableStateOf<CivitaiModel?>(null)
 
     var selectedTabIndex by mutableStateOf(0)
+    var isCivitaiModelLoading by mutableStateOf(false)
 
     fun asNew() {
         civitaiImageList = emptyList()

@@ -14,7 +14,7 @@ data class CivitaiModel(
     val baseModel: String,
     val baseModelType: String,
     val earlyAccessTimeFrame: Long,
-    val description: String,
+    val description: String?,
     val stats: Stats,
     val model: Model,
     val files: List<File>,
