@@ -51,9 +51,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-//    lint {
-//        checkReleaseBuilds = false
-//    }
+    lint {
+        checkReleaseBuilds = false
+    }
 }
 
 dependencies {
@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.appcompat)
 //    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

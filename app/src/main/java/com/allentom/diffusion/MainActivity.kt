@@ -171,7 +171,7 @@ fun DiffusionApp() {
         }
         composable(Screens.HistoryDetail.route) {
             val id = backStackEntry.value?.arguments?.getString("id")?.toLong()
-            HistoryDetailScreen(navController,historyId = id ?: 0)
+            HistoryDetailScreen(navController, historyId = id ?: 0)
         }
         composable(Screens.ControlNetPreprocess.route) {
             ControlNetPreprocessScreen()
@@ -192,18 +192,17 @@ fun DiffusionApp() {
         }
         composable(Screens.LoraPromptDetail.route) {
             val id = backStackEntry.value?.arguments?.getString("id")?.toLong()
-            LoraDetailScreen(navController,id ?: 0)
+            LoraDetailScreen(navController, id ?: 0)
         }
         composable(Screens.CivitaiModelImageScreen.route) {
             CivitaiModelImageScreen()
         }
         composable(Screens.ModelDetailScreen.route) {
             val id = backStackEntry.value?.arguments?.getString("modelId")?.toLong()
-            ModelDetailScreen(navController,id ?: 0)
+            ModelDetailScreen(navController, id ?: 0)
         }
         composable(Screens.SettingsScreen.route) {
             SettingScreen()
         }
-
     }
 }

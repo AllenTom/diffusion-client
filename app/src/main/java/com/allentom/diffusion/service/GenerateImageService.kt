@@ -43,7 +43,9 @@ class GenerateImageService : Service() {
                 .build()
         }
 
-        startForeground(1, notification)
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(1, notification)
+
         serviceScope.launch(Dispatchers.IO) {
             val refreshIndex = intent?.getIntExtra("refreshIndex", -1)?.let {
                 if (it == -1) {
@@ -57,7 +59,7 @@ class GenerateImageService : Service() {
             stopSelf()
         }
 
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder? {

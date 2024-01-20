@@ -7,5 +7,4 @@ import androidx.lifecycle.ViewModel
 
 object HistoryDetailViewModel: ViewModel() {
     var historyId by mutableLongStateOf(0L)
-
 }

@@ -405,7 +405,7 @@ object DrawViewModel {
         val intent = Intent(context, GenerateImageService::class.java)
         intent.putExtra("refreshIndex", refreshIndex)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            act.startForegroundService(intent)
+            act.startService(intent)
         }
     }
 
