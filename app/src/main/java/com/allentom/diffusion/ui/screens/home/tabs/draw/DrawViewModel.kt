@@ -106,12 +106,13 @@ suspend fun fetchEmbeddingFromApi(): Map<String, Embedding> {
     return emptyMap()
 }
 
-class GenImageItem(
+data class GenImageItem(
     val imageBase64: String?,
     val progress: Progress?,
     val seed: Int?,
     val imageName: String,
     val error: ApiError?,
+    val isInterrupted: Boolean = false
 ) {
     fun getDisplayImageBase64(): String? {
         if (imageBase64 != null) {
@@ -122,23 +123,13 @@ class GenImageItem(
         }
         return null
     }
-
-    fun copy(
-        imageBase64: String? = this.imageBase64,
-        progress: Progress? = this.progress,
-        seed: Int? = this.seed,
-        imageName: String = this.imageName,
-        error: ApiError? = this.error
-    ): GenImageItem {
-        return GenImageItem(imageBase64, progress, seed, imageName, error)
-    }
 }
 
 object DrawViewModel {
     var genScope: CoroutineScope? = null
-    var inputPromptText by mutableStateOf<List<Prompt>>(
+    var inputPromptText by mutableStateOf(
         "1girl,serafuku,classroom".split(",").map { Prompt(it, 0) })
-    var inputNegativePromptText by mutableStateOf<List<Prompt>>(
+    var inputNegativePromptText by mutableStateOf(
         "nsfw".split(",").map { Prompt(it, 0) })
     var embeddingList by mutableStateOf<List<EmbeddingPrompt>>(emptyList())
     var embeddingModels by mutableStateOf(emptyMap<String, Embedding>())
@@ -205,8 +196,7 @@ object DrawViewModel {
         currentHistory = null
     }
 
-    var interruptFlag = false
-    var skipFlag = false
+    var interruptFlag by mutableStateOf(false)
     val genImageListMutex = Mutex()
     val gson = Gson()
 
@@ -406,6 +396,26 @@ object DrawViewModel {
         intent.putExtra("refreshIndex", refreshIndex)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             act.startService(intent)
+        }
+    }
+
+    fun interruptGenerate() {
+        genScope?.launch {
+            try {
+                getApiClient().interrupt()
+                interruptFlag = true
+                genItemList = genItemList.mapIndexed { index, item ->
+                    if (index >= currentGenIndex) {
+                        return@mapIndexed item.copy(
+                            isInterrupted = true
+                        )
+                    }
+                    item
+
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

@@ -155,4 +155,5 @@
     <string name="match">match</string>
     <string name="match_options">Match options</string>
     <string name="skip_already_matched">Skip already matched</string>
+    <string name="interrupted">Interrupted</string>
 </resources>

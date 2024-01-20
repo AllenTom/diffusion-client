@@ -156,4 +156,5 @@
     <string name="match">匹配</string>
     <string name="match_options">匹配选项</string>
     <string name="skip_already_matched">跳过已匹配的模型</string>
+    <string name="interrupted">已停止</string>
 </resources>

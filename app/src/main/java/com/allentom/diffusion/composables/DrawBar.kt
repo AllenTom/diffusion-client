@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
+import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.store.Prompt
 import com.allentom.diffusion.ui.DrawBarViewModel
 import com.allentom.diffusion.ui.parts.GenProgressGrid
@@ -116,14 +117,22 @@ fun DrawBar(
                     sendOptionContextPrompts.forEach {
                         DrawViewModel.addInputPrompt(it)
                     }
-                    Toast.makeText(context, context.getString(R.string.append_to_prompt_success), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.append_to_prompt_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             ),
             ActionItem(
                 text = stringResource(id = R.string.assign_to_prompt),
                 onAction = {
                     DrawViewModel.inputPromptText = sendOptionContextPrompts
-                    Toast.makeText(context, context.getString(R.string.assign_to_prompt_success), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.assign_to_prompt_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             ),
             ActionItem(
@@ -132,14 +141,22 @@ fun DrawBar(
                     sendOptionContextPrompts.forEach {
                         DrawViewModel.addInputNegativePrompt(it)
                     }
-                    Toast.makeText(context, context.getString(R.string.append_to_negative_prompt_success), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.append_to_negative_prompt_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             ),
             ActionItem(
                 text = stringResource(R.string.assign_negative_prompt),
                 onAction = {
                     DrawViewModel.inputNegativePromptText = sendOptionContextPrompts
-                    Toast.makeText(context, context.getString(R.string.assign_to_negative_prompt_success), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.assign_to_negative_prompt_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             )
         ),
@@ -192,6 +209,17 @@ fun DrawBar(
                     }, label = {
                         Text(text = stringResource(id = R.string.tools_caption))
                     })
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (currentPanelIndex == 0 && DrawViewModel.isGenerating) {
+                        Button(
+                            onClick = {
+                                DrawViewModel.interruptGenerate()
+                            },
+                            enabled = DrawViewModel.isGenerating && !DrawViewModel.interruptFlag
+                        ) {
+                            Text(text = stringResource(id = R.string.btn_stop))
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Divider()
@@ -249,11 +277,11 @@ fun DrawBar(
                                 if (DrawBarViewModel.caption.isNotEmpty()) {
                                     PromptDisplayView(
                                         promptList = DrawBarViewModel.caption.map {
-                                        Prompt(
-                                            text = it,
-                                            piority = 0
-                                        )
-                                    },
+                                            Prompt(
+                                                text = it,
+                                                piority = 0
+                                            )
+                                        },
                                         canScroll = true,
                                     ) {
                                         sendOptionContextPrompts = it

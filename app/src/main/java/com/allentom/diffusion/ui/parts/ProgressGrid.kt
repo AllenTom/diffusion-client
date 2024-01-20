@@ -53,7 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-@Composable()
+@Composable
 fun GenProgressGrid(
     modifier: Modifier
 ) {
@@ -78,8 +78,10 @@ fun GenProgressGrid(
                 DrawViewModel.favouriteImage(context, imageItem)
             }
         }
-        Toast.makeText(context,
-            context.getString(R.string.saved_to_device_gallery), Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            context.getString(R.string.saved_to_device_gallery), Toast.LENGTH_SHORT
+        ).show()
     }
     Column(
         modifier = modifier
@@ -158,14 +160,18 @@ fun GenProgressGrid(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier.align(Alignment.Center)
                                     ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.width(32.dp),
-                                            color = MaterialTheme.colorScheme.secondary,
-                                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                            progress = imgItem.progress?.progress
-                                                ?: 0f
-                                        )
-                                        Text(text = stringResource(id = R.string.generating))
+                                        if (imgItem.isInterrupted) {
+                                            Text(text = stringResource(R.string.interrupted))
+                                        } else {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.width(32.dp),
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                progress = imgItem.progress?.progress
+                                                    ?: 0f
+                                            )
+                                            Text(text = stringResource(id = R.string.generating))
+                                        }
                                     }
                                 }
                             }
@@ -353,14 +359,18 @@ fun GenProgressGrid(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier.align(Alignment.Center)
                                         ) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.width(32.dp),
-                                                color = MaterialTheme.colorScheme.secondary,
-                                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                                progress = imageItem.progress?.progress
-                                                    ?: 0f
-                                            )
-                                            Text(text = stringResource(id = R.string.generating))
+                                            if (imageItem.isInterrupted) {
+                                                Text(text = stringResource(R.string.interrupted))
+                                            } else {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.width(32.dp),
+                                                    color = MaterialTheme.colorScheme.secondary,
+                                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    progress = imageItem.progress?.progress
+                                                        ?: 0f
+                                                )
+                                                Text(text = stringResource(id = R.string.generating))
+                                            }
                                         }
                                     }
                                 }

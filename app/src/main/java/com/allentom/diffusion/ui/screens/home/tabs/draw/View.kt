@@ -148,32 +148,13 @@ fun DrawScreen() {
                             if (DrawViewModel.isGenerating) {
                                 Button(
                                     onClick = {
-                                        scope.launch {
-                                            try {
-                                                getApiClient().interrupt()
-                                                DrawViewModel.interruptFlag = true
-                                            } catch (e: Exception) {
-                                                e.printStackTrace()
-                                            }
-                                        }
-                                    }) {
+                                        DrawViewModel.interruptGenerate()
+                                    },
+                                    enabled = DrawViewModel.isGenerating && !DrawViewModel.interruptFlag
+                                    ) {
                                     Text(text = stringResource(id = R.string.btn_stop))
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
-//                        Button(
-//                            onClick = {
-//                                scope.launch {
-//                                    try {
-//                                        getApiClient().interrupt()
-//                                        DrawViewModel.skipFlag = true
-//                                    } catch (e: Exception) {
-//                                        e.printStackTrace()
-//                                    }
-//                                }
-//                            }) {
-//                            Text(text = "Skip")
-//                        }
-//                        Spacer(modifier = Modifier.width(16.dp))
                             }
                             Button(
                                 modifier = Modifier.weight(1f),
