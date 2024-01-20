@@ -298,13 +298,6 @@ fun ControlNetPanel() {
         }
     }
 }
-
-//"resize_mode": 0,
-//"image_cfg_scale": 0,
-//"denoising_strength": 0.75,
-// "scale_by": 1.0,
-// "width": 512,
-// "height": 512,
 @Composable
 fun Img2ImgPanel() {
     Column(
@@ -321,7 +314,7 @@ fun Img2ImgPanel() {
             }
         }
         ImageBase64PickupOptionItem(
-            label = "Source",
+            label = stringResource(R.string.img2img_source_image),
             value = DrawViewModel.inputImg2ImgImgBase64,
             onValueChange = { _, it, filePath, width, height ->
                 DrawViewModel.inputImg2ImgImgBase64 = it

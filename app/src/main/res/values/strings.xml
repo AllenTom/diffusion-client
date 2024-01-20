@@ -156,4 +156,5 @@
     <string name="match_options">Match options</string>
     <string name="skip_already_matched">Skip already matched</string>
     <string name="interrupted">Interrupted</string>
+    <string name="img2img_source_image">Source image</string>
 </resources>

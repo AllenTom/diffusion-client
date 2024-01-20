@@ -14,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.allentom.diffusion.R
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
 
 @Composable
@@ -55,12 +57,18 @@ fun ImageBase64PickupOptionItem(
         trailingContent = {
             if (value != null) {
                 Box(
-                    Modifier.height(120.dp).width(120.dp)
+                    Modifier
+                        .height(120.dp)
+                        .width(120.dp)
                 ) {
                     DisplayBase64Image(base64String = value)
                 }
-
             }
         },
+        supportingContent = {
+            if (value == null) {
+                Text(text = stringResource(id = R.string.click_to_pick_image))
+            }
+        }
     )
 }
