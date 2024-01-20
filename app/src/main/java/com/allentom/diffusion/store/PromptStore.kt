@@ -12,7 +12,7 @@ import androidx.room.Query
 import androidx.room.Relation
 import androidx.room.Update
 import com.allentom.diffusion.Util
-import com.allentom.diffusion.api.civitai.entities.CivitaiModel
+import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import com.allentom.diffusion.api.getApiClient
 import com.charleskorn.kaml.Yaml
@@ -463,15 +463,15 @@ object PromptStore {
         }
     }
 
-    suspend fun linkCivitaiModel(context: Context, civitaiModel: CivitaiModel, modelId: Long) {
+    suspend fun linkCivitaiModel(context: Context, civitaiModelVersion: CivitaiModelVersion, modelId: Long) {
         val db = AppDatabaseHelper.getDatabase(context)
         var loraPrompt = db.loraPromptDao().getPrompt(modelId) ?: return
         loraPrompt = loraPrompt.copy(
-            title = civitaiModel.model.name,
-            civitaiId = civitaiModel.id
+            title = civitaiModelVersion.model.name,
+            civitaiId = civitaiModelVersion.id
         )
         // save trigger prompts
-        civitaiModel.trainedWords.let {
+        civitaiModelVersion.trainedWords.let {
             it.forEach { trigger ->
                 val prompts = trigger.split(",").map { it.trim() }
                 prompts.forEach {
@@ -492,7 +492,7 @@ object PromptStore {
 
             }
         }
-        civitaiModel.images.firstOrNull()?.let { previewImage ->
+        civitaiModelVersion.images.firstOrNull()?.let { previewImage ->
             Util.saveLoraImagesFromUrls(context, listOf(previewImage.url)).firstOrNull()?.let {
                 loraPrompt = loraPrompt.copy(previewPath = it, lockPreview = true)
             }

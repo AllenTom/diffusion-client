@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.allentom.diffusion.api.civitai.entities.CivitaiImageItem
 import com.allentom.diffusion.api.civitai.entities.CivitaiModel
+import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.ModelEntity
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageFilter
@@ -22,6 +23,8 @@ object ModelDetailViewModel {
 
     var model by mutableStateOf<ModelEntity?>(null)
 
+    var civitaiModelVersion by mutableStateOf<CivitaiModelVersion?>(null)
+
     var civitaiModel by mutableStateOf<CivitaiModel?>(null)
 
     var selectedTabIndex by mutableStateOf(0)
@@ -33,7 +36,7 @@ object ModelDetailViewModel {
         isLoading = false
         filter = AppConfigStore.config.saveCivitaiImageFilter ?:CivitaiImageFilter()
         model = null
-        civitaiModel = null
+        civitaiModelVersion = null
         selectedTabIndex = 0
     }
 }

@@ -64,6 +64,7 @@ import com.allentom.diffusion.ui.parts.CivitaiImageGrid
 import com.allentom.diffusion.ui.parts.CivitaiModelView
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageFilterPanel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
+import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -118,7 +119,7 @@ fun LoraDetailScreen(
     }
 
     fun refresh() {
-        if (LoraDetailViewModel.civitaiModel != null) {
+        if (LoraDetailViewModel.civitaiModelVersion != null) {
             return
         }
         LoraDetailViewModel.isCivitaiModelLoading = true
@@ -128,11 +129,14 @@ fun LoraDetailScreen(
             LoraDetailViewModel.loraModel?.loraPrompt?.civitaiId?.let {
                 try {
                     getCivitaiApiClient().getModelVersionById(it.toString()).let {
-                        LoraDetailViewModel.civitaiModel = it.body()
+                        LoraDetailViewModel.civitaiModelVersion = it.body()
                         val modelId = it.body()?.modelId
                         val modelVersionId = it.body()?.id
                         if (modelId != null && modelVersionId != null) {
                             refreshCivitaiImage(modelId, modelVersionId)
+                        }
+                        if (modelId != null) {
+                            LoraDetailViewModel.civitaiModel = getCivitaiApiClient().getModelById(modelId).body()
                         }
                     }
                 } catch (e: Exception) {
@@ -204,8 +208,8 @@ fun LoraDetailScreen(
                     LoraDetailViewModel.filter = it
                     AppConfigStore.updateCivitaiImageFilter(context, it)
                     refreshCivitaiImage(
-                        LoraDetailViewModel.civitaiModel?.modelId ?: 0,
-                        LoraDetailViewModel.civitaiModel?.id ?: 0
+                        LoraDetailViewModel.civitaiModelVersion?.modelId ?: 0,
+                        LoraDetailViewModel.civitaiModelVersion?.id ?: 0
                     )
                 })
             }
@@ -241,8 +245,8 @@ fun LoraDetailScreen(
                         sort = LoraDetailViewModel.filter.sort,
                         period = LoraDetailViewModel.filter.period,
                         nsfw = LoraDetailViewModel.filter.nsfw,
-                        modelVersionId = LoraDetailViewModel.civitaiModel?.id,
-                        modelId = LoraDetailViewModel.civitaiModel?.modelId,
+                        modelVersionId = LoraDetailViewModel.civitaiModelVersion?.id,
+                        modelId = LoraDetailViewModel.civitaiModelVersion?.modelId,
                     )
                 if (result.isSuccessful) {
                     LoraDetailViewModel.civitaiImageList += result.body()?.items ?: emptyList()
@@ -541,8 +545,9 @@ fun LoraDetailScreen(
                             ) {
                                 CivitaiModelView(
                                     navController = navController,
-                                    civitaiModel = LoraDetailViewModel.civitaiModel,
+                                    civitaiModelVersion = LoraDetailViewModel.civitaiModelVersion,
                                     isLoading = LoraDetailViewModel.isCivitaiModelLoading,
+                                    civitaiModel = LoraDetailViewModel.civitaiModel,
                                 )
                             }
 

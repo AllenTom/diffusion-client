@@ -39,7 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
-import com.allentom.diffusion.api.civitai.entities.CivitaiModel
+import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,10 +48,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun CivitaiModelSelectDialog(
     onDismiss: () -> Unit,
-    onApply: (CivitaiModel) -> Unit
+    onApply: (CivitaiModelVersion) -> Unit
 ) {
     var result by remember {
-        mutableStateOf<CivitaiModel?>(null)
+        mutableStateOf<CivitaiModelVersion?>(null)
     }
     var fetchId by remember {
         mutableStateOf("")

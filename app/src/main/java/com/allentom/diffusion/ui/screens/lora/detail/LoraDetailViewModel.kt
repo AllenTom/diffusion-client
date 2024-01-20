@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.allentom.diffusion.api.civitai.entities.CivitaiImageItem
 import com.allentom.diffusion.api.civitai.entities.CivitaiModel
+import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.LoraPromptWithRelation
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageFilter
@@ -23,7 +24,9 @@ object LoraDetailViewModel {
 
     var loraModel by mutableStateOf<LoraPromptWithRelation?>(null)
 
+    var civitaiModelVersion by mutableStateOf<CivitaiModelVersion?>(null)
     var civitaiModel by mutableStateOf<CivitaiModel?>(null)
+
 
     var isCivitaiModelLoading by mutableStateOf(false)
 
@@ -35,7 +38,7 @@ object LoraDetailViewModel {
         isLoading = false
         ModelDetailViewModel.filter = AppConfigStore.config.saveCivitaiImageFilter ?:CivitaiImageFilter()
         loraModel = null
-        civitaiModel = null
+        civitaiModelVersion = null
         selectedTabIndex = 0
     }
 }

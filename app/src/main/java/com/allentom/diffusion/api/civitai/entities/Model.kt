@@ -2,8 +2,23 @@ package com.allentom.diffusion.api.civitai.entities
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
-
 data class CivitaiModel(
+    val id: Long,
+    val name: String,
+    val description: String?,
+    val type: String,
+    val poi: Boolean,
+    val nsfw: Boolean,
+    val allowNoCredit: Boolean,
+    val allowCommercialUse: String,
+    val allowDerivatives: Boolean,
+    val allowDifferentLicense: Boolean,
+    val stats: Stats,
+    val creator: Creator,
+    val tags: List<String>,
+    val modelVersions: List<CivitaiModelVersion>,
+)
+data class CivitaiModelVersion(
     val id: Long,
     val modelId: Long,
     val name: String,
@@ -27,8 +42,15 @@ data class Stats(
     val downloadCount: Long,
     val ratingCount: Long,
     val rating: Float,
-):Serializable
 
+    val favoriteCount: Long?,
+    val commentCount: Long?,
+    val tippedAmountCount: Long?,
+):Serializable
+data class Creator(
+    val username: String,
+    val image: String,
+)
 data class Model(
     val name: String,
     val type: String,

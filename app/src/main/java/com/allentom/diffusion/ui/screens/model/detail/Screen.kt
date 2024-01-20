@@ -105,7 +105,7 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
     }
 
     fun refresh() {
-        if (ModelDetailViewModel.civitaiModel != null) {
+        if (ModelDetailViewModel.civitaiModelVersion != null) {
             return
         }
         ModelDetailViewModel.isCivitaiModelLoading = true
@@ -114,11 +114,14 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
             ModelDetailViewModel.model = ModelStore.getByID(context, id)
             ModelDetailViewModel.model?.civitaiApiId?.let {
                 getCivitaiApiClient().getModelVersionById(it.toString()).let {
-                    ModelDetailViewModel.civitaiModel = it.body()
+                    ModelDetailViewModel.civitaiModelVersion = it.body()
                     val modelId = it.body()?.modelId
                     val modelVersionId = it.body()?.id
                     if (modelId != null && modelVersionId != null) {
                         refreshCivitaiImage(modelId, modelVersionId)
+                    }
+                    if (modelId != null) {
+                        ModelDetailViewModel.civitaiModel = getCivitaiApiClient().getModelById(modelId).body()
                     }
                 }
             }
@@ -142,8 +145,8 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
                         sort = ModelDetailViewModel.filter.sort,
                         period = ModelDetailViewModel.filter.period,
                         nsfw = ModelDetailViewModel.filter.nsfw,
-                        modelVersionId = ModelDetailViewModel.civitaiModel?.id,
-                        modelId = ModelDetailViewModel.civitaiModel?.modelId,
+                        modelVersionId = ModelDetailViewModel.civitaiModelVersion?.id,
+                        modelId = ModelDetailViewModel.civitaiModelVersion?.modelId,
                     )
                 if (result.isSuccessful) {
                     ModelDetailViewModel.civitaiImageList += result.body()?.items ?: emptyList()
@@ -179,8 +182,8 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
                     ModelDetailViewModel.filter = it
                     AppConfigStore.updateCivitaiImageFilter(context, it)
                     refreshCivitaiImage(
-                        ModelDetailViewModel.civitaiModel?.modelId ?: 0,
-                        ModelDetailViewModel.civitaiModel?.id ?: 0
+                        ModelDetailViewModel.civitaiModelVersion?.modelId ?: 0,
+                        ModelDetailViewModel.civitaiModelVersion?.id ?: 0
                     )
                 })
             }
@@ -373,8 +376,9 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
                             ) {
                                 CivitaiModelView(
                                     navController = navController,
+                                    civitaiModelVersion = ModelDetailViewModel.civitaiModelVersion,
                                     civitaiModel = ModelDetailViewModel.civitaiModel,
-                                    isLoading = ModelDetailViewModel.isCivitaiModelLoading
+                                    isLoading = ModelDetailViewModel.isCivitaiModelLoading,
                                 )
                             }
 

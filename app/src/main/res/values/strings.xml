@@ -157,4 +157,14 @@
     <string name="skip_already_matched">Skip already matched</string>
     <string name="interrupted">Interrupted</string>
     <string name="img2img_source_image">Source image</string>
+    <string name="downloads_count">Downloads</string>
+    <string name="rating_count">Count</string>
+    <string name="rating">Rating</string>
+    <string name="rating_stats">Stats</string>
+    <string name="no_description">No description</string>
+    <string name="description">Description</string>
+    <string name="published_at">Published At</string>
+    <string name="model_tags">Tags</string>
+    <string name="model_version">Model Version</string>
+    <string name="nsfw">NSFW</string>
 </resources>

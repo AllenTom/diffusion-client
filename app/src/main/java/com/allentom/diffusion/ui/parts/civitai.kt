@@ -1,11 +1,16 @@
 package com.allentom.diffusion.ui.parts
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +26,14 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,14 +48,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
-import androidx.core.text.toSpanned
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
@@ -54,29 +67,44 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.api.civitai.entities.CivitaiImageItem
 import com.allentom.diffusion.api.civitai.entities.CivitaiModel
+import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
+import com.allentom.diffusion.api.civitai.entities.Stats
 import com.allentom.diffusion.composables.loaddingShimmer
 import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.ui.screens.civitai.CivitaiImageViewModel
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageListViewModel
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CivitaiModelView(
     navController: NavController,
+    civitaiModelVersion: CivitaiModelVersion?,
     civitaiModel: CivitaiModel?,
     isLoading: Boolean = false,
 ) {
     var currentPreviewIndex by remember {
         mutableStateOf(0)
     }
+    var displayTabIndex by remember {
+        mutableStateOf(0)
+    }
+    val context = LocalContext.current
+    val linkIcon = ImageVector.vectorResource(id = R.drawable.ic_link)
+
+    fun openBrowserWithUrl(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(url)
+        context.startActivity(intent)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        civitaiModel.let { cvModel ->
+        civitaiModelVersion.let { modelVersion ->
             Spacer(modifier = Modifier.height(8.dp))
-            cvModel?.images?.getOrNull(currentPreviewIndex)
+            modelVersion?.images?.getOrNull(currentPreviewIndex)
                 .let { displayImage ->
                     Box(
                         modifier = Modifier
@@ -128,8 +156,8 @@ fun CivitaiModelView(
                     )
             ) {
                 LazyRow {
-                    items(cvModel?.images?.size ?: 0) {
-                        val image = cvModel?.images?.get(it)
+                    items(modelVersion?.images?.size ?: 0) {
+                        val image = modelVersion?.images?.get(it)
                         Box(
                             modifier = Modifier
                                 .width(100.dp)
@@ -158,6 +186,8 @@ fun CivitaiModelView(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider()
             if (isLoading) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(
@@ -179,83 +209,148 @@ fun CivitaiModelView(
 
                 }
 
-            }else{
-                cvModel?.stats?.let { stats ->
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Stats",
-                                fontSize = 18.sp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row {
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                ) {
-                                    Text(text = "Rating")
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(text = stats.rating.toString())
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                ) {
-                                    Text(text = "Count")
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(text = stats.ratingCount.toString())
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                ) {
-                                    Text(text = "Downloads")
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(text = stats.downloadCount.toString())
-                                }
-                            }
-                        }
-                    }
-                }
+            } else {
                 Spacer(modifier = Modifier.height(16.dp))
-                cvModel?.let {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = "Published At")
-
-                        }, supportingContent = {
-                            Text(text = cvModel.publishedAt)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterChip(
+                        selected = displayTabIndex == 0,
+                        onClick = {
+                            displayTabIndex = 0
+                        },
+                        label = {
+                            Text(text = stringResource(id = R.string.model))
                         }
                     )
-                    ListItem(
-                        headlineContent = {
-                            Text(text = "Description")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    FilterChip(
+                        selected = displayTabIndex == 1,
+                        onClick = {
+                            displayTabIndex = 1
                         },
-                        supportingContent = {
-                            AndroidView(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                factory = { context -> TextView(context) },
-                                update = {
-                                    it.text = HtmlCompat.fromHtml(
-                                        cvModel.description ?: "No description",
-                                        HtmlCompat.FROM_HTML_MODE_COMPACT
+                        label = {
+                            Text(text = stringResource(R.string.model_version))
+                        }
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(onClick = {
+                        val modelId = civitaiModel?.id
+                        val modelVersionId = modelVersion?.id
+                        if (modelId != null && modelVersionId != null) {
+                            openBrowserWithUrl("https://civitai.com/models/${modelId}?modelVersionId=${modelVersionId}")
+                        }
+                    }) {
+                        Icon(
+                            imageVector = linkIcon,
+                            contentDescription = null
+                        )
+                    }
+                }
+                when (displayTabIndex) {
+                    0 -> {
+                        civitaiModel?.let { cvModel ->
+                            Spacer(modifier = Modifier.height(16.dp))
+                            ListItem(
+                                headlineContent = {
+                                    Text(stringResource(id =R.string.name))
+                                }, supportingContent = {
+                                    Text(text = cvModel.name)
+                                }
+                            )
+                            ListItem(headlineContent = {
+                                Text(stringResource(R.string.model_tags))
+                            }, supportingContent = {
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    cvModel.tags.forEach {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(
+                                                    MaterialTheme.colorScheme.primaryContainer
+                                                )
+                                                .padding(vertical = 4.dp, horizontal = 8.dp)
+
+                                        ) {
+                                            Text(text = it)
+                                        }
+                                    }
+
+                                }
+                            })
+                            ListItem(
+                                headlineContent = {
+                                    Text(stringResource(R.string.nsfw))
+                                }, supportingContent = {
+                                    Text(text = if (cvModel.nsfw) "Yes" else "No")
+                                }
+                            )
+                            cvModel.stats.let { stats ->
+                                Spacer(modifier = Modifier.height(16.dp))
+                                CivitaiModelStats(modelStats = stats)
+                            }
+
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(R.string.description))
+                                },
+                                supportingContent = {
+                                    AndroidView(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        factory = { context -> TextView(context) },
+                                        update = {
+                                            it.text = HtmlCompat.fromHtml(
+                                                cvModel.description ?: context.getString(R.string.no_description),
+                                                HtmlCompat.FROM_HTML_MODE_COMPACT
+                                            )
+                                        }
                                     )
                                 }
                             )
                         }
-                    )
+
+                    }
+                    1 -> {
+                        modelVersion?.stats?.let { stats ->
+                            Spacer(modifier = Modifier.height(16.dp))
+                            CivitaiModelStats(modelStats = stats)
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        modelVersion?.let {
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(R.string.published_at))
+
+                                }, supportingContent = {
+                                    Text(text = modelVersion.publishedAt)
+                                }
+                            )
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(R.string.description))
+                                },
+                                supportingContent = {
+                                    AndroidView(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        factory = { context -> TextView(context) },
+                                        update = {
+                                            it.text = HtmlCompat.fromHtml(
+                                                modelVersion.description ?: context.getString(R.string.no_description),
+                                                HtmlCompat.FROM_HTML_MODE_COMPACT
+                                            )
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    }
                 }
+
             }
 
         }
@@ -356,6 +451,58 @@ fun CivitaiImageGrid(
                                     }
                             )
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CivitaiModelStats(
+    modelStats: Stats?
+) {
+    modelStats?.let { stats ->
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.rating_stats),
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text(text = stringResource(R.string.rating))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = stats.rating.toString())
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text(text = stringResource(R.string.rating_count))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = stats.ratingCount.toString())
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text(text = stringResource(R.string.downloads_count))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = stats.downloadCount.toString())
                     }
                 }
             }

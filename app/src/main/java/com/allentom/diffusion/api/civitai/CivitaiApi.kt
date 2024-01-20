@@ -2,6 +2,7 @@ package com.allentom.diffusion.api.civitai
 
 import com.allentom.diffusion.api.civitai.entities.CivitaiImageListResult
 import com.allentom.diffusion.api.civitai.entities.CivitaiModel
+import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -11,12 +12,12 @@ interface CivitaiApi {
     @GET("/api/v1/model-versions/by-hash/{hash}")
     suspend fun getModelVersionByHash(
         @Path("hash") hash: String
-    ): Response<CivitaiModel>
+    ): Response<CivitaiModelVersion>
 
     @GET("/api/v1/model-versions/{id}")
     suspend fun getModelVersionById(
         @Path("id") id: String
-    ): Response<CivitaiModel>
+    ): Response<CivitaiModelVersion>
 
     //    limit (OPTIONAL)	number	The number of results to be returned per page. This can be a number between 0 and 200. By default, each page will return 100 results.
 //    postId (OPTIONAL)	number	The ID of a post to get images from
@@ -39,4 +40,9 @@ interface CivitaiApi {
         @Query("period") period: String? = "Month",
         @Query("page") page: Int? = 1,
     ): Response<CivitaiImageListResult>
+
+    @GET("/api/v1/models/{id}")
+    suspend fun getModelById(
+        @Path("id") id: Long
+    ): Response<CivitaiModel>
 }

@@ -158,4 +158,14 @@
     <string name="skip_already_matched">跳过已匹配的模型</string>
     <string name="interrupted">已停止</string>
     <string name="img2img_source_image">源图片</string>
+    <string name="downloads_count">下载量</string>
+    <string name="rating_count">评分人数</string>
+    <string name="rating">分数</string>
+    <string name="rating_stats">评分</string>
+    <string name="no_description">无内容</string>
+    <string name="description">描述</string>
+    <string name="published_at">发布时间</string>
+    <string name="model_tags">标签</string>
+    <string name="model_version">当前版本</string>
+    <string name="nsfw">不适宜内容</string>
 </resources>

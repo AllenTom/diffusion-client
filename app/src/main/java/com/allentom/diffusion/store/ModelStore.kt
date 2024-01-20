@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import com.allentom.diffusion.Util
-import com.allentom.diffusion.api.civitai.entities.CivitaiModel
+import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
@@ -110,14 +110,14 @@ object ModelStore {
         }
     }
 
-    fun linkCivitaiModel(context: Context, civitaiModel: CivitaiModel, modelId: Long) {
+    fun linkCivitaiModel(context: Context, civitaiModelVersion: CivitaiModelVersion, modelId: Long) {
         val db = AppDatabaseHelper.getDatabase(context)
         var modelEntity = db.modelDao().getByID(modelId) ?: return
         modelEntity = modelEntity.copy(
-            title = civitaiModel.model.name,
-            civitaiApiId = civitaiModel.id
+            title = civitaiModelVersion.model.name,
+            civitaiApiId = civitaiModelVersion.id
         )
-        civitaiModel.images.firstOrNull()?.let { previewImage ->
+        civitaiModelVersion.images.firstOrNull()?.let { previewImage ->
             Util.saveLoraImagesFromUrls(context, listOf(previewImage.url)).firstOrNull()?.let {
                 modelEntity = modelEntity.copy(coverPath = it)
             }
