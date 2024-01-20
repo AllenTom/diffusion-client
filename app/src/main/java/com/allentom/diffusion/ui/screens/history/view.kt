@@ -1,6 +1,7 @@
 package com.allentom.diffusion.ui.screens.history
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -102,19 +104,30 @@ fun HistoryListView(navController: NavController) {
                                     Column {
                                         Text(text = Util.formatUnixTime(historyItem.time))
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Row {
-                                            for (img in historyItem.imagePaths) {
-                                                val imgRatio =
-                                                    historyItem.width.toFloat() / historyItem.height.toFloat()
-                                                AsyncImage(
-                                                    model = img.path, contentDescription = null,
-                                                    modifier = Modifier
-                                                        .width((120 * imgRatio).dp)
-                                                        .height(120.dp),
+                                        if (historyItem.imagePaths.isNotEmpty()) {
+                                            Row(
+                                                modifier = Modifier.horizontalScroll(
+                                                    rememberScrollState()
                                                 )
-                                                Spacer(modifier = Modifier.width(16.dp))
+                                            ) {
+                                                for (img in historyItem.imagePaths) {
+                                                    val imgRatio =
+                                                        historyItem.width.toFloat() / historyItem.height.toFloat()
+                                                    AsyncImage(
+                                                        model = img.path, contentDescription = null,
+                                                        modifier = Modifier
+                                                            .width((120 * imgRatio).dp)
+                                                            .height(120.dp),
+                                                    )
+                                                    Spacer(modifier = Modifier.width(16.dp))
+                                                }
+                                            }
+                                        }else{
+                                            Box(modifier  = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp)){
+                                                Text(text = stringResource(id = R.string.no_preview))
                                             }
                                         }
+
                                     }
                                 }
                             }

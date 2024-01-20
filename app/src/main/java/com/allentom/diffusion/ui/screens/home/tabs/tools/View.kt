@@ -23,7 +23,6 @@ import com.allentom.diffusion.composables.DrawBar
 
 @Composable
 fun TabTools(navController: NavController) {
-    val captionIcon = ImageVector.vectorResource(id = R.drawable.ic_caption)
     val controlNetIcon = ImageVector.vectorResource(id = R.drawable.ic_control_net)
     val controlNetPreprocessIcon =
         ImageVector.vectorResource(id = R.drawable.ic_control_net_preprocess)
@@ -33,13 +32,6 @@ fun TabTools(navController: NavController) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-//        ListItem(
-//            modifier = Modifier.clickable {
-//                navController.navigate(Screens.Tagger.route)
-//            },
-//            headlineContent = { Text(text = stringResource(id = R.string.tools_caption)) },
-//            leadingContent = { Icon(captionIcon, contentDescription = "Caption") }
-//        )
         ListItem(
             modifier = Modifier.clickable {
                 navController.navigate(Screens.ControlNetList.route)
@@ -96,15 +88,10 @@ fun TabTools(navController: NavController) {
                 navController.navigate(Screens.SettingsScreen.route)
             },
             headlineContent = {
-            Text(text="Settings")
+            Text(text= stringResource(id = R.string.settings_screen_title))
         }, leadingContent = {
             Icon(Icons.Default.Settings, contentDescription = "Settings")
         })
-//        ListItem(headlineContent = {
-//            Text(text = "Civitai Image list")
-//        }, modifier = Modifier.clickable {
-//            navController.navigate(Screens.CivitaiImageList.route)
-//        })
         Spacer(modifier = Modifier.weight(1f))
         DrawBar()
     }
