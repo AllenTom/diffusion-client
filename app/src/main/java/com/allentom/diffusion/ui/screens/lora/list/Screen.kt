@@ -1,6 +1,9 @@
 package com.allentom.diffusion.ui.screens.lora.list
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,32 +41,43 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.LoraPrompt
 import com.allentom.diffusion.store.PromptStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.lora.detail.LoraDetailViewModel
+import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LoraListScreen(navController: NavController) {
+    val modelIcon = ImageVector.vectorResource(id = R.drawable.ic_model)
     var loraList by remember {
         mutableStateOf(emptyList<LoraPrompt>())
     }
+    var itemImageFit by remember {
+        mutableStateOf(AppConfigStore.config.loraViewDisplayMode)
+    }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    fun refresh(){
+    fun refresh() {
         scope.launch(Dispatchers.IO) {
             loraList = PromptStore.getAllLoraPrompt(context).map { it.toPrompt() }.filter {
                 DrawViewModel.loraList.any { lora -> lora.name == it.name }
@@ -84,6 +98,14 @@ fun LoraListScreen(navController: NavController) {
     }
     var isMatchAll by remember {
         mutableStateOf(false)
+    }
+    val imageFitIcon = ImageVector.vectorResource(id = R.drawable.ic_image_fit)
+    val imageCropIcon = ImageVector.vectorResource(id = R.drawable.ic_image_crop)
+    fun onChangeImageFit(newImageFit: String) {
+        itemImageFit = newImageFit
+        AppConfigStore.updateAndSave(context) {
+            it.copy(loraViewDisplayMode = newImageFit)
+        }
     }
 
     fun matchAll() {
@@ -146,6 +168,29 @@ fun LoraListScreen(navController: NavController) {
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 actions = {
+                    if (itemImageFit == "Fit") {
+                        IconButton(
+                            onClick = {
+                                onChangeImageFit("Crop")
+                            }
+                        ) {
+                            Icon(
+                                imageCropIcon,
+                                contentDescription = "Menu",
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                onChangeImageFit("Fit")
+                            }
+                        ) {
+                            Icon(
+                                imageFitIcon,
+                                contentDescription = "Menu",
+                            )
+                        }
+                    }
                     IconButton(onClick = {
                         isActionMenuShow = true
                     }) {
@@ -188,54 +233,102 @@ fun LoraListScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                items(loraList.size) { index ->
-                    val prompt = loraList[index]
+                items(loraList.size) { idx ->
+                    val prompt = loraList[idx]
                     Card(
                         modifier = Modifier
-                            .height(200.dp)
+                            .fillMaxWidth()
                             .clickable {
-                                LoraDetailViewModel.asNew()
-                                navController.navigate(
-                                    Screens.LoraPromptDetail.route.replace(
-                                        "{id}",
-                                        prompt.id.toString()
-                                    )
-                                )
+
                             }
+                            .combinedClickable(
+                                onClick = {
+                                    LoraDetailViewModel.asNew()
+                                    navController.navigate(
+                                        Screens.LoraPromptDetail.route.replace(
+                                            "{id}",
+                                            prompt.id.toString()
+                                        )
+                                    )
+
+                                }
+                            )
                     ) {
-                        Column {
+                        Box(
+                            modifier = Modifier
+                                .height(220.dp)
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),
-                                contentAlignment = Alignment.Center
+                                    .fillMaxSize()
+                                    .thenIf(itemImageFit == "Fit", Modifier.blur(16.dp))
                             ) {
                                 if (prompt.previewPath != null) {
                                     AsyncImage(
                                         model = prompt.previewPath,
                                         contentDescription = null,
+                                        contentScale = ContentScale.Crop,
                                         modifier = Modifier.fillMaxSize()
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .width(40.dp)
-                                            .height(40.dp)
                                     )
                                 }
                             }
-                            Box(
-                                modifier = Modifier
-                                    .height(40.dp)
+                            Column(
+                                modifier = Modifier.fillMaxSize()
                             ) {
-                                Text(
-                                    text = prompt.title.ifBlank { prompt.name },
-                                    modifier = Modifier.padding(8.dp)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .height(150.dp)
+                                        .padding(8.dp)
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+
+                                    if (prompt.previewPath != null) {
+                                        if (itemImageFit == "Fit") {
+                                            AsyncImage(
+                                                model = prompt.previewPath,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier.fillMaxSize(),
+                                            )
+                                        }
+                                    } else {
+                                        Icon(
+                                            modelIcon,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .width(48.dp)
+                                                .height(48.dp),
+
+                                            )
+
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxWidth()
+                                        .background(
+                                            MaterialTheme.colorScheme.primaryContainer.copy(
+                                                alpha = 0.7f
+                                            )
+                                        )
+                                        .padding(8.dp),
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = prompt.title.ifBlank { prompt.name },
+                                            fontSize = 16.sp,
+                                            maxLines = 2,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        )
+                                    }
+                                }
+
                             }
+
                         }
+
                     }
                 }
 

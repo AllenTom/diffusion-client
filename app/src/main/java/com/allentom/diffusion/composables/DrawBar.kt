@@ -40,6 +40,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -331,7 +333,6 @@ fun DrawBar(
             }
         }
     }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -409,7 +410,6 @@ fun DrawBar(
                 extraContent()
             }
             Spacer(modifier = Modifier.width(16.dp))
-
         }
     }
 }

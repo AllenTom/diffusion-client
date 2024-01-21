@@ -1,6 +1,7 @@
 package com.allentom.diffusion.ui.screens.model.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -56,6 +59,7 @@ import com.allentom.diffusion.composables.ActionItem
 import com.allentom.diffusion.composables.BottomActionSheet
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.MatchOptionDialog
+import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.ModelEntity
 import com.allentom.diffusion.store.ModelStore
@@ -70,8 +74,20 @@ fun ModelListScreen(navController: NavController) {
     var modelList by remember {
         mutableStateOf<List<ModelEntity>>(emptyList())
     }
-    val scope = rememberCoroutineScope()
+    var itemImageFit by remember {
+        mutableStateOf(AppConfigStore.config.modelViewDisplayMode)
+    }
+    val imageFitIcon = ImageVector.vectorResource(id = R.drawable.ic_image_fit)
+    val imageCropIcon = ImageVector.vectorResource(id = R.drawable.ic_image_crop)
     val context = LocalContext.current
+    fun onChangeImageFit(newImageFit: String) {
+        itemImageFit = newImageFit
+        AppConfigStore.updateAndSave(context) {
+            it.copy(modelViewDisplayMode = newImageFit)
+        }
+    }
+
+    val scope = rememberCoroutineScope()
     fun refresh() {
         scope.launch(Dispatchers.IO) {
             val result = getApiClient().getModels()
@@ -200,6 +216,29 @@ fun ModelListScreen(navController: NavController) {
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 actions = {
+                    if (itemImageFit == "Fit") {
+                        IconButton(
+                            onClick = {
+                                onChangeImageFit("Crop")
+                            }
+                        ) {
+                            Icon(
+                                imageCropIcon,
+                                contentDescription = "Menu",
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                onChangeImageFit("Fit")
+                            }
+                        ) {
+                            Icon(
+                                imageFitIcon,
+                                contentDescription = "Menu",
+                            )
+                        }
+                    }
                     IconButton(onClick = {
                         isMoreMenuDisplay = true
                     }) {
@@ -270,38 +309,79 @@ fun ModelListScreen(navController: NavController) {
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .height(150.dp)
-                                        .fillMaxWidth(),
-                                    contentAlignment = Alignment.Center,
+                                        .height(220.dp)
                                 ) {
-                                    if (model.coverPath != null) {
-                                        AsyncImage(
-                                            model = model.coverPath,
-                                            contentDescription = null,
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier.fillMaxSize(),
-                                        )
-                                    } else {
-                                        Icon(
-                                            modelIcon,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .width(48.dp)
-                                                .height(48.dp),
-
-                                            )
-                                    }
-                                }
-                                Column {
-                                    Text(
-                                        text = model.name,
-                                        fontSize = 16.sp,
+                                    Box(
                                         modifier = Modifier
-                                            .padding(8.dp)
-                                            .height(50.dp),
-                                        maxLines = 3,
-                                    )
+                                            .fillMaxSize()
+                                            .thenIf(itemImageFit == "Fit", Modifier.blur(16.dp))
+                                    ) {
+                                        if (model.coverPath != null) {
+                                            AsyncImage(
+                                                model = model.coverPath,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize(),
+
+                                                )
+                                        }
+                                    }
+                                    Column(
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .height(150.dp)
+                                                .padding(8.dp)
+                                                .fillMaxWidth(),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+
+                                            if (model.coverPath != null) {
+                                                if (itemImageFit == "Fit") {
+                                                    AsyncImage(
+                                                        model = model.coverPath,
+                                                        contentDescription = null,
+                                                        contentScale = ContentScale.Fit,
+                                                        modifier = Modifier.fillMaxSize(),
+                                                    )
+                                                }
+                                            } else {
+                                                Icon(
+                                                    modelIcon,
+                                                    contentDescription = null,
+                                                    modifier = Modifier
+                                                        .width(48.dp)
+                                                        .height(48.dp),
+
+                                                    )
+                                            }
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxWidth()
+                                                .background(
+                                                    MaterialTheme.colorScheme.primaryContainer.copy(
+                                                        alpha = 0.7f
+                                                    )
+                                                )
+                                                .padding(8.dp),
+                                        ) {
+                                            Column {
+                                                Text(
+                                                    text = model.name,
+                                                    fontSize = 16.sp,
+                                                    maxLines = 2,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                )
+                                            }
+                                        }
+
+                                    }
+
                                 }
+
                             }
                         }
                     }

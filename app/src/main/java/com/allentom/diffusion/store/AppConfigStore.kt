@@ -12,7 +12,9 @@ data class AppConfig(
     val extraImageHistory: ExtraImageParam? = null,
     val isInitPrompt: Boolean = true,
     val saveCivitaiImageFilter: CivitaiImageFilter? = null,
-    val enablePlugin: Boolean = false
+    val enablePlugin: Boolean = false,
+    val modelViewDisplayMode: String = "Crop",
+    val loraViewDisplayMode: String = "Crop"
 )
 
 object AppConfigStore {
@@ -38,6 +40,11 @@ object AppConfigStore {
 
         editor.putString("config", json)
         editor.apply()
+    }
+
+    fun updateAndSave(context: Context, block: (AppConfig) -> AppConfig) {
+        config = block(config)
+        saveData(context)
     }
 
     fun updateCivitaiImageFilter(context: Context, filter: CivitaiImageFilter) {
