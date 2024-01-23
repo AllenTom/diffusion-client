@@ -94,6 +94,12 @@ data class Prompt(
         }
         return curText
     }
+    fun getTranslationText(): String {
+        if (translation == null) {
+            return text
+        }
+        return translation!!
+    }
 }
 
 @Entity(primaryKeys = ["promptId", "loraPromptId"], tableName = "lora_trigger")
@@ -241,6 +247,13 @@ data class SavePrompt(
             promptId = promptId,
             translation = nameCn,
         )
+    }
+
+    fun getTranslationText(): String {
+        if (nameCn.isBlank() ||nameCn == text) {
+            return text
+        }
+        return nameCn
     }
 }
 

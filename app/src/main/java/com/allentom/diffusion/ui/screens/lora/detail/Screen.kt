@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
@@ -136,7 +137,8 @@ fun LoraDetailScreen(
                             refreshCivitaiImage(modelId, modelVersionId)
                         }
                         if (modelId != null) {
-                            LoraDetailViewModel.civitaiModel = getCivitaiApiClient().getModelById(modelId).body()
+                            LoraDetailViewModel.civitaiModel =
+                                getCivitaiApiClient().getModelById(modelId).body()
                         }
                     }
                 } catch (e: Exception) {
@@ -525,7 +527,20 @@ fun LoraDetailScreen(
                                                             prompt.text
                                                         ),
                                                         label = {
-                                                            Text(text = prompt.text)
+                                                            Column(
+                                                                modifier = Modifier
+                                                                    .padding(4.dp)
+                                                            ) {
+                                                                Text(
+                                                                    text = prompt.getTranslationText(),
+                                                                    fontSize = 12.sp,
+                                                                    color = MaterialTheme.colorScheme.onBackground.copy(
+                                                                        alpha = 0.6f
+                                                                    )
+                                                                )
+                                                                Text(text = prompt.text)
+
+                                                            }
                                                         },
                                                     )
                                                     Spacer(modifier = Modifier.width(8.dp))

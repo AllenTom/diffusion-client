@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.allentom.diffusion.R
 import com.allentom.diffusion.store.Prompt
 
@@ -60,7 +63,7 @@ fun PromptDisplayView(
                     }
                     onAction(contextPrompt)
                 }) {
-                    Text(text = stringResource(id = R.string.action ))
+                    Text(text = stringResource(id = R.string.action))
                 }
                 Spacer(modifier = Modifier.width(16.dp))
             }
@@ -95,7 +98,7 @@ fun PromptDisplayView(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = if (canScroll) Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())  else {
+                .verticalScroll(rememberScrollState()) else {
                 Modifier
             }
 
@@ -104,7 +107,9 @@ fun PromptDisplayView(
                 FilterChip(
                     selected = selectedPromptList.contains(it.text),
                     leadingIcon = {
-                        Text(text = it.piority.toString())
+                        if (it.piority != 0) {
+                            Text(text = it.piority.toString())
+                        }
                     },
                     onClick = {
                         if (!selectMode) {
@@ -125,7 +130,12 @@ fun PromptDisplayView(
                         }
                     },
                     label = {
-                        Text(text = it.text)
+                        Column(
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Text(text = it.getTranslationText(), fontSize = 12.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                            Text(text = it.text)
+                        }
                     })
             }
         }

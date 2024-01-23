@@ -30,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -47,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
@@ -179,7 +181,19 @@ fun PromptSelectDialog(
                                         onClick = {
                                         },
                                         label = {
-                                            Text("${prompt.text} (${prompt.piority})")
+                                            Column(
+                                                modifier = Modifier.padding(4.dp)
+                                            ) {
+                                                Text(
+                                                    text = prompt.getTranslationText(),
+                                                    fontSize = 12.sp,
+                                                    color = MaterialTheme.colorScheme.onBackground.copy(
+                                                        alpha = 0.6f
+                                                    )
+                                                )
+                                                Text("${prompt.text} (${prompt.piority})")
+
+                                            }
                                         },
                                         leadingIcon = {
                                             IconButton(
@@ -302,7 +316,12 @@ fun PromptSelectDialog(
                                     if (inputRegionParam!!.useCommon && regionIndex == 0) {
                                         Text(text = stringResource(id = R.string.common_region))
                                     } else {
-                                        Text(text = stringResource(id = R.string.region, regionIndex.toString()))
+                                        Text(
+                                            text = stringResource(
+                                                id = R.string.region,
+                                                regionIndex.toString()
+                                            )
+                                        )
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
                                     PromptEditContainer(promptList = selectedPromptList.filter {
@@ -701,10 +720,26 @@ fun PromptEditContainer(
                     )
                 },
                 label = {
-                    Text(prompt.text)
+                    Box(
+                        modifier = Modifier
+                            .padding(4.dp)
+                    ) {
+                        Column {
+                            Text(
+                                prompt.getTranslationText(),
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                            )
+                            Text(prompt.text)
+                        }
+                    }
+
+
                 },
                 leadingIcon = {
-                    Text(prompt.piority.toString())
+                    if (prompt.piority != 0) {
+                        Text(prompt.piority.toString())
+                    }
                 }
             )
             Spacer(modifier = Modifier.width(8.dp))

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.allentom.diffusion.R
 import com.allentom.diffusion.store.Prompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.RegionPromptParam
@@ -76,21 +78,22 @@ fun PromptContainer(
                         onClickPrompt?.invoke(it)
                     }
             ) {
-                Row {
+                Row(
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
                     if (it.piority != 0) {
                         Text(
                             text = it.piority.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                     }
-                    if (it.translation != null && it.translation!!.isNotEmpty() && useTranslate) {
+                    Column {
                         Text(
-                            text = it.translation!!,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            text = it.getTranslationText(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+                            fontSize = 12.sp
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                    } else {
                         Text(
                             text = it.text,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
