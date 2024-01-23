@@ -21,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.allentom.diffusion.R
 import com.allentom.diffusion.store.Prompt
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -58,7 +60,7 @@ fun PromptDisplayView(
                     }
                     onAction(contextPrompt)
                 }) {
-                    Text(text = "Action")
+                    Text(text = stringResource(id = R.string.action ))
                 }
                 Spacer(modifier = Modifier.width(16.dp))
             }
@@ -77,12 +79,12 @@ fun PromptDisplayView(
             }) {
                 if (selectMode) {
                     if (selectedPromptList.size == promptList.size) {
-                        Text(text = "Deselect all")
+                        Text(text = stringResource(id = R.string.deselect_all))
                     } else {
-                        Text(text = "Select all")
+                        Text(text = stringResource(id = R.string.select_all))
                     }
                 } else {
-                    Text(text = "Select")
+                    Text(text = stringResource(R.string.select))
                 }
 
             }

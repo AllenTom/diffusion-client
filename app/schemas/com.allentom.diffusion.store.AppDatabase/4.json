@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 2,
-    "identityHash": "72194711efbcf0affef8f3ac8fc00e2f",
+    "version": 4,
+    "identityHash": "d829745516461089015e4a590da40044",
     "entities": [
       {
         "tableName": "prompt",
@@ -56,7 +56,7 @@
       },
       {
         "tableName": "history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`historyId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `steps` INTEGER NOT NULL, `samplerName` TEXT NOT NULL, `sdModelCheckpoint` TEXT NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `batchSize` INTEGER NOT NULL, `cfgScale` REAL NOT NULL, `time` INTEGER NOT NULL, `modelId` INTEGER, `regionRatio` TEXT, `regionCount` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`historyId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `steps` INTEGER NOT NULL, `samplerName` TEXT NOT NULL, `sdModelCheckpoint` TEXT NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `batchSize` INTEGER NOT NULL, `cfgScale` REAL NOT NULL, `time` INTEGER NOT NULL, `modelId` INTEGER, `regionRatio` TEXT, `regionCount` INTEGER, `regionUseCommon` INTEGER, `regionEnable` INTEGER)",
         "fields": [
           {
             "fieldPath": "historyId",
@@ -127,6 +127,18 @@
           {
             "fieldPath": "regionCount",
             "columnName": "regionCount",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "regionUseCommon",
+            "columnName": "regionUseCommon",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "regionEnable",
+            "columnName": "regionEnable",
             "affinity": "INTEGER",
             "notNull": false
           }
@@ -778,7 +790,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '72194711efbcf0affef8f3ac8fc00e2f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd829745516461089015e4a590da40044')"
     ]
   }
 }

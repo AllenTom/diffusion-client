@@ -167,4 +167,11 @@
     <string name="model_tags">Tags</string>
     <string name="model_version">Model Version</string>
     <string name="nsfw">NSFW</string>
+    <string name="region">Region %1$s</string>
+    <string name="regional">Regional</string>
+    <string name="common_region">Common</string>
+    <string name="region_divider_ratio">Divider ratio</string>
+    <string name="region_count">Index count</string>
+    <string name="region_usecommon">useCommon</string>
+    <string name="select">Select</string>
 </resources>

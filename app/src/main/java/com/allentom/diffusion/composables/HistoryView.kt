@@ -59,25 +59,70 @@ fun HistoryView(
     PromptAction(promptActionState)
 
     Column {
-        currentHistory.prompt.takeIf { it.isNotEmpty() }?.let {
-            PromptDisplayView(
-                promptList = currentHistory.prompt,
-                title = stringResource(id = R.string.param_prompt),
-                onClickPrompt = {
-                    navController.navigate(Screens.PromptDetail.route.replace("{promptId}", it.promptId.toString()))
-                },
-                canScroll = false
-            ) {
-                promptActionState.onOpenActionBottomSheet(it, "prompt")
+
+        if (currentHistory.regionEnable == true) {
+            Text(
+                text = stringResource(id = R.string.regional),
+                fontWeight = FontWeight.W500,
+                fontSize = 18.sp
+            )
+            ListItem(headlineContent = {
+                Text(text = stringResource(id = R.string.region_divider_ratio))
+            }, supportingContent = {
+                Text(text = currentHistory.regionRatio.toString())
+            })
+            val regionCount = currentHistory.regionCount ?: 0
+            for (i in 0 until regionCount) {
+                PromptDisplayView(
+                    promptList = currentHistory.prompt.filter { it.regionIndex == i },
+                    title = if (currentHistory.regionUseCommon == true && i == 0) {
+                        stringResource(id = R.string.common_region)
+                    } else {
+                        stringResource(id = R.string.region, i.toString())
+                    },
+                    onClickPrompt = {
+                        navController.navigate(
+                            Screens.PromptDetail.route.replace(
+                                "{promptId}",
+                                it.promptId.toString()
+                            )
+                        )
+                    },
+                    canScroll = false
+                ) {
+                    promptActionState.onOpenActionBottomSheet(it, "prompt")
+                }
+            }
+        }else{
+            currentHistory.prompt.takeIf { it.isNotEmpty() }?.let {
+                PromptDisplayView(
+                    promptList = currentHistory.prompt,
+                    title = stringResource(id = R.string.param_prompt),
+                    onClickPrompt = {
+                        navController.navigate(
+                            Screens.PromptDetail.route.replace(
+                                "{promptId}",
+                                it.promptId.toString()
+                            )
+                        )
+                    },
+                    canScroll = false
+                ) {
+                    promptActionState.onOpenActionBottomSheet(it, "prompt")
+                }
             }
         }
-
         currentHistory.negativePrompt.takeIf { it.isNotEmpty() }?.let {
             PromptDisplayView(
                 promptList = currentHistory.negativePrompt,
                 title = stringResource(id = R.string.param_negative_prompt),
                 onClickPrompt = {
-                    navController.navigate(Screens.PromptDetail.route.replace("{promptId}", it.promptId.toString()))
+                    navController.navigate(
+                        Screens.PromptDetail.route.replace(
+                            "{promptId}",
+                            it.promptId.toString()
+                        )
+                    )
                 },
                 canScroll = false
             ) {

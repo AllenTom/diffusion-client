@@ -23,6 +23,7 @@ import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
 import kotlinx.coroutines.flow.Flow
 import java.io.Serializable
+import kotlin.random.Random
 
 class EmbeddingPrompt(
     var text: String,
@@ -75,11 +76,13 @@ interface EmbeddingDao {
 
 }
 
-class Prompt(
+data class Prompt(
     var text: String,
     var piority: Int,
     var promptId: Long? = null,
-
+    var translation: String? = null,
+    var regionIndex: Int = 0,
+    var randomId: String = Util.randomString(8),
     ) : Serializable {
     fun getPromptText(): String {
         if (piority == 0) {
@@ -200,8 +203,9 @@ data class LoraPrompt(
     val triggerText: List<Prompt> = emptyList(),
 ) : Serializable {
     fun getPromptText(): List<String> {
-        return listOf( "<lora:${name}:${weight}>") + prompts.map { it.getPromptText() }
+        return listOf("<lora:${name}:${weight}>") + prompts.map { it.getPromptText() }
     }
+
     fun isTriggered(prompt: Prompt): Boolean {
         return prompts.any { it.text == prompt.text }
     }
@@ -234,7 +238,8 @@ class SavePrompt(
         return Prompt(
             text = text,
             piority = 0,
-            promptId = promptId
+            promptId = promptId,
+            translation = nameCn,
         )
     }
 }
@@ -463,7 +468,11 @@ object PromptStore {
         }
     }
 
-    suspend fun linkCivitaiModel(context: Context, civitaiModelVersion: CivitaiModelVersion, modelId: Long) {
+    suspend fun linkCivitaiModel(
+        context: Context,
+        civitaiModelVersion: CivitaiModelVersion,
+        modelId: Long
+    ) {
         val db = AppDatabaseHelper.getDatabase(context)
         var loraPrompt = db.loraPromptDao().getPrompt(modelId) ?: return
         loraPrompt = loraPrompt.copy(

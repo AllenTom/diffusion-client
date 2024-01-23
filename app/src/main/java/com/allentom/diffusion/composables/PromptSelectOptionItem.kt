@@ -11,14 +11,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.ui.screens.home.tabs.draw.RegionPromptParam
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PromptSelectOptionItem(
     label: String,
     value: List<Prompt>,
     title: String = label,
-    onValueChange: (List<Prompt>) -> Unit = {}
+    regionPromptParam: RegionPromptParam? = null,
+    onValueChange: (List<Prompt>, RegionPromptParam?) -> Unit = { _, _ ->
+    }
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -26,7 +28,7 @@ fun PromptSelectOptionItem(
         modifier = Modifier.clickable { showDialog = true },
         headlineContent = { Text(text = label) },
         supportingContent = {
-            PromptFlowRow(promptList = value)
+            PromptFlowRow(promptList = value, regionPromptParam = regionPromptParam)
         }
     )
 
@@ -35,10 +37,11 @@ fun PromptSelectOptionItem(
             promptList = value,
             title = title,
             onDismiss = { showDialog = false },
-            onValueChange = {
+            onValueChange = { prompts, region ->
                 showDialog = false
-                onValueChange(it)
-            }
+                onValueChange(prompts, region)
+            },
+            regionParam = regionPromptParam
         )
     }
 }

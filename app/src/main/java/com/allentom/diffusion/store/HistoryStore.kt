@@ -2,6 +2,7 @@ package com.allentom.diffusion.store
 
 import android.content.Context
 import android.net.Uri
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -70,6 +71,10 @@ class SaveHistory(
     val img2imgParam: Img2imgParam? = null,
     var controlNetParam: ControlNetParam? = null,
     val model: ModelEntity? = null,
+    val regionRatio:String? = "",
+    val regionCount:Int? = 0,
+    val regionUseCommon:Boolean? = false,
+    val regionEnable: Boolean? = false
 ) : Serializable
 
 @Entity(primaryKeys = ["promptId", "historyId"], tableName = "prompt_history")
@@ -174,6 +179,18 @@ data class HrHistoryEntity(
     }
 }
 
+@Dao
+interface HrHistoryDao {
+    @Insert
+    fun insert(hrHistoryEntity: HrHistoryEntity)
+
+    @Update
+    fun update(hrHistoryEntity: HrHistoryEntity)
+
+    @Query("SELECT * FROM hr_history WHERE historyId = :historyId limit 1")
+    fun getHrHistory(historyId: Long): HrHistoryEntity?
+}
+
 @Entity(tableName = "image_history")
 data class ImageHistoryEntity(
     @PrimaryKey(autoGenerate = true)
@@ -219,6 +236,7 @@ data class PromptExtraEntity(
     val historyId: Long,
     val promptType: Int,
     val loraPromptId: Long = 0,
+    val regionIndex:Int? = 0
 )
 
 @Dao
@@ -388,6 +406,7 @@ data class HistoryWithRelation(
                     promptExtra.promptId == it.promptId && promptExtra.promptType == PromptType.Prompt.value
                 }?.let { extra ->
                     obj.piority = extra.priority
+                    obj.regionIndex = extra.regionIndex ?: 0
                 }
                 obj
             },
@@ -436,6 +455,10 @@ data class HistoryWithRelation(
             img2imgParam = img2imgParam?.toImg2imgParam(),
             controlNetParam = controlNetHistoryEntity?.toControlNetParam(),
             model = modelEntity,
+            regionCount = historyEntity.regionCount,
+            regionRatio = historyEntity.regionRatio,
+            regionUseCommon = historyEntity.regionUseCommon,
+            regionEnable = historyEntity.regionEnable
         )
         return result
     }
@@ -497,14 +520,6 @@ data class ControlNetHistoryWithRelation(
     val controlNetEntity: ControlNetEntity,
 )
 
-@Entity(tableName = "lora_history")
-class LoraHistoryEntity(
-    @PrimaryKey(autoGenerate = true)
-    val loraHistoryId: Long = 0,
-    val loraId: Long,
-    val historyId: Long,
-)
-
 
 @Entity(tableName = "history")
 data class HistoryEntity(
@@ -519,6 +534,10 @@ data class HistoryEntity(
     val cfgScale: Float,
     val time: Long,
     var modelId: Long? = null,
+    var regionRatio:String? = "",
+    var regionCount:Int? = 0,
+    var regionUseCommon:Boolean? = false,
+    var regionEnable:Boolean? = false
 ) : Serializable {
 
     companion object {
@@ -532,21 +551,13 @@ data class HistoryEntity(
                 batchSize = saveHistory.batchSize,
                 cfgScale = saveHistory.cfgScale,
                 time = saveHistory.time,
+                regionCount = saveHistory.regionCount,
+                regionRatio = saveHistory.regionRatio,
+                regionUseCommon = saveHistory.regionUseCommon,
+                regionEnable = saveHistory.regionEnable
             )
         }
     }
-}
-
-@Dao
-interface HrHistoryDao {
-    @Insert
-    fun insert(hrHistoryEntity: HrHistoryEntity)
-
-    @Update
-    fun update(hrHistoryEntity: HrHistoryEntity)
-
-    @Query("SELECT * FROM hr_history WHERE historyId = :historyId limit 1")
-    fun getHrHistory(historyId: Long): HrHistoryEntity?
 }
 
 @Dao
@@ -624,6 +635,7 @@ object HistoryStore {
                     priority = prompt.piority,
                     historyId = savedHistoryId,
                     promptType = PromptType.Prompt.value,
+                    regionIndex = prompt.regionIndex
                 )
             )
         }
@@ -813,8 +825,6 @@ object HistoryStore {
                     )
                 )
             }
-
-
         }
 
     }

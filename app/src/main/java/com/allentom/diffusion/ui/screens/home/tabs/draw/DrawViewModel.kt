@@ -25,6 +25,8 @@ import com.allentom.diffusion.api.ControlNetParam
 import com.allentom.diffusion.api.ControlNetWrapper
 import com.allentom.diffusion.api.Img2ImgRequest
 import com.allentom.diffusion.api.OptionsRequestBody
+import com.allentom.diffusion.api.RegionalPrompterParam
+import com.allentom.diffusion.api.RegionalPrompterWrapper
 import com.allentom.diffusion.api.Txt2ImgRequest
 import com.allentom.diffusion.api.entity.ApiError
 import com.allentom.diffusion.api.entity.ApiException
@@ -125,18 +127,33 @@ data class GenImageItem(
     }
 }
 
+data class RegionPromptParam(
+    val dividerText: String = "1",
+    val regionCount: Int = 1,
+    val useCommon: Boolean = true,
+    val enable: Boolean = false
+){
+    fun getTotalRegionCount():Int {
+        if (useCommon) {
+            return regionCount + 1
+        }
+        return regionCount
+    }
+}
+
 object DrawViewModel {
     var genScope: CoroutineScope? = null
     var inputPromptText by mutableStateOf(
         "1girl,serafuku,classroom".split(",").map { Prompt(it, 0) })
     var inputNegativePromptText by mutableStateOf(
         "nsfw".split(",").map { Prompt(it, 0) })
+    var regionPromptParam by mutableStateOf<RegionPromptParam>(RegionPromptParam())
     var embeddingList by mutableStateOf<List<EmbeddingPrompt>>(emptyList())
     var embeddingModels by mutableStateOf(emptyMap<String, Embedding>())
     var inputWidth by mutableFloatStateOf(300f)
     var inputHeight by mutableFloatStateOf(512f)
     var inputSteps by mutableFloatStateOf(20f)
-    var inputNiter by mutableFloatStateOf(2f)
+    var inputNiter by mutableFloatStateOf(1f)
     var inputSamplerName by mutableStateOf("DDIM")
     var inputCfgScale by mutableFloatStateOf(7f)
     var inputSeed by mutableIntStateOf(-1)
@@ -209,7 +226,19 @@ object DrawViewModel {
     }
 
     fun getPositivePrompt(): String {
-        return inputPromptText.map { it.getPromptText() }.joinToString(",")
+        if (regionPromptParam.regionCount > 0 && regionPromptParam.enable) {
+            return getPositiveWithRegion()
+        }
+        return inputPromptText.joinToString(",") { it.getPromptText() }
+    }
+    fun getPositiveWithRegion():String {
+        var promptTextList = mutableListOf<String>()
+        val maxRegion = regionPromptParam.getTotalRegionCount()
+        for (i in 0 until maxRegion) {
+            val regionText = inputPromptText.filter { it.regionIndex == i }.map { it.getPromptText() }.joinToString(",")
+            promptTextList.add(regionText)
+        }
+        return promptTextList.joinToString(" BREAK\n")
     }
 
     fun getNegativePrompt(): String {
@@ -222,6 +251,17 @@ object DrawViewModel {
         return inputLoraList.joinToString(",") { it.getPromptText().joinToString(",") }
     }
 
+    fun updateRegionCount(count: Int) {
+        regionPromptParam = regionPromptParam.copy(regionCount = count)
+        inputPromptText = inputPromptText.map {
+            if (it.regionIndex >= count) {
+                it.copy(regionIndex = 0)
+            } else {
+                it
+            }
+        }
+    }
+
     fun applyHistory(context: Context, useHistory: SaveHistory) {
         val history = HistoryStore.getHistoryById(context, useHistory.id) ?: return
         inputPromptText = history.prompt
@@ -232,6 +272,12 @@ object DrawViewModel {
         inputHeight = history.height.toFloat()
         inputCfgScale = history.cfgScale
         embeddingList = history.embeddingPrompt
+        regionPromptParam = RegionPromptParam(
+            regionCount = history.regionCount ?: 1,
+            dividerText = history.regionRatio ?: "1",
+            useCommon = history.regionUseCommon ?: false,
+            enable = history.regionEnable ?: false
+        )
 
 
         inputUpscaler = history.hrParam.hrUpscaler
@@ -296,15 +342,30 @@ object DrawViewModel {
         hrDenosingStrength: Float = 0.7f,
         hrUpscaler: String? = "None",
         controlNetParam: ControlNetParam? = null,
+        regionPromptParam: RegionPromptParam? = null
     ): String? {
-        var alwaysonScripts: AlwaysonScripts? = null
+        var alwaysonScripts = AlwaysonScripts()
         if (controlNetParam != null) {
-            alwaysonScripts = AlwaysonScripts(
-                controlNet = ControlNetWrapper(
-                    args = listOf(controlNetParam)
-                )
+            alwaysonScripts.controlNet = ControlNetWrapper(
+                args = listOf(controlNetParam)
             )
         }
+        if (regionPromptParam != null && regionPromptParam.regionCount > 1 && regionPromptParam.enable) {
+            var param = RegionalPrompterParam(
+                active = true,
+                ratios = regionPromptParam.dividerText,
+                useCommon = true
+            )
+            alwaysonScripts.regionalPrompter = RegionalPrompterWrapper(
+                args = param.toParamArray()
+            )
+        }
+        // print alwayson scripts in json
+        Log.d("prompt", "prompt: $prompt")
+        Log.d("alwayson", gson.toJson(alwaysonScripts))
+//        {"Regional Prompter":[true,false,"Matrix","Columns","Mask","Prompt","1,1","0",false,true,false,"Attention",false,"0","0","0","","0","0",false]}
+        //[True,False,"Matrix","Vertical","Mask","Prompt","1,1,1","",False,False,False,"Attention",False,"0","0","0",""]
+
         val request = Txt2ImgRequest(
             prompt = prompt,
             negative_prompt = negativePrompt,
@@ -466,8 +527,6 @@ object DrawViewModel {
                     )
                 }
                 for (genIndex in 0 until genTotalCount) {
-
-
                     val seed = inputSeed.let {
                         if (refreshIndex != null) {
                             return@let genItemList[refreshIndex].seed!!
@@ -514,8 +573,8 @@ object DrawViewModel {
                         try {
                             text2Image(
                                 prompt = listOf(
-                                    getPositivePrompt(),
-                                    getLoraPrompt()
+                                    getLoraPrompt(),
+                                    getPositivePrompt()
                                 ).joinToString(","),
                                 negativePrompt = getNegativePrompt(),
                                 width = inputWidth.toInt(),
@@ -529,7 +588,8 @@ object DrawViewModel {
                                 hrScale = inputHrScale,
                                 hrDenosingStrength = inputHrDenoisingStrength,
                                 hrUpscaler = inputUpscaler,
-                                controlNetParam = controlNetParam
+                                controlNetParam = controlNetParam,
+                                regionPromptParam = regionPromptParam
                             )?.let {
                                 resultImage = it
                             }
@@ -660,7 +720,11 @@ object DrawViewModel {
                         hrUpscaler = inputUpscaler
                     ),
                     img2imgParam = img2ImgParam,
-                    controlNetParam = controlNetParam
+                    controlNetParam = controlNetParam,
+                    regionRatio = regionPromptParam.dividerText,
+                    regionCount = regionPromptParam.regionCount,
+                    regionUseCommon = regionPromptParam.useCommon,
+                    regionEnable = regionPromptParam.enable
                 )
                 genScope?.launch(Dispatchers.IO) {
                     HistoryStore.saveHistoryToDatabase(context, saveHistory)

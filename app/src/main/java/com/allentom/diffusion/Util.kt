@@ -305,4 +305,20 @@ object Util {
         }
         return Prompt(text = parseText, piority = piority)
     }
+    fun randomColor(): Int {
+        val random = java.util.Random()
+        return android.graphics.Color.argb(
+            255,
+            random.nextInt(256),
+            random.nextInt(256),
+            random.nextInt(256)
+        )
+    }
+
+    fun randomString(length: Int): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z')
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
+    }
 }

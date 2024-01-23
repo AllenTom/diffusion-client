@@ -168,4 +168,11 @@
     <string name="model_tags">标签</string>
     <string name="model_version">当前版本</string>
     <string name="nsfw">不适宜内容</string>
+    <string name="region">区域 %1$s</string>
+    <string name="regional">分区</string>
+    <string name="common_region">通用</string>
+    <string name="region_divider_ratio">分割</string>
+    <string name="region_count">区域数</string>
+    <string name="region_usecommon">使用通常区域</string>
+    <string name="select">选择</string>
 </resources>

@@ -123,16 +123,20 @@ fun BaseInfoPanel(
         }
         PromptSelectOptionItem(
             label = stringResource(id = R.string.param_prompt),
-            value = DrawViewModel.inputPromptText
-        ) {
-            DrawViewModel.inputPromptText = it
+            value = DrawViewModel.inputPromptText,
+            regionPromptParam = DrawViewModel.regionPromptParam
+        ) {prompts,region ->
+            DrawViewModel.inputPromptText = prompts
+            region?.let {
+                DrawViewModel.regionPromptParam = it
+            }
         }
 
         PromptSelectOptionItem(
             label = stringResource(id = R.string.param_negative_prompt),
             value = DrawViewModel.inputNegativePromptText
-        ) {
-            DrawViewModel.inputNegativePromptText = it
+        ) { prompts,_ ->
+            DrawViewModel.inputNegativePromptText = prompts
         }
         LoraSelectOptionItem(
             label = stringResource(R.string.param_lora),

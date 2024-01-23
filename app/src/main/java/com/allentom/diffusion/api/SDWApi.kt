@@ -63,16 +63,109 @@ data class ControlNetParam(
     val controlNetId: Long = 0,
 )
 
+//1	Active	True, False	Bool	False
+//2	debug	True, False	Bool	False
+//3	Mode	Matrix, Mask, Prompt	Text	Matrix
+//4	Mode (Matrix)	Horizontal, Vertical, Colums, Rows	Text	Columns
+//5	Mode (Mask)	Mask	Text	Mask
+//6	Mode (Prompt)	Prompt, Prompt-Ex	Text	Prompt
+//7	Ratios		Text	1,1,1
+//8	Base Ratios		Text	0
+//9	Use Base	True, False	Bool	False
+//10	Use Common	True, False	Bool	False
+//11	Use Neg-Common	True, False	Bool	False
+//12	Calcmode	Attention, Latent	Text	Attention
+//13	Not Change AND	True, False	Bool	False
+//14	LoRA Textencoder		Text	0
+//15	LoRA U-Net		Text	0
+//16	Threshold		Text	0
+//17	Mask		Text
+//18	LoRA stop step		Text	0
+//19	LoRA Hires stop step		Text	0
+//20	flip	True, False	Bool	False
+data class RegionalPrompterParam(
+    @SerializedName("active")
+    val active: Boolean = false,
+    @SerializedName("debug")
+    val debug: Boolean = false,
+    @SerializedName("mode")
+    val mode: String = "Matrix",
+    @SerializedName("mode_matrix")
+    val modeMatrix: String = "Columns",
+    @SerializedName("mode_mask")
+    val modeMask: String = "Mask",
+    @SerializedName("mode_prompt")
+    val modePrompt: String = "Prompt",
+    @SerializedName("ratios")
+    val ratios: String = "1,1,1",
+    @SerializedName("base_ratios")
+    val baseRatios: String = "0.2",
+    @SerializedName("use_base")
+    val useBase: Boolean = false,
+    @SerializedName("use_common")
+    val useCommon: Boolean = false,
+    @SerializedName("use_neg_common")
+    val useNegCommon: Boolean = false,
+    @SerializedName("calcmode")
+    val calcmode: String = "Attention",
+    @SerializedName("not_change_and")
+    val notChangeAnd: Boolean = false,
+    @SerializedName("lora_textencoder")
+    val loraTextencoder: String = "0",
+    @SerializedName("lora_unet")
+    val loraUnet: String = "0",
+    @SerializedName("threshold")
+    val threshold: String = "0",
+    @SerializedName("mask")
+    val mask: String = "",
+    @SerializedName("lora_stop_step")
+    val loraStopStep: String = "0",
+    @SerializedName("lora_hires_stop_step")
+    val loraHiresStopStep: String = "0",
+    @SerializedName("flip")
+    val flip: Boolean = false,
+) {
+    fun toParamArray(): List<Any> {
+        return listOf(
+            active,
+            debug,
+            mode,
+            modeMatrix,
+            modeMask,
+            modePrompt,
+            ratios,
+            baseRatios,
+            useBase,
+            useCommon,
+            useNegCommon,
+            calcmode,
+            notChangeAnd,
+            loraTextencoder,
+            loraUnet,
+            threshold,
+            mask,
+            loraStopStep,
+            loraHiresStopStep,
+            flip,
+        )
+    }
+}
+
 data class AlwaysonScripts(
     @SerializedName("controlnet")
-    val controlNet: ControlNetWrapper?,
+    var controlNet: ControlNetWrapper? = null,
+    @SerializedName("Regional Prompter")
+    var regionalPrompter: RegionalPrompterWrapper? = null,
 )
 
 data class ControlNetWrapper(
     @SerializedName("args")
     val args: List<ControlNetParam> = listOf(),
 )
-
+data class RegionalPrompterWrapper(
+    @SerializedName("args")
+    val args: List<Any>? = null
+)
 data class Txt2ImgRequest(
     val batch_size: Int = 1,
     val prompt: String,
@@ -113,8 +206,7 @@ data class Img2ImgRequest(
     val image_cfg_scale: Float = 7f,
     val denoising_strength: Float = 0.75f,
     val scale_by: Float = 1f,
-
-    )
+)
 
 data class InterrogateRequest(
     val image: String,
