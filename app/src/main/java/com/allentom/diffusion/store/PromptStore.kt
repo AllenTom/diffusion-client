@@ -213,7 +213,7 @@ data class LoraPrompt(
 
 
 @Entity(tableName = "prompt")
-class SavePrompt(
+data class SavePrompt(
     @PrimaryKey(autoGenerate = true)
     val promptId: Long = 0,
     var text: String,
@@ -283,10 +283,8 @@ interface PromptDao {
 }
 
 object PromptStore {
-    fun refresh(context: Context, includeLibrary: Boolean = false) {
-        if (includeLibrary) {
-            loadLibrary(context)
-        }
+    fun refresh(context: Context) {
+
     }
 
     fun updatePrompt(context: Context, promptList: List<String>) {
@@ -395,6 +393,21 @@ object PromptStore {
             db.promptDao().getPromptById(id)!!
         } else {
             prompt
+        }
+    }
+    fun newPromptByName(context: Context,newPrompt:SavePrompt) {
+        val db = AppDatabaseHelper.getDatabase(context)
+        val prompt = db.promptDao().getPrompt(newPrompt.text)
+        if (prompt == null) {
+            val promptEntity = newPrompt
+            db.promptDao().insert(promptEntity)
+        } else {
+            val promptToSave = prompt.copy(
+                nameCn = newPrompt.nameCn,
+                category = newPrompt.category,
+                text = newPrompt.text,
+            )
+            db.promptDao().update(promptToSave)
         }
     }
 

@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.composables.PromptLibraryImportDialog
 import com.allentom.diffusion.store.PromptStore
 import com.allentom.diffusion.store.SavePrompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
@@ -131,6 +132,26 @@ fun PromptCategoryScreen(
             }
 
         }
+    }
+    if (isSecondDisplay == true) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    Content()
+
+                }
+            }
+        }
+        return
     }
 
     Scaffold(

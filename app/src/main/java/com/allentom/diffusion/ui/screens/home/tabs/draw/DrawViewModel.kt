@@ -843,7 +843,7 @@ object DrawViewModel {
 
         startTime = System.currentTimeMillis()
         if (AppConfigStore.config.isInitPrompt) {
-            PromptStore.refresh(context, true)
+            PromptStore.refresh(context)
             AppConfigStore.config = AppConfigStore.config.copy(isInitPrompt = false)
             AppConfigStore.saveData(context)
         }

@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,19 +28,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.IsWideWindow
+import com.allentom.diffusion.composables.PromptLibraryImportDialog
 import com.allentom.diffusion.store.PromptStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PromptScreen(navController: NavController) {
     var categoryList by remember {
@@ -46,11 +53,13 @@ fun PromptScreen(navController: NavController) {
     }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    var currentSelectCategoryName by remember {
+    var currentSelectCategoryName by rememberSaveable {
         mutableStateOf<String?>(null)
     }
-
-
+    var isImportDialogOpen by remember {
+        mutableStateOf(false)
+    }
+    val downloadIcon = ImageVector.vectorResource(id = R.drawable.ic_download)
     fun refreshSearch() {
         coroutineScope.launch(Dispatchers.IO) {
             categoryList = PromptStore.getAllCategory(context)
@@ -63,7 +72,15 @@ fun PromptScreen(navController: NavController) {
         refreshSearch()
     }
     val isWideDisplay = IsWideWindow()
-
+    if (isImportDialogOpen) {
+        PromptLibraryImportDialog(onDismiss = {
+            isImportDialogOpen = false
+        }) {
+            coroutineScope.launch(Dispatchers.IO) {
+                refreshSearch()
+            }
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,15 +90,23 @@ fun PromptScreen(navController: NavController) {
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 actions = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .clickable {
-                                navController.navigate(Screens.PromptSearch.route)
-                            }
-                    )
+                    IconButton(onClick = {
+                        isImportDialogOpen = true
+                    }) {
+                        Icon(
+                            imageVector = downloadIcon,
+                            contentDescription = null
+                        )
+                    }
+                    IconButton(onClick = {
+                        navController.navigate(Screens.PromptSearch.route)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                        )
+                    }
+
                 }
             )
         },

@@ -174,4 +174,9 @@
     <string name="region_count">Index count</string>
     <string name="region_usecommon">useCommon</string>
     <string name="select">Select</string>
+    <string name="import_prompt_library_dialog_title">Import library</string>
+    <string name="reading">Reading</string>
+    <string name="pickup_a_library_file">Pickup a library file</string>
+    <string name="total_prompts">Total %1$s prompts</string>
+    <string name="importing">Importing %1$s/%2$s</string>
 </resources>
