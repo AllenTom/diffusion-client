@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
@@ -91,6 +92,10 @@ fun PromptSelectDialog(
     val coroutineScope = rememberCoroutineScope()
     var searchJob: Job? by remember { mutableStateOf(null) }
     val scope = rememberCoroutineScope()
+    var editMode by remember {
+        mutableStateOf(false)
+    }
+
     fun refreshSearchResult() {
         scope.launch(Dispatchers.IO) {
             if (inputPromptText.isNotEmpty()) {
@@ -184,14 +189,27 @@ fun PromptSelectDialog(
                                             Column(
                                                 modifier = Modifier.padding(4.dp)
                                             ) {
-                                                Text(
-                                                    text = prompt.getTranslationText(),
-                                                    fontSize = 12.sp,
-                                                    color = MaterialTheme.colorScheme.onBackground.copy(
-                                                        alpha = 0.6f
-                                                    )
-                                                )
-                                                Text("${prompt.text} (${prompt.piority})")
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(text = prompt.piority.toString())
+                                                    Spacer(modifier = Modifier.width(16.dp))
+                                                    Column(
+                                                        modifier = Modifier.padding(4.dp)
+                                                    ) {
+                                                        Text(
+                                                            text = prompt.getTranslationText(),
+                                                            fontSize = 12.sp,
+                                                            color = MaterialTheme.colorScheme.onBackground.copy(
+                                                                alpha = 0.6f
+                                                            )
+                                                        )
+                                                        Text(prompt.text)
+
+                                                    }
+
+                                                }
+
 
                                             }
                                         },
@@ -297,6 +315,15 @@ fun PromptSelectDialog(
                             horizontalArrangement = Arrangement.End
                         ) {
                             IconButton(onClick = {
+                                editMode = !editMode
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = null,
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            IconButton(onClick = {
                                 currentSelectPromptIndex = null
                                 selectedPromptList = emptyList()
                             }) {
@@ -305,6 +332,7 @@ fun PromptSelectDialog(
                                     contentDescription = null,
                                 )
                             }
+
                         }
                         Column(
                             modifier = Modifier
@@ -338,7 +366,8 @@ fun PromptSelectDialog(
                                             selectedPromptList.filter { it != prompt }
 
                                         refreshSearchResult()
-                                    })
+                                    }, editMode = editMode
+                                    )
                                 }
                             } else {
                                 PromptEditContainer(
@@ -357,7 +386,9 @@ fun PromptSelectDialog(
                                             selectedPromptList.filter { it != prompt }
 
                                         refreshSearchResult()
-                                    })
+                                    },
+                                    editMode = editMode
+                                )
                             }
 
                         }
@@ -397,7 +428,7 @@ fun PromptSelectDialog(
                                     modifier = Modifier
                                         .clickable {
                                             selectedPromptList =
-                                                selectedPromptList + Prompt(prompt.text, 0)
+                                                selectedPromptList + prompt.toPrompt()
                                             refreshSearchResult()
                                         }
                                         .padding(4.dp)
@@ -695,53 +726,37 @@ fun RegionalPrompterPanel(
 
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PromptEditContainer(
     promptList: List<Prompt>,
     onPromptClick: (Prompt) -> Unit = {},
     isItemSelected: (Prompt) -> Boolean = { false },
     onPromptDelete: (Prompt) -> Unit = {},
+    editMode: Boolean = false
 ) {
-    FlowRow {
+    FlowRow(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         promptList.forEachIndexed { index, prompt ->
-            FilterChip(
-                onClick = {
-                    onPromptClick(prompt)
+            PromptChip(
+                prompt = prompt,
+                onClickPrompt = {
+                    onPromptClick(it)
                 },
                 selected = isItemSelected(prompt),
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
+                tail = {
+                    if (editMode) {
+                        IconButton(onClick = {
                             onPromptDelete(prompt)
-                        }
-                    )
-                },
-                label = {
-                    Box(
-                        modifier = Modifier
-                            .padding(4.dp)
-                    ) {
-                        Column {
-                            Text(
-                                prompt.getTranslationText(),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
                             )
-                            Text(prompt.text)
                         }
                     }
-
-
-                },
-                leadingIcon = {
-                    if (prompt.piority != 0) {
-                        Text(prompt.piority.toString())
-                    }
-                }
-            )
+                })
             Spacer(modifier = Modifier.width(8.dp))
         }
     }

@@ -59,7 +59,6 @@ fun HistoryView(
     PromptAction(promptActionState)
 
     Column {
-
         if (currentHistory.regionEnable == true) {
             Text(
                 text = stringResource(id = R.string.regional),
@@ -71,7 +70,10 @@ fun HistoryView(
             }, supportingContent = {
                 Text(text = currentHistory.regionRatio.toString())
             })
-            val regionCount = currentHistory.regionCount ?: 0
+            var regionCount = currentHistory.regionCount ?: 0
+            if (currentHistory.regionUseCommon == true) {
+                regionCount += 1
+            }
             for (i in 0 until regionCount) {
                 PromptDisplayView(
                     promptList = currentHistory.prompt.filter { it.regionIndex == i },

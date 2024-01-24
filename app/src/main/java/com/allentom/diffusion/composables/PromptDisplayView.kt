@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.allentom.diffusion.R
 import com.allentom.diffusion.store.Prompt
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PromptDisplayView(
     promptList: List<Prompt>,
@@ -101,20 +101,15 @@ fun PromptDisplayView(
                 .verticalScroll(rememberScrollState()) else {
                 Modifier
             }
-
         ) {
             promptList.forEach {
-                FilterChip(
+                PromptChip(
+                    prompt = it,
                     selected = selectedPromptList.contains(it.text),
-                    leadingIcon = {
-                        if (it.piority != 0) {
-                            Text(text = it.piority.toString())
-                        }
-                    },
-                    onClick = {
+                    onClickPrompt = {
                         if (!selectMode) {
                             onClickPrompt?.invoke(it)
-                            return@FilterChip
+                            return@PromptChip
                         }
                         selectedPromptList =
                             if (selectedPromptList.contains(it.text)) {
@@ -128,15 +123,8 @@ fun PromptDisplayView(
                         if (selectedPromptList.isEmpty()) {
                             selectMode = false
                         }
-                    },
-                    label = {
-                        Column(
-                            modifier = Modifier.padding(4.dp)
-                        ) {
-                            Text(text = it.getTranslationText(), fontSize = 12.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
-                            Text(text = it.text)
-                        }
-                    })
+                    }
+                )
             }
         }
     }

@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.api.entity.Lora
 import com.allentom.diffusion.store.LoraPrompt
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LoraSelectOptionItem(
     label: String,

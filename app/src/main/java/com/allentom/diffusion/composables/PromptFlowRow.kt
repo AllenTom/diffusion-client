@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,10 +32,14 @@ fun PromptFlowRow(
     useTranslate: Boolean = false,
     regionPromptParam: RegionPromptParam? = null
 ) {
-    if (regionPromptParam != null) {
+    if (regionPromptParam != null && regionPromptParam.enable) {
         Column {
             for (i in 0 until regionPromptParam.getTotalRegionCount()) {
-                Text(text = stringResource(R.string.region, i.toString()))
+                if (regionPromptParam.useCommon && i == 0) {
+                    Text(text = stringResource(R.string.common_region))
+                } else {
+                    Text(text = stringResource(R.string.region, i.toString()))
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 PromptContainer(
                     promptList = promptList.filter { it.regionIndex == i },
@@ -46,7 +49,7 @@ fun PromptFlowRow(
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
-    }else{
+    } else {
         PromptContainer(
             promptList = promptList,
             onClickPrompt = onClickPrompt,

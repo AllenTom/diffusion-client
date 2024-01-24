@@ -216,8 +216,10 @@ fun CivitaiModelSelectDialog(
                                             .verticalScroll(rememberScrollState())
                                     ) {
                                         lora.triggerText.forEach {
-                                            FilterChip(
-                                                onClick = {
+                                            PromptChip(
+                                                prompt = it,
+                                                selected = lora.isTriggered(it),
+                                                onClickPrompt = {
                                                     if (lora.isTriggered(it)) {
                                                         selectedLoraList =
                                                             selectedLoraList.map { curLora ->
@@ -241,15 +243,8 @@ fun CivitaiModelSelectDialog(
                                                                 curLora
                                                             }
                                                     }
-                                                },
-                                                label = {
-                                                    Text(text = it.text)
-                                                },
-                                                selected = lora.prompts.any { prompt ->
-                                                    prompt.text == it.text
-                                                },
-
-                                                )
+                                                }
+                                            )
                                             Spacer(modifier = Modifier.width(8.dp))
                                         }
                                     }
@@ -257,6 +252,7 @@ fun CivitaiModelSelectDialog(
 
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                         Divider()
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyColumn(

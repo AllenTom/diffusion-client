@@ -400,15 +400,24 @@ data class HistoryWithRelation(
     fun toSaveHistory(): SaveHistory {
         val result = SaveHistory(
             id = historyEntity.historyId,
-            prompt = prompts.map {
-                val obj = it.toPrompt()
-                promptExtraEntity.find { promptExtra ->
-                    promptExtra.promptId == it.promptId && promptExtra.promptType == PromptType.Prompt.value
-                }?.let { extra ->
-                    obj.piority = extra.priority
-                    obj.regionIndex = extra.regionIndex ?: 0
+//            prompt = prompts.map {
+//                val obj = it.toPrompt()
+//                promptExtraEntity.find { promptExtra ->
+//                    promptExtra.promptId == it.promptId && promptExtra.promptType == PromptType.Prompt.value
+//                }?.let { extra ->
+//                    obj.piority = extra.priority
+//                    obj.regionIndex = extra.regionIndex ?: 0
+//                }
+//                obj
+//            },
+            prompt = promptExtraEntity.mapNotNull { promptExtraEntity ->
+                val prompt = prompts.find { it.promptId == promptExtraEntity.promptId }
+                prompt?.let {
+                    val obj = it.toPrompt()
+                    obj.piority = promptExtraEntity.priority
+                    obj.regionIndex = promptExtraEntity.regionIndex ?: 0
+                    obj
                 }
-                obj
             },
             negativePrompt = negativePrompts.map {
                 val obj = it.toPrompt()
@@ -615,6 +624,7 @@ object HistoryStore {
         val savedHistoryId = database.historyDao().insert(
             historyEntity
         )
+        val savedPromptRelList = mutableListOf<SavePrompt>()
         history.prompt.forEach { prompt ->
             val promptEntity = database.promptDao().getPrompt(prompt.text)
             val promptId = if (promptEntity != null) {
@@ -623,12 +633,18 @@ object HistoryStore {
             } else {
                 database.promptDao().insert(SavePrompt.fromPrompt(prompt))
             }
-            database.promptHistoryDao().insert(
-                PromptHistoryCrossRef(
-                    promptId = promptId,
-                    historyId = savedHistoryId
+            if (promptEntity == null) {
+                return@forEach
+            }
+            if (savedPromptRelList.none { it.promptId == promptId }) {
+                database.promptHistoryDao().insert(
+                    PromptHistoryCrossRef(
+                        promptId = promptId,
+                        historyId = savedHistoryId
+                    )
                 )
-            )
+                savedPromptRelList += promptEntity
+            }
             database.promptExtraDao().insert(
                 PromptExtraEntity(
                     promptId = promptId,
