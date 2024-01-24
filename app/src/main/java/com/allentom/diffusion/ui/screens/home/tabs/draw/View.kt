@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
-import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
 import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.ui.parts.GenProgressGrid
@@ -213,7 +212,6 @@ fun DrawScreen() {
                         }
                     }
                 }
-
             }
         }
 

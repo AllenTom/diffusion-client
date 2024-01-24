@@ -75,10 +75,7 @@ fun PromptSelectDialog(
     regionParam: RegionPromptParam? = null
 ) {
     var selectedPromptList by remember { mutableStateOf(promptList) }
-    var inputPromptText by remember { mutableStateOf("") }
-    var searchResults by remember {
-        mutableStateOf<List<SavePrompt>>(emptyList())
-    }
+
     var currentSelectPromptIndex by remember {
         mutableStateOf(null as String?)
     }
@@ -88,33 +85,23 @@ fun PromptSelectDialog(
     var inputRegionParam by remember {
         mutableStateOf(regionParam)
     }
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    var searchJob: Job? by remember { mutableStateOf(null) }
-    val scope = rememberCoroutineScope()
+
     var editMode by remember {
         mutableStateOf(false)
     }
 
-    fun refreshSearchResult() {
-        scope.launch(Dispatchers.IO) {
-            if (inputPromptText.isNotEmpty()) {
-                PromptStore.searchPrompt(
-                    context,
-                    inputPromptText,
-                    emptyList()
-                )
-                    .let { results ->
-                        searchResults = results
-                    }
+    fun updateListByPrompt(prompt: Prompt, update: (Prompt) -> Prompt) {
+        selectedPromptList = selectedPromptList.toMutableList().map {
+            if (it.randomId == prompt.randomId) {
+                return@map update(it)
             } else {
-                searchResults =
-                    PromptStore.getTopNPrompt(context, 10)
+                return@map it
             }
         }
     }
+
+
     LaunchedEffect(Unit) {
-        refreshSearchResult()
         if (selectedPromptList.isNotEmpty()) {
             currentSelectPromptIndex = selectedPromptList.first().randomId
         }
@@ -216,17 +203,11 @@ fun PromptSelectDialog(
                                         leadingIcon = {
                                             IconButton(
                                                 onClick = {
-                                                    selectedPromptList =
-                                                        selectedPromptList.toMutableList()
-                                                            .map {
-                                                                if (it == prompt) {
-                                                                    return@map it.copy(
-                                                                        piority = it.piority + 1
-                                                                    )
-                                                                } else {
-                                                                    it
-                                                                }
-                                                            }
+                                                    updateListByPrompt(prompt) {
+                                                        it.copy(
+                                                            piority = it.piority + 1
+                                                        )
+                                                    }
                                                 }
                                             ) {
                                                 Icon(
@@ -239,20 +220,18 @@ fun PromptSelectDialog(
                                         trailingIcon = {
                                             IconButton(
                                                 onClick = {
-                                                    selectedPromptList =
-                                                        selectedPromptList.toMutableList()
-                                                            .map {
-                                                                if (it == prompt) {
-                                                                    if (prompt.piority == 0) {
-                                                                        return@map it
-                                                                    }
-                                                                    return@map it.copy(
-                                                                        piority = it.piority - 1
-                                                                    )
-                                                                } else {
-                                                                    it
-                                                                }
+                                                    updateListByPrompt(prompt) {
+                                                        if (it == prompt) {
+                                                            if (prompt.piority == 0) {
+                                                                return@updateListByPrompt it
                                                             }
+                                                            return@updateListByPrompt it.copy(
+                                                                piority = it.piority - 1
+                                                            )
+                                                        } else {
+                                                            it
+                                                        }
+                                                    }
                                                 }
                                             ) {
                                                 Icon(
@@ -273,18 +252,11 @@ fun PromptSelectDialog(
                                                     FilterChip(
                                                         selected = prompt.regionIndex == regionIndex,
                                                         onClick = {
-                                                            selectedPromptList =
-                                                                selectedPromptList.toMutableList()
-                                                                    .map {
-                                                                        if (it == prompt) {
-
-                                                                            return@map it.copy(
-                                                                                regionIndex = regionIndex
-                                                                            )
-                                                                        } else {
-                                                                            it
-                                                                        }
-                                                                    }
+                                                            updateListByPrompt(prompt) {
+                                                                it.copy(
+                                                                    regionIndex = regionIndex
+                                                                )
+                                                            }
                                                             currentSelectPromptIndex =
                                                                 prompt.copy(regionIndex = regionIndex).randomId
                                                         },
@@ -364,8 +336,6 @@ fun PromptSelectDialog(
                                         }
                                         selectedPromptList =
                                             selectedPromptList.filter { it != prompt }
-
-                                        refreshSearchResult()
                                     }, editMode = editMode
                                     )
                                 }
@@ -384,8 +354,6 @@ fun PromptSelectDialog(
                                         }
                                         selectedPromptList =
                                             selectedPromptList.filter { it != prompt }
-
-                                        refreshSearchResult()
                                     },
                                     editMode = editMode
                                 )
@@ -394,54 +362,9 @@ fun PromptSelectDialog(
                         }
                     }
                     if (selectIndex == 1) {
-                        OutlinedTextField(
-                            value = inputPromptText,
-                            onValueChange = { newValue ->
-                                inputPromptText = newValue
-                                searchJob?.cancel()
-                                searchJob = coroutineScope.launch {
-                                    delay(500L)  // delay for 300ms
-                                    refreshSearchResult()
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                    modifier = Modifier.clickable {
-                                        selectedPromptList =
-                                            selectedPromptList + Prompt(inputPromptText, 0)
-                                        inputPromptText = ""
-                                    }
-                                )
-                            },
-
-                            )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        LazyColumn(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            items(searchResults.size) {
-                                val prompt = searchResults[it]
-                                Column(
-                                    modifier = Modifier
-                                        .clickable {
-                                            selectedPromptList =
-                                                selectedPromptList + prompt.toPrompt()
-                                            refreshSearchResult()
-                                        }
-                                        .padding(4.dp)
-                                        .fillMaxWidth()
-
-                                ) {
-                                    Text(text = prompt.text)
-                                    if (prompt.text != prompt.nameCn) {
-                                        Text(text = prompt.nameCn)
-                                    }
-                                }
-                            }
-                        }
+                        PromptLibraryPanel(onAddPrompt = {
+                            selectedPromptList = selectedPromptList + it
+                        }, regionParam = inputRegionParam)
                     }
                     if (selectIndex == 2) {
                         inputRegionParam?.let {
@@ -480,6 +403,136 @@ fun PromptSelectDialog(
             }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PromptLibraryPanel(
+    onAddPrompt: (Prompt) -> Unit = {},
+    regionParam: RegionPromptParam? = null
+) {
+    val context = LocalContext.current
+
+    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
+    var searchJob: Job? by remember { mutableStateOf(null) }
+    var inputPromptText by remember { mutableStateOf("") }
+    var searchResults by remember {
+        mutableStateOf<List<SavePrompt>>(emptyList())
+    }
+    var regionIndexToAdd by remember {
+        mutableStateOf(0)
+    }
+
+    fun refreshSearchResult() {
+        scope.launch(Dispatchers.IO) {
+            if (inputPromptText.isNotEmpty()) {
+                PromptStore.searchPrompt(
+                    context,
+                    inputPromptText,
+                    emptyList()
+                )
+                    .let { results ->
+                        searchResults = results
+                    }
+            } else {
+                searchResults =
+                    PromptStore.getTopNPrompt(context, 10)
+            }
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        regionParam?.let {
+            if (regionParam.enable) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                ) {
+                    for (regionIndex in 0 until regionParam.getTotalRegionCount()) {
+                        FilterChip(
+                            selected = regionIndexToAdd == regionIndex,
+                            onClick = {
+                                regionIndexToAdd = regionIndex
+                            },
+                            label = {
+                                if (regionParam.useCommon && regionIndex == 0) {
+                                    Text(stringResource(R.string.common_region))
+                                } else {
+                                    Text(
+                                        stringResource(
+                                            id = R.string.region,
+                                            regionIndex.toString()
+                                        )
+                                    )
+
+                                }
+                            })
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+        }
+        OutlinedTextField(
+            value = inputPromptText,
+            onValueChange = { newValue ->
+                inputPromptText = newValue
+                searchJob?.cancel()
+                searchJob = coroutineScope.launch {
+                    delay(500L)  // delay for 300ms
+                    refreshSearchResult()
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.clickable {
+                        onAddPrompt(
+                            Prompt(
+                                text = inputPromptText,
+                                piority = 0,
+                                regionIndex = regionIndexToAdd
+                            )
+                        )
+                        inputPromptText = ""
+                    }
+                )
+            },
+
+            )
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyColumn(
+            modifier = Modifier.weight(1f)
+        ) {
+            items(searchResults.size) {
+                val prompt = searchResults[it]
+                Column(
+                    modifier = Modifier
+                        .clickable {
+                            onAddPrompt(prompt.toPrompt().copy(regionIndex = regionIndexToAdd))
+                            refreshSearchResult()
+                        }
+                        .padding(4.dp)
+                        .fillMaxWidth()
+
+                ) {
+                    Text(text = prompt.text)
+                    if (prompt.text != prompt.nameCn) {
+                        Text(text = prompt.nameCn)
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 data class Region(
@@ -620,27 +673,6 @@ fun RegionalPrompterPanel(
             onValueChange(regionParam.copy(enable = it))
         })
     }
-//    Row {
-//        FilterChip(
-//            selected = selectedMode == "Columns",
-//            onClick = {
-//                selectedMode = "Columns"
-//            },
-//            label = {
-//                Text(text = "Columns")
-//            }
-//        )
-//        Spacer(modifier = Modifier.width(8.dp))
-//        FilterChip(
-//            selected = selectedMode == "Rows",
-//            onClick = {
-//                selectedMode = "Rows"
-//            },
-//            label = {
-//                Text(text = "Rows")
-//            }
-//        )
-//    }
     Spacer(modifier = Modifier.height(8.dp))
     TextField(
         modifier = Modifier

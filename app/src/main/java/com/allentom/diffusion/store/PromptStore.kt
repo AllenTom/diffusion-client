@@ -280,7 +280,7 @@ interface PromptDao {
         exclude: List<String> = emptyList()
     ): List<SavePrompt>
 
-    @Query("SELECT * FROM prompt WHERE text like '%' || :text || '%' or nameCn like '%' || :text || '%' order by count desc limit 20")
+    @Query("SELECT * FROM prompt WHERE text like '%' || :text || '%' or nameCn like '%' || :text || '%' order by count desc limit 40")
     fun searchPrompt(
         text: String,
     ): List<SavePrompt>
