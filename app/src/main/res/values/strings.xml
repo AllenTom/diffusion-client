@@ -179,4 +179,11 @@
     <string name="pickup_a_library_file">Pickup a library file</string>
     <string name="total_prompts">Total %1$s prompts</string>
     <string name="importing">Importing %1$s/%2$s</string>
+    <string name="inpaint_dialog_title">Inpaint</string>
+    <string name="mask_blur">Mask blur</string>
+    <string name="mask_mode">Mask mode</string>
+    <string name="masked_content">Masked content</string>
+    <string name="inpaint_area">Inpaint area</string>
+    <string name="only_masked_padding_pixels">Only masked padding, pixels</string>
+    <string name="inpaint_mask">Mask</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.allentom.diffusion.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,12 +16,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,10 +33,14 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
+import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.SaveHistory
 import com.allentom.diffusion.ui.screens.historydetail.ParamItem
+import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -43,6 +51,11 @@ fun HistoryView(
     var isImage2ImageInputPreviewOpen by remember {
         mutableStateOf(false)
     }
+    var maskPreview by remember {
+        mutableStateOf(null as String?)
+    }
+    val scope = rememberCoroutineScope()
+
     var promptActionState = rememberPromptActionState()
 
     if (isImage2ImageInputPreviewOpen) {
@@ -53,6 +66,18 @@ fun HistoryView(
                     isImage2ImageInputPreviewOpen = false
                 }
             )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val sourceImagePath = currentHistory.img2imgParam?.path
+        val sourceMaskPath = currentHistory.img2imgParam?.maskPath
+
+        if (sourceImagePath != null && sourceMaskPath != null) {
+            scope.launch(Dispatchers.IO) {
+                val preview = Util.combineImagePaths(sourceImagePath, sourceMaskPath)
+                maskPreview = preview
+            }
         }
     }
 
@@ -95,7 +120,7 @@ fun HistoryView(
                     promptActionState.onOpenActionBottomSheet(it, "prompt")
                 }
             }
-        }else{
+        } else {
             currentHistory.prompt.takeIf { it.isNotEmpty() }?.let {
                 PromptDisplayView(
                     promptList = currentHistory.prompt,
@@ -291,6 +316,84 @@ fun HistoryView(
                     }
                 }
             }
+            if (img2imgParam.inpaint == true) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Inpaint",
+                    fontWeight = FontWeight.W500,
+                    fontSize = 18.sp
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    img2imgParam.maskPath?.let {
+                        Box(
+                            modifier = Modifier
+                                .height(120.dp)
+                                .width(120.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            AsyncImage(
+                                model = img2imgParam.maskPath,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(color = Color.Black),
+                                contentDescription = null,
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                    }
+                    maskPreview?.let {
+                        Box(
+                            modifier = Modifier
+                                .height(120.dp)
+                                .width(120.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            DisplayBase64Image(base64String = it)
+                        }
+                    }
+                }
+
+
+                Spacer(modifier = Modifier.height(8.dp))
+                FlowRow(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    ParamItem(label = stringResource(R.string.mask_blur),
+                        value = { Text(text = img2imgParam.maskBlur.toString()) })
+                    ParamItem(label = stringResource(R.string.mask_mode),
+                        value = {
+                            Text(
+                                text = DrawViewModel.maskInvertOptions.get(
+                                    img2imgParam.maskInvert ?: 0
+                                )
+                            )
+                        })
+                    ParamItem(label = stringResource(R.string.masked_content),
+                        value = {
+                            Text(
+                                text = DrawViewModel.inpaintingFillOptions.get(
+                                    img2imgParam.inpaintingFill ?: 0
+                                )
+                            )
+                        })
+                    ParamItem(label = stringResource(R.string.inpaint_area),
+                        value = {
+                            Text(
+                                text = DrawViewModel.inpaintingFullResOptions.get(
+                                    img2imgParam.inpaintingFullRes ?: 0
+                                )
+                            )
+                        })
+                    ParamItem(label = stringResource(R.string.only_masked_padding_pixels)) {
+                        Text(text = img2imgParam.inpaintingFullResPadding.toString())
+                    }
+                }
+            }
+
         }
         currentHistory.hrParam.takeIf { it.enableScale }?.let {
             Spacer(modifier = Modifier.height(16.dp))

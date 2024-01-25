@@ -304,7 +304,6 @@ fun PromptSelectDialog(
                                     contentDescription = null,
                                 )
                             }
-
                         }
                         Column(
                             modifier = Modifier

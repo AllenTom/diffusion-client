@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryDetailScreen(navController: NavController,historyId: Long) {
+fun HistoryDetailScreen(navController: NavController, historyId: Long) {
     var saveHistory by remember {
         mutableStateOf<SaveHistory?>(null)
     }
@@ -102,7 +102,7 @@ fun HistoryDetailScreen(navController: NavController,historyId: Long) {
             ActionItem(text = stringResource(id = R.string.apply), onAction = {
                 saveHistory?.let { saveHistory ->
                     scope.launch(Dispatchers.IO) {
-                        DrawViewModel.applyHistory(context,saveHistory)
+                        DrawViewModel.applyHistory(context, saveHistory)
                     }
                     Toast.makeText(
                         context,
@@ -168,7 +168,10 @@ fun HistoryDetailScreen(navController: NavController,historyId: Long) {
                                         FirstScreen(currentHistory = currentHistory)
                                         if (!isWideDisplay) {
                                             Spacer(modifier = Modifier.height(16.dp))
-                                            SecondScreen(currentHistory = currentHistory, navController = navController)
+                                            SecondScreen(
+                                                currentHistory = currentHistory,
+                                                navController = navController
+                                            )
                                         }
                                     }
                                 }
@@ -180,10 +183,15 @@ fun HistoryDetailScreen(navController: NavController,historyId: Long) {
                                         .fillMaxHeight()
                                 ) {
                                     LazyColumn(
-                                        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 16.dp)
                                     ) {
                                         item {
-                                            SecondScreen(currentHistory = currentHistory, navController = navController)
+                                            SecondScreen(
+                                                currentHistory = currentHistory,
+                                                navController = navController
+                                            )
                                         }
                                     }
                                 }
@@ -229,7 +237,7 @@ fun FirstScreen(
             )
         }
     }
-    fun favouriteImage(imageHistory: ImageHistory){
+    fun favouriteImage(imageHistory: ImageHistory) {
         currentHistory.let { saveHistory ->
             scope.launch(Dispatchers.IO) {
                 DrawViewModel.favouriteImageHistory(context, imageHistory, saveHistory.id)
@@ -317,17 +325,13 @@ fun FirstScreen(
                             scope.launch {
                                 DrawViewModel.inputImg2ImgImgBase64 =
                                     Util.readImageWithPathToBase64(it.path)
-                                currentHistory.img2imgParam?.width?.let {
-                                    DrawViewModel.inputImg2ImgWidth =
-                                        currentHistory.img2imgParam.width.toFloat()
-                                }
-                                currentHistory.img2imgParam?.height?.let {
-                                    DrawViewModel.inputImg2ImgHeight =
-                                        currentHistory.img2imgParam.height.toFloat()
-                                }
-
+                                val width =
+                                    currentHistory.img2imgParam?.width ?: currentHistory.width
+                                DrawViewModel.inputImg2ImgWidth = width.toFloat()
+                                val height =
+                                    currentHistory.img2imgParam?.height ?: currentHistory.height
+                                DrawViewModel.inputImg2ImgHeight = height.toFloat()
                                 DrawViewModel.inputSeed = it.seed
-
                                 Toast.makeText(
                                     context,
                                     context.getString(R.string.image_sent_to_image_to_image),
@@ -373,8 +377,8 @@ fun FirstScreen(
 }
 
 @Composable
-fun SecondScreen(currentHistory: SaveHistory,navController: NavController) {
-    HistoryView(currentHistory = currentHistory,navController)
+fun SecondScreen(currentHistory: SaveHistory, navController: NavController) {
+    HistoryView(currentHistory = currentHistory, navController)
     Spacer(modifier = Modifier.height(120.dp))
 }
 

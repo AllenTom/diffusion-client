@@ -180,4 +180,11 @@
     <string name="pickup_a_library_file">选择一个库文件</string>
     <string name="total_prompts">共 %1$s 个提示词</string>
     <string name="importing">导入中 %1$s/%2$s</string>
+    <string name="inpaint_dialog_title">局部重绘</string>
+    <string name="mask_blur">蒙版模糊</string>
+    <string name="mask_mode">蒙版模式</string>
+    <string name="masked_content">蒙版内容</string>
+    <string name="inpaint_area">重绘区域</string>
+    <string name="only_masked_padding_pixels">蒙版边距</string>
+    <string name="inpaint_mask">蒙版</string>
 </resources>

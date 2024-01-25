@@ -71,9 +71,9 @@ class SaveHistory(
     val img2imgParam: Img2imgParam? = null,
     var controlNetParam: ControlNetParam? = null,
     val model: ModelEntity? = null,
-    val regionRatio:String? = "",
-    val regionCount:Int? = 0,
-    val regionUseCommon:Boolean? = false,
+    val regionRatio: String? = "",
+    val regionCount: Int? = 0,
+    val regionUseCommon: Boolean? = false,
     val regionEnable: Boolean? = false
 ) : Serializable
 
@@ -236,7 +236,7 @@ data class PromptExtraEntity(
     val historyId: Long,
     val promptType: Int,
     val loraPromptId: Long = 0,
-    val regionIndex:Int? = 0
+    val regionIndex: Int? = 0
 )
 
 @Dao
@@ -267,7 +267,7 @@ interface ImageHistoryDao {
 
 }
 
-class Img2imgParam(
+data class Img2imgParam(
     val denoisingStrength: Float,
     val resizeMode: Int,
     val scaleBy: Float,
@@ -276,6 +276,13 @@ class Img2imgParam(
     val cfgScale: Float,
     val path: String,
     val historyId: Long,
+    val maskPath: String? = null,
+    val inpaint: Boolean? = false,
+    val maskBlur: Float? = null,
+    val maskInvert: Int? = null,
+    val inpaintingFill: Int? = null,
+    val inpaintingFullRes: Int? = null,
+    val inpaintingFullResPadding: Int? = null,
 ) : Serializable
 
 @Entity(tableName = "img2img")
@@ -290,7 +297,16 @@ data class Img2ImgEntity(
     val cfgScale: Float,
     val path: String,
     val historyId: Long,
-) {
+    // inpaint
+    val maskPath: String? = null,
+    val inpaint: Boolean? = false,
+    val maskBlur: Float? = null,
+    val maskInvert: Int? = null,
+    val inpaintingFill: Int? = null,
+    val inpaintingFullRes: Int? = null,
+    val inpaintingFullResPadding: Int? = null,
+
+    ) {
     companion object {
         fun fromImg2imgParam(img2imgParam: Img2imgParam, historyId: Long): Img2ImgEntity {
             return Img2ImgEntity(
@@ -302,6 +318,12 @@ data class Img2ImgEntity(
                 cfgScale = img2imgParam.cfgScale,
                 path = img2imgParam.path,
                 historyId = historyId,
+                maskPath = img2imgParam.maskPath,
+                inpaint = img2imgParam.inpaint,
+                maskBlur = img2imgParam.maskBlur,
+                maskInvert = img2imgParam.maskInvert,
+                inpaintingFill = img2imgParam.inpaintingFill,
+                inpaintingFullRes = img2imgParam.inpaintingFullRes,
             )
         }
     }
@@ -316,6 +338,12 @@ data class Img2ImgEntity(
             cfgScale = cfgScale,
             path = path,
             historyId = historyId,
+            maskPath = maskPath,
+            inpaint = inpaint,
+            maskBlur = maskBlur,
+            maskInvert = maskInvert,
+            inpaintingFill = inpaintingFill,
+            inpaintingFullRes = inpaintingFullRes,
         )
     }
 }
@@ -400,16 +428,6 @@ data class HistoryWithRelation(
     fun toSaveHistory(): SaveHistory {
         val result = SaveHistory(
             id = historyEntity.historyId,
-//            prompt = prompts.map {
-//                val obj = it.toPrompt()
-//                promptExtraEntity.find { promptExtra ->
-//                    promptExtra.promptId == it.promptId && promptExtra.promptType == PromptType.Prompt.value
-//                }?.let { extra ->
-//                    obj.piority = extra.priority
-//                    obj.regionIndex = extra.regionIndex ?: 0
-//                }
-//                obj
-//            },
             prompt = promptExtraEntity.mapNotNull { promptExtraEntity ->
                 val prompt = prompts.find { it.promptId == promptExtraEntity.promptId }
                 prompt?.let {
@@ -543,10 +561,10 @@ data class HistoryEntity(
     val cfgScale: Float,
     val time: Long,
     var modelId: Long? = null,
-    var regionRatio:String? = "",
-    var regionCount:Int? = 0,
-    var regionUseCommon:Boolean? = false,
-    var regionEnable:Boolean? = false
+    var regionRatio: String? = "",
+    var regionCount: Int? = 0,
+    var regionUseCommon: Boolean? = false,
+    var regionEnable: Boolean? = false
 ) : Serializable {
 
     companion object {
@@ -776,17 +794,29 @@ object HistoryStore {
             )
         }
         history.img2imgParam?.let {
-            database.img2ImgDao().insert(
-                Img2ImgEntity(
-                    denoisingStrength = it.denoisingStrength,
-                    resizeMode = it.resizeMode,
-                    scaleBy = it.scaleBy,
-                    width = it.width,
-                    height = it.height,
-                    cfgScale = it.cfgScale,
-                    path = it.path,
-                    historyId = savedHistoryId,
+            var ent = Img2ImgEntity(
+                denoisingStrength = it.denoisingStrength,
+                resizeMode = it.resizeMode,
+                scaleBy = it.scaleBy,
+                width = it.width,
+                height = it.height,
+                cfgScale = it.cfgScale,
+                path = it.path,
+                historyId = savedHistoryId,
+            )
+            if (it.inpaint == true) {
+                ent = ent.copy(
+                    maskPath = it.maskPath,
+                    inpaint = it.inpaint,
+                    maskBlur = it.maskBlur,
+                    maskInvert = it.maskInvert,
+                    inpaintingFill = it.inpaintingFill,
+                    inpaintingFullRes = it.inpaintingFullRes,
+                    inpaintingFullResPadding = it.inpaintingFullResPadding,
                 )
+            }
+            database.img2ImgDao().insert(
+                ent
             )
         }
         history.controlNetParam?.let { controlNetParam ->

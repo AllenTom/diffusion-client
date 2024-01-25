@@ -132,8 +132,8 @@ data class RegionPromptParam(
     val regionCount: Int = 1,
     val useCommon: Boolean = true,
     val enable: Boolean = false
-){
-    fun getTotalRegionCount():Int {
+) {
+    fun getTotalRegionCount(): Int {
         if (useCommon) {
             return regionCount + 1
         }
@@ -199,6 +199,20 @@ object DrawViewModel {
     var inputImg2ImgWidth by mutableFloatStateOf(512f)
     var inputImg2ImgHeight by mutableFloatStateOf(512f)
     var inputImg2ImgCfgScale by mutableFloatStateOf(7f)
+    var inputImg2ImgMask by mutableStateOf<String?>(null)
+    var inputImg2ImgMaskPreview by mutableStateOf<String?>(null)
+    var inputImg2ImgInpaint by mutableStateOf(false)
+
+    var inputImg2ImgMaskBlur by mutableFloatStateOf(4f)
+    val maskInvertOptions = listOf("Inpaint masked", "Inpaint not masked")
+    var inputImg2ImgInpaintingMaskInvert by mutableStateOf(0)
+    val inpaintingFillOptions = listOf("fill", "original", "latent noise", "latent nothing")
+    var inputImg2ImgInpaintingFill by mutableStateOf(0)
+    val inpaintingFullResOptions = listOf("Whole picture", "Only masked")
+    var inputImg2ImgInpaintingFullRes by mutableStateOf(0)
+
+    var inputImg2ImgInpaintingFullResPadding by mutableStateOf(32)
+
     var currentHistory by mutableStateOf<SaveHistory?>(null)
     fun startGenerating(count: Int) {
         isGenerating = true
@@ -231,11 +245,14 @@ object DrawViewModel {
         }
         return inputPromptText.joinToString(",") { it.getPromptText() }
     }
-    fun getPositiveWithRegion():String {
+
+    fun getPositiveWithRegion(): String {
         var promptTextList = mutableListOf<String>()
         val maxRegion = regionPromptParam.getTotalRegionCount()
         for (i in 0 until maxRegion) {
-            val regionText = inputPromptText.filter { it.regionIndex == i }.map { it.getPromptText() }.joinToString(",")
+            val regionText =
+                inputPromptText.filter { it.regionIndex == i }.map { it.getPromptText() }
+                    .joinToString(",")
             promptTextList.add(regionText)
         }
         return promptTextList.joinToString(" BREAK\n")
@@ -286,6 +303,7 @@ object DrawViewModel {
         inputEnableHiresFix = history.hrParam.enableScale
 
         history.img2imgParam?.let { img2imgParam: Img2imgParam ->
+            val inputImageBase64 = Util.readImageWithPathToBase64(img2imgParam.path)
             inputImg2ImgWidth = img2imgParam.width.toFloat()
             inputImg2ImgHeight = img2imgParam.height.toFloat()
             inputImg2ImgCfgScale = img2imgParam.cfgScale
@@ -293,7 +311,33 @@ object DrawViewModel {
             inputImg2ImgResizeMode = img2imgParam.resizeMode
             inputImg2ImgScaleBy = img2imgParam.scaleBy
             inputImg2ImgImgFilename = img2imgParam.path
-            inputImg2ImgImgBase64 = Util.readImageWithPathToBase64(img2imgParam.path)
+            inputImg2ImgImgBase64 = inputImageBase64
+            if (img2imgParam.inpaint == true) {
+                val maskBase64 = Util.readImageWithPathToBase64(img2imgParam.maskPath!!)
+                inputImg2ImgInpaint = true
+                inputImg2ImgMask = maskBase64
+                img2imgParam.maskBlur?.let {
+                    inputImg2ImgMaskBlur = it
+                }
+                img2imgParam.maskInvert?.let {
+                    inputImg2ImgInpaintingMaskInvert = it
+                }
+                img2imgParam.inpaintingFill?.let {
+                    inputImg2ImgInpaintingFill = it
+                }
+                img2imgParam.inpaintingFullRes?.let {
+                    inputImg2ImgInpaintingFullRes = it
+                }
+                img2imgParam.inpaintingFullResPadding?.let {
+                    inputImg2ImgInpaintingFullResPadding = it
+                }
+
+                val previewBase64 = Util.combineBase64Images(
+                    inputImageBase64,
+                    maskBase64,
+                )
+                inputImg2ImgMaskPreview = previewBase64
+            }
         }
 
         history.controlNetParam?.let {
@@ -406,6 +450,12 @@ object DrawViewModel {
         resizeMode: Int?,
         denoisingStrength: Float?,
         scaleBy: Float?,
+        mask: String = "",
+        inpaintingMaskInvert: Int = 0,
+        maskBlur: Float = 4f,
+        inpaintingFill: Int = 0,
+        inpaintFullRes: Int = 1,
+        inpaintFullResPadding: Int = 32,
 
         ): String? {
         val request = Img2ImgRequest(
@@ -423,6 +473,12 @@ object DrawViewModel {
             image_cfg_scale = cfgScale,
             denoising_strength = denoisingStrength ?: 0.75f,
             scale_by = scaleBy ?: 1f,
+            mask = mask.trim(),
+            inpainting_mask_invert = inpaintingMaskInvert,
+            mask_blur = maskBlur,
+            inpainting_fill = inpaintingFill,
+            inpaint_full_res = inpaintFullRes,
+            inpaint_full_res_padding = inpaintFullResPadding
         )
         val list = getApiClient().img2img(
             request = request
@@ -619,6 +675,12 @@ object DrawViewModel {
                                 resizeMode = inputImg2ImgResizeMode,
                                 denoisingStrength = inputImg2ImgDenoisingStrength,
                                 scaleBy = inputImg2ImgScaleBy,
+                                mask = if (inputImg2ImgInpaint) inputImg2ImgMask ?: "" else "",
+                                inpaintingMaskInvert = inputImg2ImgInpaintingMaskInvert,
+                                maskBlur = inputImg2ImgMaskBlur,
+                                inpaintingFill = inputImg2ImgInpaintingFill,
+                                inpaintFullRes = inputImg2ImgInpaintingFullRes,
+                                inpaintFullResPadding = inputImg2ImgInpaintingFullResPadding
                             )?.let {
                                 resultImage = it
 
@@ -642,7 +704,6 @@ object DrawViewModel {
                     updateGenItemByIndex(currentGenIndex) {
                         it.copy(imageBase64 = resultImage)
                     }
-
                     val imagePath = Util.saveImageBase64ToAppData(
                         context,
                         resultImage!!,
@@ -690,6 +751,23 @@ object DrawViewModel {
                             path = savePath,
                             historyId = 0
                         )
+                        if (inputImg2ImgInpaint) {
+                            val maskFilename = "${UUID.randomUUID()}.png"
+                            val maskPath = Util.saveImg2ImgMaskFile(
+                                context,
+                                inputImg2ImgMask ?: "",
+                                maskFilename
+                            )
+                            img2ImgParam = img2ImgParam?.copy(
+                                maskPath = maskPath,
+                                inpaint = true,
+                                maskBlur = inputImg2ImgMaskBlur,
+                                maskInvert = inputImg2ImgInpaintingMaskInvert,
+                                inpaintingFill = inputImg2ImgInpaintingFill,
+                                inpaintingFullRes = inputImg2ImgInpaintingFullRes,
+                                inpaintingFullResPadding = inputImg2ImgInpaintingFullResPadding
+                            )
+                        }
                     }
 
 

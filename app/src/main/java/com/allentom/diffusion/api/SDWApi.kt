@@ -162,10 +162,12 @@ data class ControlNetWrapper(
     @SerializedName("args")
     val args: List<ControlNetParam> = listOf(),
 )
+
 data class RegionalPrompterWrapper(
     @SerializedName("args")
     val args: List<Any>? = null
 )
+
 data class Txt2ImgRequest(
     val batch_size: Int = 1,
     val prompt: String,
@@ -206,6 +208,18 @@ data class Img2ImgRequest(
     val image_cfg_scale: Float = 7f,
     val denoising_strength: Float = 0.75f,
     val scale_by: Float = 1f,
+    // mask
+    val mask: String = "",
+    //Mask mode
+    val inpainting_mask_invert: Int = 0,
+    //Mask blur
+    val mask_blur: Float = 4f,
+    //Masked content
+    val inpainting_fill: Int = 0,
+    //Inpaint area
+    val inpaint_full_res: Int = 1,
+    //inpaint_full_res_padding
+    val inpaint_full_res_padding: Int = 32,
 )
 
 data class InterrogateRequest(

@@ -23,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
+import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.EmbeddingSelectOptionItem
 import com.allentom.diffusion.composables.ImageBase64PickupOptionItem
 import com.allentom.diffusion.composables.LoraSelectOptionItem
+import com.allentom.diffusion.composables.MaskDrawOptionItem
 import com.allentom.diffusion.composables.PromptSelectOptionItem
 import com.allentom.diffusion.composables.SliderOptionItem
 import com.allentom.diffusion.composables.SwitchOptionItem
@@ -125,7 +127,7 @@ fun BaseInfoPanel(
             label = stringResource(id = R.string.param_prompt),
             value = DrawViewModel.inputPromptText,
             regionPromptParam = DrawViewModel.regionPromptParam
-        ) {prompts,region ->
+        ) { prompts, region ->
             DrawViewModel.inputPromptText = prompts
             region?.let {
                 DrawViewModel.regionPromptParam = it
@@ -135,7 +137,7 @@ fun BaseInfoPanel(
         PromptSelectOptionItem(
             label = stringResource(id = R.string.param_negative_prompt),
             value = DrawViewModel.inputNegativePromptText
-        ) { prompts,_ ->
+        ) { prompts, _ ->
             DrawViewModel.inputNegativePromptText = prompts
         }
         LoraSelectOptionItem(
@@ -168,7 +170,6 @@ fun BaseInfoPanel(
             useInt = true,
             onValueChangeInt = { DrawViewModel.inputHeight = it.toFloat() }
         )
-
         TextPickUpItem(
             label = stringResource(R.string.param_sampler),
             value = DrawViewModel.inputSamplerName,
@@ -302,6 +303,7 @@ fun ControlNetPanel() {
         }
     }
 }
+
 @Composable
 fun Img2ImgPanel() {
     Column(
@@ -327,6 +329,71 @@ fun Img2ImgPanel() {
                 DrawViewModel.inputImg2ImgImgFilename = filePath
             }
         )
+        if (DrawViewModel.inputImg2ImgImgBase64 != null) {
+            SwitchOptionItem(
+                label = stringResource(id = R.string.inpaint_dialog_title),
+                value = DrawViewModel.inputImg2ImgInpaint
+            ) {
+                DrawViewModel.inputImg2ImgInpaint = it
+            }
+        }
+        if (DrawViewModel.inputImg2ImgImgBase64 != null && DrawViewModel.inputImg2ImgInpaint) {
+            MaskDrawOptionItem(
+                label = stringResource(R.string.inpaint_mask),
+                value = DrawViewModel.inputImg2ImgMaskPreview,
+                backgroundImageBase64 = DrawViewModel.inputImg2ImgImgBase64
+            ) {
+                DrawViewModel.inputImg2ImgMask = it
+                DrawViewModel.inputImg2ImgMaskPreview = Util.combineBase64Images(
+                    DrawViewModel.inputImg2ImgImgBase64!!,
+                    it
+                )
+            }
+            SliderOptionItem(label = stringResource(id = R.string.mask_blur),
+                value = DrawViewModel.inputImg2ImgMaskBlur,
+                valueRange = 0f..64f,
+                useInt = true,
+                onValueChangeInt = {
+                    DrawViewModel.inputImg2ImgMaskBlur = it.toFloat()
+                }
+
+            )
+            TextPickUpItem(
+                label = stringResource(id = R.string.mask_mode),
+                value = DrawViewModel.maskInvertOptions[DrawViewModel.inputImg2ImgInpaintingMaskInvert],
+                options = DrawViewModel.maskInvertOptions
+            ) {
+                DrawViewModel.inputImg2ImgInpaintingMaskInvert =
+                    DrawViewModel.maskInvertOptions.indexOf(it)
+            }
+            TextPickUpItem(
+                label = stringResource(id = R.string.masked_content),
+                value = DrawViewModel.inpaintingFillOptions[DrawViewModel.inputImg2ImgInpaintingFill],
+                options = DrawViewModel.inpaintingFillOptions
+            ) {
+                DrawViewModel.inputImg2ImgInpaintingFill =
+                    DrawViewModel.inpaintingFillOptions.indexOf(it)
+            }
+            TextPickUpItem(
+                label = stringResource(id = R.string.inpaint_area),
+                value = DrawViewModel.inpaintingFullResOptions[DrawViewModel.inputImg2ImgInpaintingFullRes],
+                options = DrawViewModel.inpaintingFullResOptions
+            ) {
+                DrawViewModel.inputImg2ImgInpaintingFullRes =
+                    DrawViewModel.inpaintingFullResOptions.indexOf(it)
+            }
+            SliderOptionItem(label = stringResource(id = R.string.only_masked_padding_pixels),
+                value = DrawViewModel.inputImg2ImgInpaintingFullResPadding.toFloat(),
+                valueRange = 0f..256f,
+                useInt = true,
+                onValueChangeInt = {
+                    DrawViewModel.inputImg2ImgInpaintingFullResPadding = it
+                }
+            )
+
+        }
+
+
         SliderOptionItem(label = stringResource(R.string.param_denoising_strength),
             value = DrawViewModel.inputImg2ImgDenoisingStrength, valueRange = 0f..1f,
             onValueChangeFloat = {

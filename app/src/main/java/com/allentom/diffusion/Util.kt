@@ -1,10 +1,15 @@
 package com.allentom.diffusion
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.net.Uri
 import android.os.Environment
 import android.util.Base64
+import androidx.compose.ui.graphics.asImageBitmap
 import com.allentom.diffusion.store.Prompt
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -186,6 +191,20 @@ object Util {
         return file.absolutePath
     }
 
+    fun saveImg2ImgMaskFile(context: Context, imgBase64: String, fileName: String): String {
+        val imageBytes = Base64.decode(imgBase64, Base64.DEFAULT)
+        val uuid = UUID.randomUUID().toString()
+        val ext = fileName.substring(fileName.lastIndexOf(".") + 1)
+        val saveFilename = "${uuid}.${ext}"
+        val saveDir = File(context.filesDir, "inpaint_mask")
+        if (!saveDir.exists()) {
+            saveDir.mkdir()
+        }
+        val file = File(saveDir, saveFilename)
+        file.writeBytes(imageBytes)
+        return file.absolutePath
+    }
+
     fun copyImageFileToGallery(context: Context, imagePath: String, fileName: String) {
         val file = File(imagePath)
         if (!file.exists()) {
@@ -321,4 +340,74 @@ object Util {
             .map { allowedChars.random() }
             .joinToString("")
     }
+
+    fun getDimensionsFromBase64(base64String: String): Pair<Int, Int> {
+        val decodedString = Base64.decode(base64String, Base64.DEFAULT)
+        val decodedBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+        val imageBitmap = decodedBitmap.asImageBitmap()
+        return Pair(imageBitmap.width, imageBitmap.height)
+    }
+
+    fun calculateActualSize(containerWidth: Int, containerHeight: Int, imageWidth: Int, imageHeight: Int): Pair<Int, Int> {
+        val containerRatio = containerWidth.toFloat() / containerHeight.toFloat()
+        val imageRatio = imageWidth.toFloat() / imageHeight.toFloat()
+
+        return if (containerRatio > imageRatio) {
+            // Container is wider than the image relative to their heights, so height will be the limiting factor
+            val actualWidth = (containerHeight * imageRatio).toInt()
+            Pair(actualWidth, containerHeight)
+        } else {
+            // Container is taller than the image relative to their widths, so width will be the limiting factor
+            val actualHeight = (containerWidth / imageRatio).toInt()
+            Pair(containerWidth, actualHeight)
+        }
+    }
+
+    fun combineBase64Images(base64Image1: String, base64Image2: String): String {
+        // Decode the Base64 strings to Bitmaps
+        val decodedBytes1 = Base64.decode(base64Image1, Base64.DEFAULT)
+        val bitmap1 = BitmapFactory.decodeByteArray(decodedBytes1, 0, decodedBytes1.size)
+
+        val decodedBytes2 = Base64.decode(base64Image2, Base64.DEFAULT)
+        val bitmap2 = BitmapFactory.decodeByteArray(decodedBytes2, 0, decodedBytes2.size)
+
+        // Create a new Bitmap that can contain both Bitmaps
+        val width = bitmap1.width
+        val height = bitmap1.height
+        val combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+        // Draw the Bitmaps onto the new Bitmap
+        val canvas = Canvas(combinedBitmap)
+        canvas.drawBitmap(bitmap1, 0f, 0f, null)
+        canvas.drawBitmap(bitmap2, 0f, 0f, null)
+
+        // Convert the new Bitmap back to a Base64 string
+        val outputStream = ByteArrayOutputStream()
+        combinedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val combinedBytes = outputStream.toByteArray()
+        return Base64.encodeToString(combinedBytes, Base64.DEFAULT)
+    }
+
+    fun combineImagePaths(imagePath1: String, imagePath2: String): String {
+        // Read the images and convert them to Bitmaps
+        val bitmap1 = BitmapFactory.decodeFile(imagePath1)
+        val bitmap2 = BitmapFactory.decodeFile(imagePath2)
+
+        // Create a new Bitmap that can contain both Bitmaps
+        val width = bitmap1.width
+        val height = bitmap1.height
+        val combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+        // Draw the Bitmaps onto the new Bitmap
+        val canvas = Canvas(combinedBitmap)
+        canvas.drawBitmap(bitmap1, 0f, 0f, null)
+        canvas.drawBitmap(bitmap2, 0f, 0f, null)
+
+        // Convert the new Bitmap back to a Base64 string
+        val outputStream = ByteArrayOutputStream()
+        combinedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val combinedBytes = outputStream.toByteArray()
+        return Base64.encodeToString(combinedBytes, Base64.DEFAULT)
+    }
+
 }

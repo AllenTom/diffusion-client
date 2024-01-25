@@ -1,11 +1,15 @@
 package com.allentom.diffusion.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,24 +44,28 @@ fun TextPickUpItem(
 
     if (showDialog) {
         AlertDialog(
-            modifier = Modifier.height(500.dp),
+            modifier = Modifier
+                .heightIn(max = 500.dp)
+                .fillMaxWidth(),
             onDismissRequest = { showDialog = false },
             title = { Text(title) },
             text = {
                 LazyColumn {
                     items(options.size) { index ->
-                        TextButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                onValueChange(options[index])
-                                showDialog = false
-                            }) {
-                            Text(
-                                text = options[index],
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-
+                        ListItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onValueChange(options[index])
+                                    showDialog = false
+                                },
+                            headlineContent = {
+                                Text(
+                                    text = options[index],
+                                    color = if (options[index] == value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        )
                     }
                 }
             },
