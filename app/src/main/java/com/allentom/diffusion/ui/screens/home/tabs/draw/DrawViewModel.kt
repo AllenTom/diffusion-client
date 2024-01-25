@@ -184,8 +184,6 @@ object DrawViewModel {
     var inputControlNetControlModel by mutableStateOf<String?>(null)
     var inputContentNetImageBase64 by mutableStateOf<String?>(null)
     var inputContentNetImagePath by mutableStateOf<String?>(null)
-    val ControlNetModeList =
-        listOf("Balanced", "My prompt is more important", "ControlNet is more important")
     var controlNetModelList by mutableStateOf<List<String>>(emptyList())
     var enableControlNetFeat by mutableStateOf(false)
     var inputImg2ImgImgBase64 by mutableStateOf<String?>(null)
@@ -193,8 +191,6 @@ object DrawViewModel {
     var generateMode by mutableStateOf("text2img")
     var inputImg2ImgDenoisingStrength by mutableFloatStateOf(0.7f)
     var inputImg2ImgResizeMode by mutableIntStateOf(0)
-    var inputImg2ImgResizeModeList =
-        listOf("Just resize", "Crop and resize", "Resize and fill", "Just resize (latent upscale)")
     var inputImg2ImgScaleBy by mutableFloatStateOf(1f)
     var inputImg2ImgWidth by mutableFloatStateOf(512f)
     var inputImg2ImgHeight by mutableFloatStateOf(512f)
@@ -202,13 +198,9 @@ object DrawViewModel {
     var inputImg2ImgMask by mutableStateOf<String?>(null)
     var inputImg2ImgMaskPreview by mutableStateOf<String?>(null)
     var inputImg2ImgInpaint by mutableStateOf(false)
-
     var inputImg2ImgMaskBlur by mutableFloatStateOf(4f)
-    val maskInvertOptions = listOf("Inpaint masked", "Inpaint not masked")
     var inputImg2ImgInpaintingMaskInvert by mutableStateOf(0)
-    val inpaintingFillOptions = listOf("fill", "original", "latent noise", "latent nothing")
     var inputImg2ImgInpaintingFill by mutableStateOf(0)
-    val inpaintingFullResOptions = listOf("Whole picture", "Only masked")
     var inputImg2ImgInpaintingFullRes by mutableStateOf(0)
 
     var inputImg2ImgInpaintingFullResPadding by mutableStateOf(32)

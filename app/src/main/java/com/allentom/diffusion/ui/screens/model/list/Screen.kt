@@ -370,7 +370,7 @@ fun ModelListScreen(navController: NavController) {
                                         ) {
                                             Column {
                                                 Text(
-                                                    text = model.name,
+                                                    text = model.title ?: model.name,
                                                     fontSize = 16.sp,
                                                     maxLines = 2,
                                                     color = MaterialTheme.colorScheme.onPrimaryContainer,

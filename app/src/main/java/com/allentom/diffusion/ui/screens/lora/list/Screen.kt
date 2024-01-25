@@ -55,6 +55,7 @@ import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.composables.MatchOptionDialog
 import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.LoraPrompt
@@ -77,6 +78,8 @@ fun LoraListScreen(navController: NavController) {
     }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var isMatchDialogOpen by remember { mutableStateOf(false) }
+
     fun refresh() {
         scope.launch(Dispatchers.IO) {
             loraList = PromptStore.getAllLoraPrompt(context).map { it.toPrompt() }.filter {
@@ -108,7 +111,7 @@ fun LoraListScreen(navController: NavController) {
         }
     }
 
-    fun matchAll() {
+    fun matchAll(isSkipExist: Boolean) {
         if (isMatchAll) {
             return
         }
@@ -120,6 +123,10 @@ fun LoraListScreen(navController: NavController) {
             totalLora = list.size
             list.forEach { loraPrompt ->
                 try {
+                    if (isSkipExist && loraPrompt.civitaiId != null) {
+                        currentLora++
+                        return@forEach
+                    }
                     PromptStore.matchLoraByModelId(context, loraPrompt.id)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -154,6 +161,14 @@ fun LoraListScreen(navController: NavController) {
             confirmButton = { },
             dismissButton = { }
         )
+    }
+
+    if (isMatchDialogOpen) {
+        MatchOptionDialog(onDismiss = {
+            isMatchDialogOpen = false
+        }) { isSkipExist ->
+            matchAll(isSkipExist)
+        }
     }
 
     val configuration = LocalConfiguration.current
@@ -209,7 +224,7 @@ fun LoraListScreen(navController: NavController) {
                                 text = { Text(stringResource(R.string.match_all_lora)) },
                                 onClick = {
                                     isActionMenuShow = false
-                                    matchAll()
+                                    isMatchDialogOpen = true
                                 }
                             )
                         }

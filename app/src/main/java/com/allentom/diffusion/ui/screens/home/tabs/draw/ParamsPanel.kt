@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.EmbeddingSelectOptionItem
@@ -230,6 +231,7 @@ fun HiresFixPanel() {
             label = stringResource(R.string.param_scale_by),
             value = DrawViewModel.inputHrScale,
             valueRange = 1f..4f,
+            baseFloat = 0.05f,
             onValueChangeFloat = {
                 DrawViewModel.inputHrScale = it
             })
@@ -241,6 +243,7 @@ fun HiresFixPanel() {
             })
         SliderOptionItem(label = stringResource(R.string.param_denoising_strength),
             value = DrawViewModel.inputHrDenoisingStrength, valueRange = 0f..1f,
+            baseFloat = 0.01f,
             onValueChangeFloat = {
                 DrawViewModel.inputHrDenoisingStrength = it
             })
@@ -262,6 +265,7 @@ fun ControlNetPanel() {
             label = stringResource(R.string.param_guidance_start),
             value = DrawViewModel.inputControlNetGuidanceStart,
             valueRange = 0f..1f,
+            baseFloat = 0.01f,
             onValueChangeFloat = {
                 DrawViewModel.inputControlNetGuidanceStart = it
             })
@@ -269,21 +273,23 @@ fun ControlNetPanel() {
             label = stringResource(R.string.param_guidance_end),
             value = DrawViewModel.inputControlNetGuidanceEnd,
             valueRange = 0f..1f,
+            baseFloat = 0.01f,
             onValueChangeFloat = {
                 DrawViewModel.inputControlNetGuidanceEnd = it
             })
         TextPickUpItem(
             label = stringResource(R.string.param_control_mode),
-            value = DrawViewModel.ControlNetModeList[DrawViewModel.inputControlNetControlMode],
-            options = DrawViewModel.ControlNetModeList
+            value = ConstValues.ControlNetModeList[DrawViewModel.inputControlNetControlMode],
+            options = ConstValues.ControlNetModeList
         ) {
             DrawViewModel.inputControlNetControlMode =
-                DrawViewModel.ControlNetModeList.indexOf(it)
+                ConstValues.ControlNetModeList.indexOf(it)
         }
         SliderOptionItem(
             label = stringResource(R.string.param_control_weight),
             value = DrawViewModel.inputControlNetControlWeight,
             valueRange = 0f..2f,
+            baseFloat = 0.05f,
             onValueChangeFloat = {
                 DrawViewModel.inputControlNetControlWeight = it
             })
@@ -360,27 +366,27 @@ fun Img2ImgPanel() {
             )
             TextPickUpItem(
                 label = stringResource(id = R.string.mask_mode),
-                value = DrawViewModel.maskInvertOptions[DrawViewModel.inputImg2ImgInpaintingMaskInvert],
-                options = DrawViewModel.maskInvertOptions
+                value = ConstValues.MaskInvertOptions[DrawViewModel.inputImg2ImgInpaintingMaskInvert],
+                options = ConstValues.MaskInvertOptions
             ) {
                 DrawViewModel.inputImg2ImgInpaintingMaskInvert =
-                    DrawViewModel.maskInvertOptions.indexOf(it)
+                    ConstValues.MaskInvertOptions.indexOf(it)
             }
             TextPickUpItem(
                 label = stringResource(id = R.string.masked_content),
-                value = DrawViewModel.inpaintingFillOptions[DrawViewModel.inputImg2ImgInpaintingFill],
-                options = DrawViewModel.inpaintingFillOptions
+                value = ConstValues.InpaintingFillOptions[DrawViewModel.inputImg2ImgInpaintingFill],
+                options = ConstValues.InpaintingFillOptions
             ) {
                 DrawViewModel.inputImg2ImgInpaintingFill =
-                    DrawViewModel.inpaintingFillOptions.indexOf(it)
+                    ConstValues.InpaintingFillOptions.indexOf(it)
             }
             TextPickUpItem(
                 label = stringResource(id = R.string.inpaint_area),
-                value = DrawViewModel.inpaintingFullResOptions[DrawViewModel.inputImg2ImgInpaintingFullRes],
-                options = DrawViewModel.inpaintingFullResOptions
+                value = ConstValues.InpaintingFullResOptions[DrawViewModel.inputImg2ImgInpaintingFullRes],
+                options = ConstValues.InpaintingFullResOptions
             ) {
                 DrawViewModel.inputImg2ImgInpaintingFullRes =
-                    DrawViewModel.inpaintingFullResOptions.indexOf(it)
+                    ConstValues.InpaintingFullResOptions.indexOf(it)
             }
             SliderOptionItem(label = stringResource(id = R.string.only_masked_padding_pixels),
                 value = DrawViewModel.inputImg2ImgInpaintingFullResPadding.toFloat(),
@@ -396,23 +402,26 @@ fun Img2ImgPanel() {
 
         SliderOptionItem(label = stringResource(R.string.param_denoising_strength),
             value = DrawViewModel.inputImg2ImgDenoisingStrength, valueRange = 0f..1f,
+            baseFloat = 0.01f,
             onValueChangeFloat = {
                 DrawViewModel.inputImg2ImgDenoisingStrength = it
             })
-        SliderOptionItem(label = stringResource(R.string.param_scale_by),
+        SliderOptionItem(label = stringResource(R.string.param_cfg_scale),
             value = DrawViewModel.inputImg2ImgCfgScale, valueRange = 1f..30f,
             useInt = true,
+            baseFloat = 0.5f,
             onValueChangeInt = {
                 DrawViewModel.inputImg2ImgCfgScale = it.toFloat()
             })
         TextPickUpItem(
             label = stringResource(R.string.param_resize_mode),
-            value = DrawViewModel.inputImg2ImgResizeModeList[DrawViewModel.inputImg2ImgResizeMode],
-            options = DrawViewModel.inputImg2ImgResizeModeList
+            value = ConstValues.Img2ImgResizeModeList[DrawViewModel.inputImg2ImgResizeMode],
+            options = ConstValues.Img2ImgResizeModeList
         )
         SliderOptionItem(label = stringResource(id = R.string.param_scale_by),
             value = DrawViewModel.inputImg2ImgScaleBy,
             valueRange = 0.05f..4f,
+            baseFloat = 0.05f,
             onValueChangeFloat = {
                 DrawViewModel.inputImg2ImgScaleBy = it
             })

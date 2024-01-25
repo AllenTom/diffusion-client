@@ -173,6 +173,7 @@ data class LoraPromptEntity(
             previewPath = previewPath,
             hash = hash,
             title = title,
+            civitaiId = civitaiId,
         )
     }
 }
@@ -207,6 +208,7 @@ data class LoraPrompt(
     val title: String = "",
     val prompts: List<Prompt> = emptyList(),
     val triggerText: List<Prompt> = emptyList(),
+    val civitaiId: Long? = null,
 ) : Serializable {
     fun getPromptText(): List<String> {
         return listOf("<lora:${name}:${weight}>") + prompts.map { it.getPromptText() }

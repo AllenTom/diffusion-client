@@ -3,6 +3,7 @@ package com.allentom.diffusion.composables
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -30,6 +31,8 @@ fun SliderOptionItem(
     steps: Int = 0,
     useInt: Boolean = false,
     title: String = label,
+    format: (Float) -> Float = { it },
+    baseFloat: Float? = null,
     onValueChangeFloat: (Float) -> Unit = {},
     onValueChangeInt: (Int) -> Unit = {}
 ) {
@@ -45,6 +48,14 @@ fun SliderOptionItem(
             })
         }
     )
+    fun formatWithBaseFloat(value: Float): Float {
+        if (baseFloat == null) {
+            return value
+        }
+        val raw = baseFloat.toString()
+        val decimal = raw.substringAfter(".").length
+        return String.format("%.${decimal}f", (value / baseFloat).toInt() * baseFloat).toFloat()
+    }
 
     if (showDialog) {
         AlertDialog(
@@ -60,7 +71,7 @@ fun SliderOptionItem(
                             inputValue = if (useInt) {
                                 it.roundToInt().toFloat()
                             } else {
-                                it
+                                format(formatWithBaseFloat(it))
                             }
                             inputTextValue = inputValue.toString()
                         },
@@ -69,18 +80,21 @@ fun SliderOptionItem(
                         modifier = Modifier
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(value = inputTextValue, onValueChange = {
-                        inputTextValue = it
-                        try {
-                            inputValue = if (useInt) {
-                                it.toInt().toFloat()
-                            } else {
-                                it.toFloat()
-                            }
-                        } catch (e: Exception) {
+                    OutlinedTextField(
+                        value = inputTextValue,
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = {
+                            inputTextValue = it
+                            try {
+                                inputValue = if (useInt) {
+                                    it.toInt().toFloat()
+                                } else {
+                                    format(formatWithBaseFloat(it.toFloat()))
+                                }
+                            } catch (e: Exception) {
 
-                        }
-                    })
+                            }
+                        })
                 }
             },
             confirmButton = {

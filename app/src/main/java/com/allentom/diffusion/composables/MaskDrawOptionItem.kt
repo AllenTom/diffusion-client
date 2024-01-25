@@ -40,7 +40,7 @@ fun MaskDrawOptionItem(
     ListItem(
         modifier = Modifier.clickable { showDialog = true },
         headlineContent = { Text(text = title) },
-        supportingContent = {
+        trailingContent = {
             value?.let {
                 Box(
                     modifier = Modifier
@@ -50,7 +50,7 @@ fun MaskDrawOptionItem(
                     DisplayBase64Image(base64String = value)
                 }
             }
-        }
+        },
     )
     if (showDialog) {
         InpaintDialog(

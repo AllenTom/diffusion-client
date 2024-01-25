@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
@@ -90,11 +93,14 @@ fun HistoryView(
                 fontWeight = FontWeight.W500,
                 fontSize = 18.sp
             )
-            ListItem(headlineContent = {
-                Text(text = stringResource(id = R.string.region_divider_ratio))
-            }, supportingContent = {
-                Text(text = currentHistory.regionRatio.toString())
-            })
+            Spacer(modifier = Modifier.height(8.dp))
+            FlowRow(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                ParamItem(label = stringResource(R.string.region_divider_ratio),
+                    value = { Text(text = currentHistory.regionRatio.toString()) })
+            }
             var regionCount = currentHistory.regionCount ?: 0
             if (currentHistory.regionUseCommon == true) {
                 regionCount += 1
@@ -102,10 +108,12 @@ fun HistoryView(
             for (i in 0 until regionCount) {
                 PromptDisplayView(
                     promptList = currentHistory.prompt.filter { it.regionIndex == i },
-                    title = if (currentHistory.regionUseCommon == true && i == 0) {
-                        stringResource(id = R.string.common_region)
-                    } else {
-                        stringResource(id = R.string.region, i.toString())
+                    titleComponent = {
+                        if (currentHistory.regionUseCommon == true && i == 0) {
+                            SectionTitle(title = stringResource(id = R.string.common_region))
+                        } else {
+                            SectionTitle(title = stringResource(id = R.string.region, i.toString()))
+                        }
                     },
                     onClickPrompt = {
                         navController.navigate(
@@ -124,7 +132,9 @@ fun HistoryView(
             currentHistory.prompt.takeIf { it.isNotEmpty() }?.let {
                 PromptDisplayView(
                     promptList = currentHistory.prompt,
-                    title = stringResource(id = R.string.param_prompt),
+                    titleComponent = {
+                        SectionTitle(title = stringResource(R.string.param_prompt))
+                    },
                     onClickPrompt = {
                         navController.navigate(
                             Screens.PromptDetail.route.replace(
@@ -142,7 +152,9 @@ fun HistoryView(
         currentHistory.negativePrompt.takeIf { it.isNotEmpty() }?.let {
             PromptDisplayView(
                 promptList = currentHistory.negativePrompt,
-                title = stringResource(id = R.string.param_negative_prompt),
+                titleComponent = {
+                    SectionTitle(title = stringResource(R.string.param_negative_prompt))
+                },
                 onClickPrompt = {
                     navController.navigate(
                         Screens.PromptDetail.route.replace(
@@ -158,11 +170,7 @@ fun HistoryView(
         }
         currentHistory.loraPrompt.takeIf { it.isNotEmpty() }?.let {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.lora),
-                fontWeight = FontWeight.W500,
-                fontSize = 18.sp
-            )
+            SectionTitle(title = stringResource(R.string.param_lora))
             Spacer(modifier = Modifier.height(8.dp))
             Box {
                 Column {
@@ -182,31 +190,25 @@ fun HistoryView(
         }
         currentHistory.embeddingPrompt.takeIf { it.isNotEmpty() }?.let {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.embedding),
-                fontWeight = FontWeight.W500,
-                fontSize = 18.sp
-            )
+            SectionTitle(title = stringResource(R.string.embedding))
             Spacer(modifier = Modifier.height(8.dp))
-            Box {
-                Column {
-                    currentHistory.embeddingPrompt.forEach {
-                        ListItem(headlineContent = {
-                            Text(text = it.text)
-                        }, supportingContent = {
-                            Text(text = it.piority.toString())
-                        })
-                    }
+            FlowRow(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                currentHistory.embeddingPrompt.forEach {
+                    AssistChip(
+                        onClick = { },
+                        label = { Text(text = it.text) }
+                    )
                 }
             }
         }
         currentHistory.model?.let { modelEntity ->
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(id = R.string.model),
-                fontWeight = FontWeight.W500,
-                fontSize = 18.sp
-            )
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionTitle(title = stringResource(R.string.model))
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier
@@ -250,11 +252,9 @@ fun HistoryView(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(id = R.string.param),
-            fontWeight = FontWeight.W500,
-            fontSize = 18.sp
-        )
+        Divider()
+        Spacer(modifier = Modifier.height(16.dp))
+        SectionTitle(title = stringResource(R.string.param))
         Spacer(modifier = Modifier.height(8.dp))
         Box(
             modifier = Modifier
@@ -275,11 +275,9 @@ fun HistoryView(
         }
         currentHistory.img2imgParam?.let { img2imgParam ->
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.image_to_image),
-                fontWeight = FontWeight.W500,
-                fontSize = 18.sp
-            )
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionTitle(title = stringResource(R.string.image_to_image))
             Spacer(modifier = Modifier.height(8.dp))
             Column {
                 Box(
@@ -310,7 +308,7 @@ fun HistoryView(
                     ParamItem(label = stringResource(id = R.string.param_denoising_strength),
                         value = { Text(text = img2imgParam.denoisingStrength.toString()) })
                     ParamItem(label = stringResource(id = R.string.param_resize_mode),
-                        value = { Text(text = DrawViewModel.inputImg2ImgResizeModeList[img2imgParam.resizeMode]) })
+                        value = { Text(text = ConstValues.Img2ImgResizeModeList[img2imgParam.resizeMode]) })
                     ParamItem(label = stringResource(id = R.string.param_scale_by)) {
                         Text(text = img2imgParam.scaleBy.toString())
                     }
@@ -318,11 +316,8 @@ fun HistoryView(
             }
             if (img2imgParam.inpaint == true) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Inpaint",
-                    fontWeight = FontWeight.W500,
-                    fontSize = 18.sp
-                )
+                SectionTitle(title = stringResource(R.string.inpaint_dialog_title))
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -355,8 +350,6 @@ fun HistoryView(
                         }
                     }
                 }
-
-
                 Spacer(modifier = Modifier.height(8.dp))
                 FlowRow(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -367,7 +360,7 @@ fun HistoryView(
                     ParamItem(label = stringResource(R.string.mask_mode),
                         value = {
                             Text(
-                                text = DrawViewModel.maskInvertOptions.get(
+                                text = ConstValues.MaskInvertOptions.get(
                                     img2imgParam.maskInvert ?: 0
                                 )
                             )
@@ -375,7 +368,7 @@ fun HistoryView(
                     ParamItem(label = stringResource(R.string.masked_content),
                         value = {
                             Text(
-                                text = DrawViewModel.inpaintingFillOptions.get(
+                                text = ConstValues.InpaintingFillOptions.get(
                                     img2imgParam.inpaintingFill ?: 0
                                 )
                             )
@@ -383,7 +376,7 @@ fun HistoryView(
                     ParamItem(label = stringResource(R.string.inpaint_area),
                         value = {
                             Text(
-                                text = DrawViewModel.inpaintingFullResOptions.get(
+                                text = ConstValues.InpaintingFullResOptions.get(
                                     img2imgParam.inpaintingFullRes ?: 0
                                 )
                             )
@@ -397,11 +390,9 @@ fun HistoryView(
         }
         currentHistory.hrParam.takeIf { it.enableScale }?.let {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(id = R.string.param_hires_fix),
-                fontWeight = FontWeight.W500,
-                fontSize = 18.sp
-            )
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionTitle(title = stringResource(id = R.string.param_hires_fix))
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -417,11 +408,9 @@ fun HistoryView(
         }
         currentHistory.controlNetParam?.takeIf { it.enabled }?.let {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(id = R.string.param_control_net),
-                fontWeight = FontWeight.W500,
-                fontSize = 18.sp
-            )
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionTitle(title = stringResource(id = R.string.param_control_net))
             Spacer(modifier = Modifier.height(8.dp))
             Column {
                 Box(
@@ -447,7 +436,7 @@ fun HistoryView(
                     ParamItem(label = stringResource(id = R.string.param_guidance_end),
                         value = { Text(text = it.guidanceEnd.toString()) })
                     ParamItem(label = stringResource(id = R.string.param_control_mode),
-                        value = { Text(text = DrawViewModel.ControlNetModeList[it.controlMode]) })
+                        value = { Text(text = ConstValues.ControlNetModeList[it.controlMode]) })
                     ParamItem(
                         label = stringResource(id = R.string.param_control_weight),
                         value = { Text(text = it.weight.toString()) })
@@ -460,4 +449,13 @@ fun HistoryView(
     }
 
 
+}
+
+@Composable
+fun SectionTitle(title: String) {
+    Text(
+        text = title,
+        fontWeight = FontWeight.W500,
+        fontSize = 18.sp
+    )
 }

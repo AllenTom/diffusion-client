@@ -58,6 +58,7 @@ import com.allentom.diffusion.composables.ApplyLoraDialog
 import com.allentom.diffusion.composables.BottomActionSheet
 import com.allentom.diffusion.composables.CivitaiModelSelectDialog
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.composables.MatchOptionDialog
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.Prompt
 import com.allentom.diffusion.store.PromptStore

@@ -186,4 +186,19 @@
     <string name="inpaint_area">Inpaint area</string>
     <string name="only_masked_padding_pixels">Only masked padding, pixels</string>
     <string name="inpaint_mask">Mask</string>
+    <string name="just_resize">Just resize</string>
+    <string name="crop_and_resize">Crop and resize</string>
+    <string name="resize_and_fill">Resize and fill</string>
+    <string name="just_resize_latent_upscale">Just resize (latent upscale)</string>
+    <string name="balanced">Balanced</string>
+    <string name="my_prompt_is_more_important">My prompt is more important</string>
+    <string name="controlnet_is_more_important">ControlNet is more important</string>
+    <string name="inpaint_masked">Inpaint masked</string>
+    <string name="inpaint_not_masked">Inpaint not masked</string>
+    <string name="fill">fill</string>
+    <string name="original">original</string>
+    <string name="latent_noise">latent noise</string>
+    <string name="latent_nothing">latent nothing</string>
+    <string name="whole_picture">Whole picture</string>
+    <string name="only_masked">Only masked</string>
 </resources>
