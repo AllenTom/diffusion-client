@@ -105,13 +105,21 @@ fun DrawScreen() {
         }
     }
     if (isParamDisplayed) {
-        ParamsModalBottomSheet(onDismissRequest = {
-            isParamDisplayed = false
-        }) {
-            scope.launch {
-                DrawViewModel.switchModel(it)
+        ParamsModalBottomSheet(
+            onDismissRequest = {
+                isParamDisplayed = false
+            },
+            onSwitchModel = {
+                scope.launch {
+                    DrawViewModel.switchModel(it)
+                }
+            },
+            onSwitchVae = {
+                scope.launch {
+                    DrawViewModel.switchVae(it)
+                }
             }
-        }
+        )
     }
     Row() {
         Box(
@@ -128,7 +136,11 @@ fun DrawScreen() {
                         .padding(16.dp)
                         .fillMaxSize()
                 ) {
-                    GenProgressGrid(modifier = Modifier.fillMaxWidth().weight(1f))
+                    GenProgressGrid(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Box(
                         modifier = Modifier
@@ -150,7 +162,7 @@ fun DrawScreen() {
                                         DrawViewModel.interruptGenerate()
                                     },
                                     enabled = DrawViewModel.isGenerating && !DrawViewModel.interruptFlag
-                                    ) {
+                                ) {
                                     Text(text = stringResource(id = R.string.btn_stop))
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
@@ -206,11 +218,18 @@ fun DrawScreen() {
 
             ) {
                 isWideDisplay.takeIf { it }.let {
-                    ParamsPanel {
-                        scope.launch {
-                            DrawViewModel.switchModel(it)
+                    ParamsPanel(
+                        onSwitchVae = {
+                            scope.launch {
+                                DrawViewModel.switchVae(it)
+                            }
+                        },
+                        onSwitchModel = {
+                            scope.launch {
+                                DrawViewModel.switchModel(it)
+                            }
                         }
-                    }
+                    )
                 }
             }
         }

@@ -264,12 +264,30 @@ fun HistoryView(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                ParamItem(
+                    label = stringResource(id = R.string.param_width),
+                    value = { Text(text = currentHistory.width.toString()) }
+                )
+                ParamItem(
+                    label = stringResource(id = R.string.param_height),
+                    value = { Text(text = currentHistory.height.toString()) })
                 ParamItem(label = stringResource(id = R.string.param_steps),
                     value = { Text(text = currentHistory.steps.toString()) })
                 ParamItem(label = stringResource(id = R.string.param_sampler),
                     value = { Text(text = currentHistory.samplerName) })
                 ParamItem(label = stringResource(id = R.string.param_cfg_scale),
                     value = { Text(text = currentHistory.cfgScale.toString()) })
+                ParamItem(label = "Vae", value = {
+                    Text(text = currentHistory.vaeName.toString())
+                })
+                if (currentHistory.enableRefiner) {
+                    ParamItem(label = stringResource(R.string.refiner_model),
+                        value = { Text(text = currentHistory.refinerModelName.toString()) }
+                    )
+                    ParamItem(label = stringResource(R.string.refiner_switch_at),
+                        value = { Text(text = currentHistory.refinerSwitchAt.toString()) }
+                    )
+                }
 
             }
         }

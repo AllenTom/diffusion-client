@@ -37,6 +37,7 @@ import com.allentom.diffusion.api.entity.Option
 import com.allentom.diffusion.api.entity.Progress
 import com.allentom.diffusion.api.entity.Sampler
 import com.allentom.diffusion.api.entity.Upscale
+import com.allentom.diffusion.api.entity.Vae
 import com.allentom.diffusion.api.entity.throwApiExceptionIfNotSuccessful
 import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.service.GenerateImageService
@@ -80,7 +81,14 @@ suspend fun fetchModelFromApi(): List<Model> {
     }
     return emptyList()
 }
-
+suspend fun fetchVaeFromApi(): List<Vae> {
+    val list = getApiClient().getVaeList()
+    val body = list.body()
+    if (list.isSuccessful && body != null) {
+        return body
+    }
+    return emptyList()
+}
 suspend fun fetchUpscalersFromApi(): List<Upscale> {
     val list = getApiClient().getUpscalers()
     val body = list.body()
@@ -160,6 +168,8 @@ object DrawViewModel {
     var samplerList by mutableStateOf(emptyList<Sampler>())
     var progress by mutableStateOf<Progress?>(null)
     var models by mutableStateOf<List<Model>>(emptyList())
+    var vaeList by mutableStateOf<List<Vae>>(emptyList())
+    var useVae by mutableStateOf<String?>(null)
     var isGenerating by mutableStateOf(false)
     var options by mutableStateOf<Option?>(null)
     var useModelName by mutableStateOf<String?>(null)
@@ -202,6 +212,10 @@ object DrawViewModel {
     var inputImg2ImgInpaintingMaskInvert by mutableStateOf(0)
     var inputImg2ImgInpaintingFill by mutableStateOf(0)
     var inputImg2ImgInpaintingFullRes by mutableStateOf(0)
+
+    var enableRefiner by mutableStateOf(false)
+    var refinerModel by mutableStateOf<String?>(null)
+    var refinerSwitchAt by mutableStateOf(0.8f)
 
     var inputImg2ImgInpaintingFullResPadding by mutableStateOf(32)
 
@@ -287,6 +301,10 @@ object DrawViewModel {
             useCommon = history.regionUseCommon ?: false,
             enable = history.regionEnable ?: false
         )
+        enableRefiner = history.enableRefiner
+        refinerModel = history.refinerModelName
+        refinerSwitchAt = history.refinerSwitchAt ?: 0.8f
+
 
 
         inputUpscaler = history.hrParam.hrUpscaler
@@ -378,7 +396,9 @@ object DrawViewModel {
         hrDenosingStrength: Float = 0.7f,
         hrUpscaler: String? = "None",
         controlNetParam: ControlNetParam? = null,
-        regionPromptParam: RegionPromptParam? = null
+        regionPromptParam: RegionPromptParam? = null,
+        refinerModel: String? = null,
+        refinerSwitchAt: Float? = null
     ): String? {
         var alwaysonScripts = AlwaysonScripts()
         if (controlNetParam != null) {
@@ -416,7 +436,9 @@ object DrawViewModel {
             hr_scale = hrScale,
             denoising_strength = hrDenosingStrength,
             hr_upscaler = hrUpscaler ?: "None",
-            alwayson_scripts = alwaysonScripts
+            alwayson_scripts = alwaysonScripts,
+            refiner_checkpoint = refinerModel,
+            refiner_switch_at = refinerSwitchAt
         )
         val list = getApiClient().txt2img(
             request = request
@@ -613,17 +635,13 @@ object DrawViewModel {
                             }
                         }
                     }
-
-
-
-
                     if (generateMode == "text2img") {
                         try {
                             text2Image(
                                 prompt = listOf(
                                     getLoraPrompt(),
                                     getPositivePrompt()
-                                ).joinToString(","),
+                                ).filter { it.isNotBlank() }.joinToString(","),
                                 negativePrompt = getNegativePrompt(),
                                 width = inputWidth.toInt(),
                                 height = inputHeight.toInt(),
@@ -637,7 +655,9 @@ object DrawViewModel {
                                 hrDenosingStrength = inputHrDenoisingStrength,
                                 hrUpscaler = inputUpscaler,
                                 controlNetParam = controlNetParam,
-                                regionPromptParam = regionPromptParam
+                                regionPromptParam = regionPromptParam,
+                                refinerModel = if (enableRefiner) refinerModel else null,
+                                refinerSwitchAt = if (enableRefiner) refinerSwitchAt else null
                             )?.let {
                                 resultImage = it
                             }
@@ -794,7 +814,11 @@ object DrawViewModel {
                     regionRatio = regionPromptParam.dividerText,
                     regionCount = regionPromptParam.regionCount,
                     regionUseCommon = regionPromptParam.useCommon,
-                    regionEnable = regionPromptParam.enable
+                    regionEnable = regionPromptParam.enable,
+                    vaeName = useVae,
+                    enableRefiner = enableRefiner,
+                    refinerModelName = refinerModel,
+                    refinerSwitchAt = refinerSwitchAt
                 )
                 genScope?.launch(Dispatchers.IO) {
                     HistoryStore.saveHistoryToDatabase(context, saveHistory)
@@ -939,6 +963,11 @@ object DrawViewModel {
         Log.d("initViewModel", "Call time for fetchModelFromApi: ${endTime - startTime} ms")
 
         startTime = System.currentTimeMillis()
+        vaeList = fetchVaeFromApi()
+        endTime = System.currentTimeMillis()
+        Log.d("initViewModel", "Call time for fetchVaeFromApi: ${endTime - startTime} ms")
+
+        startTime = System.currentTimeMillis()
         upscalers = fetchUpscalersFromApi()
         endTime = System.currentTimeMillis()
         Log.d("initViewModel", "Call time for fetchUpscalersFromApi: ${endTime - startTime} ms")
@@ -976,6 +1005,7 @@ object DrawViewModel {
         endTime = System.currentTimeMillis()
         Log.d("initViewModel", "Call time for getOptions: ${endTime - startTime} ms")
         useModelName = options?.sdModelCheckpoint
+        useVae = options?.sdVae
     }
 
     suspend fun switchModel(modelName: String) {
@@ -988,5 +1018,16 @@ object DrawViewModel {
         useModelName = modelName
         isSwitchingModel = false
 
+    }
+
+    suspend fun switchVae(modelName: String) {
+        isSwitchingModel = true
+        getApiClient().setOptions(
+            OptionsRequestBody(
+                sdVae = modelName
+            )
+        )
+        useVae = modelName
+        isSwitchingModel = false
     }
 }

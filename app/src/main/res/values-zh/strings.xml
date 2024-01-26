@@ -202,4 +202,7 @@
     <string name="latent_nothing">无潜在空间</string>
     <string name="whole_picture">全图</string>
     <string name="only_masked">仅蒙版</string>
+    <string name="refiner_model">细化模型</string>
+    <string name="refiner_switch_at">切换点</string>
+    <string name="refiner">细化</string>
 </resources>

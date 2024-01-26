@@ -74,7 +74,11 @@ class SaveHistory(
     val regionRatio: String? = "",
     val regionCount: Int? = 0,
     val regionUseCommon: Boolean? = false,
-    val regionEnable: Boolean? = false
+    val regionEnable: Boolean? = false,
+    val vaeName: String? = null,
+    val enableRefiner: Boolean = false,
+    val refinerModelName: String? = null,
+    val refinerSwitchAt: Float? = null,
 ) : Serializable
 
 @Entity(primaryKeys = ["promptId", "historyId"], tableName = "prompt_history")
@@ -485,7 +489,11 @@ data class HistoryWithRelation(
             regionCount = historyEntity.regionCount,
             regionRatio = historyEntity.regionRatio,
             regionUseCommon = historyEntity.regionUseCommon,
-            regionEnable = historyEntity.regionEnable
+            regionEnable = historyEntity.regionEnable,
+            vaeName = historyEntity.vaeName,
+            enableRefiner = historyEntity.enableRefiner ?: false,
+            refinerModelName = historyEntity.refinerModelName,
+            refinerSwitchAt = historyEntity.refinerSwitchAt,
         )
         return result
     }
@@ -564,7 +572,11 @@ data class HistoryEntity(
     var regionRatio: String? = "",
     var regionCount: Int? = 0,
     var regionUseCommon: Boolean? = false,
-    var regionEnable: Boolean? = false
+    var regionEnable: Boolean? = false,
+    val enableRefiner: Boolean? = false,
+    val refinerModelName: String? = null,
+    val refinerSwitchAt: Float? = null,
+    val vaeName: String? = null,
 ) : Serializable {
 
     companion object {
@@ -581,7 +593,11 @@ data class HistoryEntity(
                 regionCount = saveHistory.regionCount,
                 regionRatio = saveHistory.regionRatio,
                 regionUseCommon = saveHistory.regionUseCommon,
-                regionEnable = saveHistory.regionEnable
+                regionEnable = saveHistory.regionEnable,
+                enableRefiner = saveHistory.enableRefiner,
+                refinerModelName = saveHistory.refinerModelName,
+                refinerSwitchAt = saveHistory.refinerSwitchAt,
+                vaeName = saveHistory.vaeName,
             )
         }
     }

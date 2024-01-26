@@ -17,6 +17,7 @@ import com.allentom.diffusion.api.entity.SDWEmbeddingList
 import com.allentom.diffusion.api.entity.Sampler
 import com.allentom.diffusion.api.entity.Text2ImageResult
 import com.allentom.diffusion.api.entity.Upscale
+import com.allentom.diffusion.api.entity.Vae
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import retrofit2.Response
@@ -185,6 +186,8 @@ data class Txt2ImgRequest(
 //    val hr_steps:Int = 0,
     val hr_upscaler: String = "None",
     val alwayson_scripts: AlwaysonScripts? = AlwaysonScripts(null),
+    val refiner_checkpoint: String? = null,
+    val refiner_switch_at: Float? = null,
 )
 
 //"resize_mode": 0,
@@ -228,7 +231,8 @@ data class InterrogateRequest(
 )
 
 data class OptionsRequestBody(
-    @SerializedName("sd_model_checkpoint") val sdModelCheckpoint: String,
+    @SerializedName("sd_model_checkpoint") val sdModelCheckpoint: String? = null,
+    @SerializedName("sd_vae") val sdVae: String? = null,
 )
 
 data class ExtraImageRequest(
@@ -319,6 +323,9 @@ interface SDWApi {
 
     @GET("/sdapi/v1/embeddings")
     suspend fun getEmbeddingList(): Response<SDWEmbeddingList>
+
+    @GET("/sdapi/v1/sd-vae")
+    suspend fun getVaeList(): Response<List<Vae>>
 
     @GET("/diffusionhelper/hash")
     suspend fun getHash(

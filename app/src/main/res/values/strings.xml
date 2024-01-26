@@ -201,4 +201,7 @@
     <string name="latent_nothing">latent nothing</string>
     <string name="whole_picture">Whole picture</string>
     <string name="only_masked">Only masked</string>
+    <string name="refiner_model">Refiner model</string>
+    <string name="refiner_switch_at">Refiner Switch at</string>
+    <string name="refiner">Refiner</string>
 </resources>

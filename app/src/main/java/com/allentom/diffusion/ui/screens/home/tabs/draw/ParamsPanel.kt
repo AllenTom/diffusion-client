@@ -38,13 +38,15 @@ import com.allentom.diffusion.composables.TextPickUpItem
 @Composable
 fun ParamsModalBottomSheet(
     onDismissRequest: () -> Unit,
-    onSwitchModel: (String) -> Unit
+    onSwitchModel: (String) -> Unit,
+    onSwitchVae: (String) -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = {
         onDismissRequest()
     }) {
         ParamsPanel(
-            onSwitchModel = onSwitchModel
+            onSwitchModel = onSwitchModel,
+            onSwitchVae = onSwitchVae
         )
     }
 }
@@ -52,7 +54,8 @@ fun ParamsModalBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParamsPanel(
-    onSwitchModel: (String) -> Unit
+    onSwitchModel: (String) -> Unit,
+    onSwitchVae: (String) -> Unit
 ) {
     var tabIndex by remember { mutableIntStateOf(0) }
     Column {
@@ -93,7 +96,7 @@ fun ParamsPanel(
         Spacer(modifier = Modifier.height(16.dp))
         when (tabIndex) {
             0 -> {
-                BaseInfoPanel(onSwitchModel)
+                BaseInfoPanel(onSwitchModel, onSwitchVae)
             }
 
             1 -> {
@@ -113,7 +116,8 @@ fun ParamsPanel(
 
 @Composable
 fun BaseInfoPanel(
-    onSwitchModel: (String) -> Unit
+    onSwitchModel: (String) -> Unit,
+    onSwitchVae: (String) -> Unit
 ) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
@@ -207,6 +211,31 @@ fun BaseInfoPanel(
             useInt = true,
             onValueChangeInt = { DrawViewModel.inputNiter = it.toFloat() }
         )
+        TextPickUpItem(
+            label = "Vae",
+            value = DrawViewModel.useVae,
+            options = DrawViewModel.vaeList.map { it.modelName } + listOf("None", "Automatic")) {
+            onSwitchVae(it)
+        }
+        SwitchOptionItem(label = stringResource(R.string.refiner),
+            value = DrawViewModel.enableRefiner) {
+            DrawViewModel.enableRefiner = it
+        }
+        if (DrawViewModel.enableRefiner) {
+            TextPickUpItem(label = stringResource(id = R.string.refiner_model),
+                value = DrawViewModel.refinerModel,
+                options = DrawViewModel.models.map { it.title }) {
+                DrawViewModel.refinerModel = it
+            }
+            SliderOptionItem(label = stringResource(id = R.string.refiner_switch_at),
+                value = DrawViewModel.refinerSwitchAt,
+                valueRange = 0f..1f,
+                baseFloat = 0.01f,
+                onValueChangeFloat = { DrawViewModel.refinerSwitchAt = it }
+            )
+        }
+
+
     }
 }
 

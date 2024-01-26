@@ -187,6 +187,11 @@ fun DrawBar(
                 scope.launch {
                     DrawViewModel.switchModel(it)
                 }
+            },
+            onSwitchVae = {
+                scope.launch {
+                    DrawViewModel.switchVae(it)
+                }
             }
         )
 
