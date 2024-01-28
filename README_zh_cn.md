@@ -34,7 +34,14 @@
 [diffusion-extension](https://github.com/AllenTom/diffusion-extension.git)
 
 在相应的插件目录中执行命令进行下载
-
 ```bash
 git clone https://github.com/AllenTom/diffusion-extension.git
 ```
+
+## 提示词库
+你可以在这里[这里](https://github.com/AllenTom/diffusion-client/releases/tag/0.0.2)下载提示词
+
+在提示词管理的功能中导入提示词
+
+
+

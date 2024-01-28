@@ -40,3 +40,9 @@ in stable-diffusion-webui extensions run command
 ```bash
 git clone https://github.com/AllenTom/diffusion-extension.git
 ```
+
+## Prompt Library
+You can import prebuild prompt library from [here](https://github.com/AllenTom/diffusion-client/releases/tag/0.0.2)
+
+In prompt library just import from file
+
