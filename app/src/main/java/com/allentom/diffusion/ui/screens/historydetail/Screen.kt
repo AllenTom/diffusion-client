@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
+import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.ActionItem
 import com.allentom.diffusion.composables.BottomActionSheet
@@ -64,6 +65,7 @@ import com.allentom.diffusion.store.HistoryStore
 import com.allentom.diffusion.store.ImageHistory
 import com.allentom.diffusion.store.SaveHistory
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
+import com.allentom.diffusion.ui.screens.reactor.ReactorViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -165,7 +167,10 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
                                     modifier = Modifier.fillMaxSize()
                                 ) {
                                     item {
-                                        FirstScreen(currentHistory = currentHistory)
+                                        FirstScreen(
+                                            currentHistory = currentHistory,
+                                            navController = navController
+                                        )
                                         if (!isWideDisplay) {
                                             Spacer(modifier = Modifier.height(16.dp))
                                             SecondScreen(
@@ -211,6 +216,7 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
 @Composable
 fun FirstScreen(
     currentHistory: SaveHistory,
+    navController: NavController
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -337,6 +343,26 @@ fun FirstScreen(
                                     context.getString(R.string.image_sent_to_image_to_image),
                                     Toast.LENGTH_SHORT
                                 ).show()
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = null
+                            )
+
+                        },
+                        text = { Text(stringResource(id = R.string.send_to_reactor)) },
+                        onClick = {
+                            isActionMenuShow = false
+                            scope.launch {
+                                val imageBase64 =
+                                    Util.readImageWithPathToBase64(it.path)
+                                ReactorViewModel.targetImage = imageBase64
+                                ReactorViewModel.targetImageFileName = it.path.split("/").last()
+                                navController.navigate(Screens.ReactorScreen.route)
                             }
                         }
                     )

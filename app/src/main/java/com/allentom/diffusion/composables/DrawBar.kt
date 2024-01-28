@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -198,9 +199,14 @@ fun DrawBar(
     }
 
     if (isImageModalShow) {
-        ModalBottomSheet(onDismissRequest = {
-            isImageModalShow = false
-        }) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                isImageModalShow = false
+            },
+            sheetState = rememberModalBottomSheetState(
+                skipPartiallyExpanded = true
+            ),
+        ) {
             Column(
                 Modifier.padding(16.dp)
             ) {
@@ -239,6 +245,7 @@ fun DrawBar(
                     ) {
                         GenProgressGrid(modifier = Modifier.fillMaxSize())
                     }
+
                     1 ->
                         Column(
                             modifier = Modifier

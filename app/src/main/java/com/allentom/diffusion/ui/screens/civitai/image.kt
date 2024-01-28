@@ -92,15 +92,23 @@ fun CivitaiModelImageScreen() {
                                 AsyncImage(
                                     model = civitaiImage.url,
                                     contentDescription = null,
-                                    modifier = Modifier.fillMaxSize().clickable {
-                                        previewDialogState.openPreview(civitaiImage.url)
-                                    },
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable {
+                                            previewDialogState.openPreview(civitaiImage.url)
+                                        },
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             civitaiImage.meta?.let { imageMeta ->
                                 prompt.takeIf { it.isNotEmpty() }?.let { promptList ->
-                                    PromptDisplayView(promptList = promptList, canScroll = false) {
+                                    PromptDisplayView(
+                                        promptList = promptList,
+                                        canScroll = false,
+                                        title = stringResource(
+                                            id = R.string.prompts
+                                        )
+                                    ) {
                                         promptActionState.onOpenActionBottomSheet(
                                             prompt = it, target = "prompt"
                                         )
@@ -109,7 +117,13 @@ fun CivitaiModelImageScreen() {
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 negativePrompt.takeIf { it.isNotEmpty() }?.let { promptList ->
-                                    PromptDisplayView(promptList = promptList, canScroll = false) {
+                                    PromptDisplayView(
+                                        promptList = promptList,
+                                        canScroll = false,
+                                        title = stringResource(
+                                            id = R.string.param_negative_prompt
+                                        )
+                                    ) {
                                         promptActionState.onOpenActionBottomSheet(
                                             prompt = it, target = "negativePrompt"
                                         )

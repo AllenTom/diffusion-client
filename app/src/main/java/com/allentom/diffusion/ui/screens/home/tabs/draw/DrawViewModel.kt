@@ -25,6 +25,8 @@ import com.allentom.diffusion.api.ControlNetParam
 import com.allentom.diffusion.api.ControlNetWrapper
 import com.allentom.diffusion.api.Img2ImgRequest
 import com.allentom.diffusion.api.OptionsRequestBody
+import com.allentom.diffusion.api.ReactorParamRequest
+import com.allentom.diffusion.api.ReactorWrapper
 import com.allentom.diffusion.api.RegionalPrompterParam
 import com.allentom.diffusion.api.RegionalPrompterWrapper
 import com.allentom.diffusion.api.Txt2ImgRequest
@@ -81,6 +83,7 @@ suspend fun fetchModelFromApi(): List<Model> {
     }
     return emptyList()
 }
+
 suspend fun fetchVaeFromApi(): List<Vae> {
     val list = getApiClient().getVaeList()
     val body = list.body()
@@ -89,6 +92,7 @@ suspend fun fetchVaeFromApi(): List<Vae> {
     }
     return emptyList()
 }
+
 suspend fun fetchUpscalersFromApi(): List<Upscale> {
     val list = getApiClient().getUpscalers()
     val body = list.body()
@@ -114,6 +118,19 @@ suspend fun fetchEmbeddingFromApi(): Map<String, Embedding> {
         return list.body()!!.loaded
     }
     return emptyMap()
+}
+
+suspend fun fetchReactorUpscalerFromApi(): List<String> {
+    try {
+        val list = getApiClient().getReactorUpscaler()
+        val body = list.body()
+        if (list.isSuccessful && body != null) {
+            return list.body()!!.upscalers
+        }
+    } catch (e: java.lang.Exception) {
+        return emptyList()
+    }
+    return emptyList()
 }
 
 data class GenImageItem(
@@ -148,6 +165,21 @@ data class RegionPromptParam(
         return regionCount
     }
 }
+
+data class ReactorParam(
+    val enabled: Boolean = false,
+    val singleImageResult: String? = null,
+    val singleImageResultFilename: String? = null,
+    val genderDetectionSource: Int = 0,
+    val genderDetectionTarget: Int = 0,
+    val restoreFace: String = "None",
+    val restoreFaceVisibility: Float = 1f,
+    val codeFormerWeightFidelity: Float = 0.5f,
+    val postprocessingOrder: Boolean = true,
+    val upscaler: String = "None",
+    val scaleBy: Float = 1f,
+    val upscalerVisibility: Float = 1f,
+)
 
 object DrawViewModel {
     var genScope: CoroutineScope? = null
@@ -218,6 +250,9 @@ object DrawViewModel {
     var refinerSwitchAt by mutableStateOf(0.8f)
 
     var inputImg2ImgInpaintingFullResPadding by mutableStateOf(32)
+
+    var reactorParam by mutableStateOf<ReactorParam>(ReactorParam())
+    var reactorUpscalerList by mutableStateOf<List<String>>(emptyList())
 
     var currentHistory by mutableStateOf<SaveHistory?>(null)
     fun startGenerating(count: Int) {
@@ -362,6 +397,10 @@ object DrawViewModel {
         }
         // for lora
         inputLoraList = history.loraPrompt
+
+        history.reactorParam?.let {
+            reactorParam = it
+        }
     }
 
     fun applyControlNetParams(context: Context, history: SaveControlNet) {
@@ -398,7 +437,8 @@ object DrawViewModel {
         controlNetParam: ControlNetParam? = null,
         regionPromptParam: RegionPromptParam? = null,
         refinerModel: String? = null,
-        refinerSwitchAt: Float? = null
+        refinerSwitchAt: Float? = null,
+        reactorParam: ReactorParam? = null
     ): String? {
         var alwaysonScripts = AlwaysonScripts()
         if (controlNetParam != null) {
@@ -414,6 +454,28 @@ object DrawViewModel {
             )
             alwaysonScripts.regionalPrompter = RegionalPrompterWrapper(
                 args = param.toParamArray()
+            )
+        }
+        if (reactorParam != null && reactorParam.enabled) {
+            reactorParam.singleImageResultFilename
+            val args = ReactorParamRequest(
+                enable = true,
+                singleSourceImage = Util.generateDataImageString(
+                    reactorParam.singleImageResultFilename!!,
+                    reactorParam.singleImageResult!!.replace(
+                        "\n",
+                        ""
+                    )
+                ),
+                genderDetectionSource = reactorParam.genderDetectionSource,
+                genderDetectionTarget = reactorParam.genderDetectionTarget,
+                restoreFace = reactorParam.restoreFace,
+                restoreFaceVisibility = reactorParam.restoreFaceVisibility,
+                codeFormerWeightFidelity = reactorParam.codeFormerWeightFidelity,
+                postprocessingOrder = reactorParam.postprocessingOrder
+            )
+            alwaysonScripts.reactor = ReactorWrapper(
+                args = args.toParamArray()
             )
         }
         // print alwayson scripts in json
@@ -636,6 +698,7 @@ object DrawViewModel {
                         }
                     }
                     if (generateMode == "text2img") {
+
                         try {
                             text2Image(
                                 prompt = listOf(
@@ -657,7 +720,8 @@ object DrawViewModel {
                                 controlNetParam = controlNetParam,
                                 regionPromptParam = regionPromptParam,
                                 refinerModel = if (enableRefiner) refinerModel else null,
-                                refinerSwitchAt = if (enableRefiner) refinerSwitchAt else null
+                                refinerSwitchAt = if (enableRefiner) refinerSwitchAt else null,
+                                reactorParam = reactorParam
                             )?.let {
                                 resultImage = it
                             }
@@ -781,14 +845,7 @@ object DrawViewModel {
                             )
                         }
                     }
-
-
                 }
-//                var controlNetParam: ControlNetParam? = null
-//                if (controlNetParam != null) {
-////                    ControlNetStore.addNet(controlNetParam)
-////                    ControlNetStore.saveData(context)
-//                }
                 val saveHistory = SaveHistory(
                     prompt = inputPromptText,
                     negativePrompt = inputNegativePromptText,
@@ -818,7 +875,8 @@ object DrawViewModel {
                     vaeName = useVae,
                     enableRefiner = enableRefiner,
                     refinerModelName = refinerModel,
-                    refinerSwitchAt = refinerSwitchAt
+                    refinerSwitchAt = refinerSwitchAt,
+                    reactorParam = reactorParam
                 )
                 genScope?.launch(Dispatchers.IO) {
                     HistoryStore.saveHistoryToDatabase(context, saveHistory)
@@ -981,6 +1039,14 @@ object DrawViewModel {
         embeddingModels = fetchEmbeddingFromApi()
         endTime = System.currentTimeMillis()
         Log.d("initViewModel", "Call time for fetchEmbeddingFromApi: ${endTime - startTime} ms")
+
+        startTime = System.currentTimeMillis()
+        reactorUpscalerList = fetchReactorUpscalerFromApi()
+        endTime = System.currentTimeMillis()
+        Log.d(
+            "initViewModel",
+            "Call time for fetchReactorUpscalerFromApi: ${endTime - startTime} ms"
+        )
 
         // check controlnet version
         try {

@@ -204,4 +204,28 @@
     <string name="refiner_model">Refiner model</string>
     <string name="refiner_switch_at">Refiner Switch at</string>
     <string name="refiner">Refiner</string>
+    <string name="reactor_single_source_image">Single source image</string>
+    <string name="reactor_gender_detection_source">Gender Detection (Source)</string>
+    <string name="reactor_gender_detection_target">Gender Detection (Target)</string>
+    <string name="reactor_restore_face">Restore Face</string>
+    <string name="reactor_restore_face_visibility">Restore Face Visibility</string>
+    <string name="reactor_codeformer_weight_fidelity">CodeFormer Weight (Fidelity)</string>
+    <string name="reactor_postprocessing_order">Postprocessing Order</string>
+    <string name="reactor_upscaler">Upscaler</string>
+    <string name="reactor_scale_by">Scale by</string>
+    <string name="reactor_upscaler_visibility_if_scale_1">Upscaler Visibility (if scale = 1)</string>
+    <string name="reactor">Reactor</string>
+    <string name="reactor_gender_detect_no">No</string>
+    <string name="reactor_gender_detect_female_only">Female Only</string>
+    <string name="reactor_gender_detect_male_only">Male Only</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="apply_params">Apply params</string>
+    <string name="params_applied">Params applied</string>
+    <string name="send_to_reactor">Send to reactor</string>
+    <string name="importing_control_net">Importing control net</string>
+    <string name="delete_items">Delete %1$s items</string>
+    <string name="import_from_folder">Import from folder</string>
+    <string name="use_control_net">Use control net</string>
+    <string name="send_to_caption">Send to caption</string>
 </resources>

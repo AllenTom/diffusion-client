@@ -29,4 +29,6 @@ sealed class Screens(val route: String) {
 
     object ModelDetailScreen : Screens("model_detail_screen/{modelId}")
     object SettingsScreen : Screens("settings_screen")
+
+    object ReactorScreen : Screens("reactor_screen")
 }

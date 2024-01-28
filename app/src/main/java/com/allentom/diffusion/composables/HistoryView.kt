@@ -464,6 +464,74 @@ fun HistoryView(
             }
 
         }
+        currentHistory.reactorParam?.let { reactorParam ->
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionTitle(title = stringResource(id = R.string.reactor))
+            Spacer(modifier = Modifier.height(8.dp))
+            Column {
+                reactorParam.singleImageResult?.let {
+                    Box(
+                        modifier = Modifier
+                            .height(120.dp)
+                            .fillMaxWidth(),
+                    ) {
+                        DisplayBase64Image(base64String = reactorParam.singleImageResult)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                FlowRow(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    ParamItem(label = stringResource(id = R.string.reactor_gender_detection_source),
+                        value = {
+                            Text(text = ConstValues.ReactorGenderDetectionOptions.get(reactorParam.genderDetectionSource))
+                        }
+                    )
+                    ParamItem(label = stringResource(id = R.string.reactor_gender_detection_target),
+                        value = {
+                            Text(text = ConstValues.ReactorGenderDetectionOptions.get(reactorParam.genderDetectionSource))
+                        }
+                    )
+                    ParamItem(label = stringResource(id = R.string.reactor_restore_face),
+                        value = {
+                            Text(text = reactorParam.restoreFace)
+                        }
+                    )
+                    ParamItem(
+                        label = stringResource(id = R.string.reactor_restore_face_visibility),
+                        value = { Text(text = reactorParam.restoreFaceVisibility.toString()) })
+                    ParamItem(
+                        label = stringResource(id = R.string.reactor_codeformer_weight_fidelity),
+                        value = { Text(text = reactorParam.codeFormerWeightFidelity.toString()) })
+                    ParamItem(
+                        label = stringResource(id = R.string.reactor_postprocessing_order),
+                        value = {
+                            Text(
+                                text = if (reactorParam.postprocessingOrder) stringResource(
+                                    id = R.string.yes
+                                ) else stringResource(
+                                    id = R.string.no
+                                )
+                            )
+                        })
+                    ParamItem(
+                        label = stringResource(id = R.string.reactor_upscaler),
+                        value = { Text(text = reactorParam.upscaler) })
+                    ParamItem(
+                        label = stringResource(id = R.string.reactor_scale_by),
+                        value = { Text(text = reactorParam.scaleBy.toString()) })
+                    ParamItem(
+                        label = stringResource(id = R.string.reactor_upscaler_visibility_if_scale_1),
+                        value = { Text(text = reactorParam.upscalerVisibility.toString()) })
+                }
+            }
+
+        }
     }
 
 

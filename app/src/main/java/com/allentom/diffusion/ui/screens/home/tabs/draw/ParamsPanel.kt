@@ -13,7 +13,9 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,6 +34,7 @@ import com.allentom.diffusion.composables.MaskDrawOptionItem
 import com.allentom.diffusion.composables.PromptSelectOptionItem
 import com.allentom.diffusion.composables.SliderOptionItem
 import com.allentom.diffusion.composables.SwitchOptionItem
+import com.allentom.diffusion.composables.TextAreaOptionItem
 import com.allentom.diffusion.composables.TextPickUpItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,11 +42,15 @@ import com.allentom.diffusion.composables.TextPickUpItem
 fun ParamsModalBottomSheet(
     onDismissRequest: () -> Unit,
     onSwitchModel: (String) -> Unit,
-    onSwitchVae: (String) -> Unit
+    onSwitchVae: (String) -> Unit,
+    state: SheetState? = null
 ) {
-    ModalBottomSheet(onDismissRequest = {
-        onDismissRequest()
-    }) {
+    ModalBottomSheet(
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        sheetState = state ?: rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
         ParamsPanel(
             onSwitchModel = onSwitchModel,
             onSwitchVae = onSwitchVae
@@ -89,6 +96,12 @@ fun ParamsPanel(
                     }, label = {
                         Text(stringResource(id = R.string.param_img2Img))
                     }, selected = tabIndex == 3)
+                    Spacer(modifier = Modifier.width(16.dp))
+                    FilterChip(onClick = {
+                        tabIndex = 4
+                    }, label = {
+                        Text(stringResource(R.string.reactor))
+                    }, selected = tabIndex == 4)
                 }
             }
         }
@@ -109,6 +122,16 @@ fun ParamsPanel(
 
             3 -> {
                 Img2ImgPanel()
+            }
+
+            4 -> {
+                ReactorPanel(
+                    onValueChange = {
+                        DrawViewModel.reactorParam = it
+                    },
+                    reactorParam = DrawViewModel.reactorParam,
+                    showEnableOption = true
+                )
             }
         }
     }
@@ -217,8 +240,10 @@ fun BaseInfoPanel(
             options = DrawViewModel.vaeList.map { it.modelName } + listOf("None", "Automatic")) {
             onSwitchVae(it)
         }
-        SwitchOptionItem(label = stringResource(R.string.refiner),
-            value = DrawViewModel.enableRefiner) {
+        SwitchOptionItem(
+            label = stringResource(R.string.refiner),
+            value = DrawViewModel.enableRefiner
+        ) {
             DrawViewModel.enableRefiner = it
         }
         if (DrawViewModel.enableRefiner) {
@@ -470,5 +495,140 @@ fun Img2ImgPanel() {
             onValueChangeInt = {
                 DrawViewModel.inputImg2ImgHeight = it.toFloat()
             })
+    }
+}
+
+@Composable
+fun ReactorPanel(
+    onValueChange: (ReactorParam) -> Unit = {},
+    showEnableOption: Boolean = true,
+    reactorParam: ReactorParam
+) {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
+        if (showEnableOption) {
+            SwitchOptionItem(
+                label = stringResource(R.string.enable),
+                value = reactorParam.enabled
+            ) {
+                onValueChange(reactorParam.copy(enabled = it))
+            }
+        }
+
+        ImageBase64PickupOptionItem(
+            label = stringResource(R.string.reactor_single_source_image),
+            value = reactorParam.singleImageResult
+        ) { fileUri, imgBase64, filename, width, height ->
+            onValueChange(
+                reactorParam.copy(
+                    singleImageResult = imgBase64,
+                    singleImageResultFilename = filename,
+                )
+            )
+        }
+        TextPickUpItem(
+            label = stringResource(R.string.reactor_gender_detection_source),
+            value = ConstValues.ReactorGenderDetectionOptions[reactorParam.genderDetectionSource],
+            options = ConstValues.ReactorGenderDetectionOptions
+        ) {
+            onValueChange(
+                reactorParam.copy(
+                    genderDetectionSource = ConstValues.ReactorGenderDetectionOptions.indexOf(it)
+                )
+            )
+        }
+        TextPickUpItem(
+            label = stringResource(R.string.reactor_gender_detection_target),
+            value = ConstValues.ReactorGenderDetectionOptions[reactorParam.genderDetectionTarget],
+            options = ConstValues.ReactorGenderDetectionOptions
+        ) {
+            onValueChange(
+                reactorParam.copy(
+                    genderDetectionTarget = ConstValues.ReactorGenderDetectionOptions.indexOf(it)
+                )
+            )
+        }
+        TextPickUpItem(
+            label = stringResource(R.string.reactor_restore_face),
+            value = reactorParam.restoreFace,
+            options = ConstValues.ReactorRestoreFaceOption
+        ) {
+            onValueChange(
+                reactorParam.copy(
+                    restoreFace = it
+                )
+            )
+        }
+        SliderOptionItem(label = stringResource(R.string.reactor_restore_face_visibility),
+            value = reactorParam.restoreFaceVisibility,
+            valueRange = 0f..1f,
+            baseFloat = 0.1f,
+            onValueChangeFloat = {
+                onValueChange(
+                    reactorParam.copy(
+                        restoreFaceVisibility = it
+                    )
+                )
+            }
+        )
+        SliderOptionItem(label = stringResource(R.string.reactor_codeformer_weight_fidelity),
+            value = reactorParam.codeFormerWeightFidelity,
+            valueRange = 0f..1f,
+            baseFloat = 0.1f,
+            onValueChangeFloat = {
+                onValueChange(
+                    reactorParam.copy(
+                        codeFormerWeightFidelity = it
+                    )
+                )
+            }
+        )
+        SwitchOptionItem(
+            label = stringResource(R.string.reactor_postprocessing_order),
+            value = reactorParam.postprocessingOrder
+        ) {
+            onValueChange(
+                reactorParam.copy(
+                    postprocessingOrder = it
+                )
+            )
+        }
+        TextPickUpItem(
+            label = stringResource(R.string.reactor_upscaler),
+            value = reactorParam.upscaler,
+            options = DrawViewModel.reactorUpscalerList
+        ) {
+            onValueChange(
+                reactorParam.copy(
+                    upscaler = it
+                )
+            )
+        }
+        SliderOptionItem(label = stringResource(R.string.reactor_scale_by),
+            value = reactorParam.scaleBy,
+            valueRange = 1f..8f,
+            baseFloat = 0.1f,
+            onValueChangeFloat = {
+                onValueChange(
+                    reactorParam.copy(
+                        scaleBy = it
+                    )
+                )
+            }
+        )
+        SliderOptionItem(label = stringResource(R.string.reactor_upscaler_visibility_if_scale_1),
+            value = reactorParam.upscalerVisibility,
+            valueRange = 0f..1f,
+            baseFloat = 0.1f,
+            onValueChangeFloat = {
+                onValueChange(
+                    reactorParam.copy(
+                        upscalerVisibility = it
+                    )
+                )
+            }
+        )
+
     }
 }

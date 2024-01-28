@@ -13,6 +13,8 @@ import com.allentom.diffusion.api.entity.Model
 import com.allentom.diffusion.api.entity.ModelHash
 import com.allentom.diffusion.api.entity.Option
 import com.allentom.diffusion.api.entity.Progress
+import com.allentom.diffusion.api.entity.RactorResultImage
+import com.allentom.diffusion.api.entity.ReactorUpscaleList
 import com.allentom.diffusion.api.entity.SDWEmbeddingList
 import com.allentom.diffusion.api.entity.Sampler
 import com.allentom.diffusion.api.entity.Text2ImageResult
@@ -152,11 +154,129 @@ data class RegionalPrompterParam(
     }
 }
 
+//img_base64, #0
+//True, #1 Enable ReActor
+//'0', #2 Comma separated face number(s) from swap-source image
+//'0', #3 Comma separated face number(s) for target image (result)
+//'C:\stable-diffusion-webui\models\insightface\inswapper_128.onnx', #4 model path
+//'CodeFormer', #4 Restore Face: None; CodeFormer; GFPGAN
+//1, #5 Restore visibility value
+//True, #7 Restore face -> Upscale
+//'4x_NMKD-Superscale-SP_178000_G', #8 Upscaler (type 'None' if doesn't need), see full list here: http://127.0.0.1:7860/sdapi/v1/script-info -> reactor -> sec.8
+//1.5, #9 Upscaler scale value
+//1, #10 Upscaler visibility (if scale = 1)
+//False, #11 Swap in source image
+//True, #12 Swap in generated image
+//1, #13 Console Log Level (0 - min, 1 - med or 2 - max)
+//0, #14 Gender Detection (Source) (0 - No, 1 - Female Only, 2 - Male Only)
+//0, #15 Gender Detection (Target) (0 - No, 1 - Female Only, 2 - Male Only)
+//False, #16 Save the original image(s) made before swapping
+//0.8, #17 CodeFormer Weight (0 = maximum effect, 1 = minimum effect), 0.5 - by default
+//False, #18 Source Image Hash Check, True - by default
+//False, #19 Target Image Hash Check, False - by default
+//"CUDA", #20 CPU or CUDA (if you have it), CPU - by default
+//True, #21 Face Mask Correction
+//1, #22 Select Source, 0 - Image, 1 - Face Model, 2 - Source Folder
+//"elena.safetensors", #23 Filename of the face model (from "models/reactor/faces"), e.g. elena.safetensors, don't forger to set #22 to 1
+//"C:\PATH_TO_FACES_IMAGES", #24 The path to the folder containing source faces images, don't forger to set #22 to 2
+//None, #25 skip it for API
+//True, #26 Randomly select an image from the path
+data class ReactorParamRequest(
+    // #0
+    val singleSourceImage:String = "",
+    // #1
+    val enable:Boolean = false,
+    // #2
+    val sourceImageAbove:String = "0",
+    // #3
+    val targetImageResult:String = "0",
+    // #4
+    val model:String = "inswapper_128.onnx",
+    // #5 Restore Face
+    val restoreFace:String = "CodeFormer",
+    // #6 Restore Face Visibility
+    val restoreFaceVisibility:Float = 1f,
+    // #7 Postprocessing Order
+    val postprocessingOrder:Boolean = true,
+    // #8 Upscaler
+    val upscaler:String = "None",
+    // #9 Scale by
+    val scaleBy:Float = 1f,
+    // #10 Upscaler Visibility (if scale = 1)
+    val upscalerVisibility:Float = 1f,
+    // #11 Swap in source image
+    val  swapInSourceImage:Boolean = false,
+    // #12 Swap in generated image
+    val swapInGeneratedImage:Boolean = true,
+    // #13 Console Log Level
+    val consoleLogLevel:Int = 2,
+    // #14 Gender Detection (Source)
+    val genderDetectionSource:Int = 1,
+    // #15 Gender Detection (Target)
+    val genderDetectionTarget:Int = 1,
+    // Save Original (Swap in generated only)
+    val saveOriginalSwapInGeneratedOnly:Boolean = false,
+    // CodeFormer Weight (Fidelity)
+    val codeFormerWeightFidelity:Float = 0.8f,
+    // Source Image Hash Check
+    val sourceImageHashCheck:Boolean = false,
+    // Target Image Hash Check
+    val targetImageHashCheck:Boolean = false,
+    //Execution Provider
+    val executionProvider:String = "CPU",
+    //Face Mask Correction
+    val faceMaskCorrection:Boolean = false,
+    //Select Source
+    val selectSource:Int = 0,
+    //Choose Face Model
+    val chooseFaceModel:String = "None",
+    //Source Folder
+    val sourceFolder:String = "",
+    //Multiple Source Images
+    val multipleSourceImages:String? = "",
+    //Random Image
+    val randomImage:Boolean = false,
+) {
+    fun toParamArray():List<Any?>{
+        return listOf(
+            singleSourceImage,
+            enable,
+            sourceImageAbove,
+            targetImageResult,
+            model,
+            restoreFace,
+            restoreFaceVisibility,
+            postprocessingOrder,
+            upscaler,
+            scaleBy,
+            upscalerVisibility,
+            swapInSourceImage,
+            swapInGeneratedImage,
+            consoleLogLevel,
+            genderDetectionSource,
+            genderDetectionTarget,
+            saveOriginalSwapInGeneratedOnly,
+            codeFormerWeightFidelity,
+            sourceImageHashCheck,
+            targetImageHashCheck,
+            executionProvider,
+            faceMaskCorrection,
+            selectSource,
+            chooseFaceModel,
+            sourceFolder,
+            multipleSourceImages,
+            randomImage
+        )
+    }
+}
+
 data class AlwaysonScripts(
     @SerializedName("controlnet")
     var controlNet: ControlNetWrapper? = null,
     @SerializedName("Regional Prompter")
     var regionalPrompter: RegionalPrompterWrapper? = null,
+    @SerializedName("reactor")
+    var reactor: ReactorWrapper? = null,
 )
 
 data class ControlNetWrapper(
@@ -167,6 +287,10 @@ data class ControlNetWrapper(
 data class RegionalPrompterWrapper(
     @SerializedName("args")
     val args: List<Any>? = null
+)
+data class ReactorWrapper(
+    @SerializedName("args")
+    val args: List<Any?>? = null
 )
 
 data class Txt2ImgRequest(
@@ -259,7 +383,35 @@ data class ControlNetDetectRequest(
     @SerializedName("controlnet_threshold_b") val controlNetThresholdB: Float = 64f,
     @SerializedName("controlnet_input_images") val controlNetInputImages: List<String> = listOf(),
 )
-
+data class ReactorRequestBody(
+    @SerializedName("source_image")
+    val sourceImage: String,
+    @SerializedName("target_image")
+    val targetImage: String,
+    @SerializedName("source_faces_index")
+    val sourceFacesIndex: List<Long>,
+    @SerializedName("face_index")
+    val faceIndex: List<Long>,
+    val upscaler: String,
+    val scale: Float,
+    @SerializedName("upscale_visibility")
+    val upscaleVisibility: Float,
+    @SerializedName("face_restorer")
+    val faceRestorer: String,
+    @SerializedName("restorer_visibility")
+    val restorerVisibility: Float,
+    @SerializedName("restore_first")
+    val restoreFirst: Long,
+    val model: String,
+    @SerializedName("gender_source")
+    val genderSource: Int,
+    @SerializedName("gender_target")
+    val genderTarget: Int,
+    @SerializedName("save_to_file")
+    val saveToFile: Int,
+    @SerializedName("result_file_path")
+    val resultFilePath: String,
+)
 interface SDWApi {
     @GET("/sdapi/v1/samplers")
     suspend fun getSamplers(): Response<List<Sampler>>
@@ -326,7 +478,8 @@ interface SDWApi {
 
     @GET("/sdapi/v1/sd-vae")
     suspend fun getVaeList(): Response<List<Vae>>
-
+    @GET("/reactor/upscalers")
+    suspend fun getReactorUpscaler(): Response<ReactorUpscaleList>
     @GET("/diffusionhelper/hash")
     suspend fun getHash(
         @Query("modelType")
@@ -337,4 +490,13 @@ interface SDWApi {
 
     @GET("/diffusionhelper/ping")
     suspend fun ping(): Response<HelperPing>
+
+
+
+
+    @POST("/reactor/image")
+    suspend fun reactorImage(
+        @Body request: ReactorRequestBody
+    ): Response<RactorResultImage>
+
 }

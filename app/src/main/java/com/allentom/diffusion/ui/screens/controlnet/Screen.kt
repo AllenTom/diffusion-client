@@ -1,5 +1,6 @@
 package com.allentom.diffusion.ui.screens.controlnet
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -53,9 +54,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.ControlNetImportDialog
 import com.allentom.diffusion.composables.DrawBar
@@ -66,6 +69,7 @@ import com.allentom.diffusion.ui.screens.home.HomeViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -131,11 +135,11 @@ fun ControlNetScreen(navController: NavController) {
             onDismissRequest = {
             },
             title = {
-                Text(text = "Importing")
+                Text(text = stringResource(R.string.importing_control_net))
             },
             text = {
                 Column {
-                    Text(text = "Importing $currentImportIndex/$totalImportCount")
+                    Text(text = stringResource(id = R.string.importing,currentImportIndex.toString(),totalImportCount.toString()))
                     Spacer(modifier = Modifier.height(16.dp))
                     LinearProgressIndicator(
                         progress = currentImportIndex.toFloat() / totalImportCount.toFloat(),
@@ -154,15 +158,24 @@ fun ControlNetScreen(navController: NavController) {
         }) {
             isImportFromFolder = false
             scope.launch(Dispatchers.IO) {
-                totalImportCount = it.size
-                isImportProgressDialogShow = true
-                it.forEach { item ->
-                    ControlNetStore.addControlNet(context, item.sourceUri, item.previewUri)
-                    currentImportIndex += 1
+                try {
+                    totalImportCount = it.size
+                    isImportProgressDialogShow = true
+                    it.forEach { item ->
+                        ControlNetStore.addControlNet(context, item.sourceUri, item.previewUri)
+                        currentImportIndex += 1
+                    }
+                    refresh()
+                }catch (e:Exception) {
+                    scope.launch(Dispatchers.Main) {
+                        Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                    }
+
+                }finally {
+                    isImportProgressDialogShow = false
                 }
-                refresh()
+
             }
-            isImportProgressDialogShow = false
         }
     }
     Scaffold(
@@ -190,7 +203,10 @@ fun ControlNetScreen(navController: NavController) {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete ${selectedControlNetIds.size} items",
+                                contentDescription = stringResource(
+                                    R.string.delete_items,
+                                    selectedControlNetIds.size.toString()
+                                ),
                             )
                         }
                     } else {
@@ -220,7 +236,7 @@ fun ControlNetScreen(navController: NavController) {
                         onDismissRequest = { isActionMenuShow = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Import from folder") },
+                            text = { Text(stringResource(R.string.import_from_folder)) },
                             onClick = {
                                 isActionMenuShow = false
                                 isImportFromFolder = true
@@ -337,12 +353,12 @@ fun ControlInfoBottomSheet(
                 imageActionDialogOpen = false
             },
             title = {
-                Text(text = "Image Action")
+                Text(text = stringResource(id = R.string.action))
             },
             text = {
                 ListItem(
                     headlineContent = {
-                        Text(text = "Send to caption")
+                        Text(text = stringResource(R.string.send_to_caption))
                     },
                     modifier = Modifier.clickable {
                         scope.launch {
@@ -389,7 +405,7 @@ fun ControlInfoBottomSheet(
                             modifier = Modifier
                                 .width(200.dp)
                                 .height(200.dp)
-                                .combinedClickable (
+                                .combinedClickable(
                                     onClick = {},
                                     onLongClick = {
                                         imageActionDialogOpen = true
@@ -410,7 +426,7 @@ fun ControlInfoBottomSheet(
                     onUseParams()
                     onDismiss()
                 }, modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Use Params")
+                    Text(text = stringResource(R.string.use_control_net))
                 }
 
             }

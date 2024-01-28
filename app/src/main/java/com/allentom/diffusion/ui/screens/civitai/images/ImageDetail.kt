@@ -184,16 +184,22 @@ fun CivitaiImageDetailScreen(id: Long) {
                             ) {
                                 AsyncImage(
                                     model = imageItem.url,
-                                    modifier = Modifier.fillMaxWidth().clickable {
-                                        previewDialogState.openPreview(imageItem.url)
-                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            previewDialogState.openPreview(imageItem.url)
+                                        },
                                     contentDescription = "image"
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             Column {
                                 promptList.takeIf { it.isNotEmpty() }?.let {
-                                    PromptDisplayView(promptList = it, canScroll = false) {
+                                    PromptDisplayView(
+                                        promptList = it, canScroll = false, title = stringResource(
+                                            id = R.string.prompts
+                                        )
+                                    ) {
                                         promptActionState.onOpenActionBottomSheet(
                                             prompt = it, target = "prompt"
                                         )
@@ -203,7 +209,11 @@ fun CivitaiImageDetailScreen(id: Long) {
                                 }
                             }
                             negativePromptList.takeIf { it.isNotEmpty() }?.let {
-                                PromptDisplayView(promptList = it, canScroll = false) {
+                                PromptDisplayView(
+                                    promptList = it, canScroll = false, title = stringResource(
+                                        id = R.string.param_negative_prompt
+                                    )
+                                ) {
                                     promptActionState.onOpenActionBottomSheet(
                                         prompt = it, target = "negativePrompt"
                                     )

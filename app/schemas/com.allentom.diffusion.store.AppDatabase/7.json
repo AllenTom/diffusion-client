@@ -1,0 +1,934 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 7,
+    "identityHash": "6abb1fe2381c0c5dd30b6053ccb32563",
+    "entities": [
+      {
+        "tableName": "prompt",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`promptId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `text` TEXT NOT NULL, `nameCn` TEXT NOT NULL, `time` INTEGER NOT NULL, `count` INTEGER NOT NULL, `category` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "promptId",
+            "columnName": "promptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameCn",
+            "columnName": "nameCn",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "count",
+            "columnName": "count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "promptId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`historyId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `steps` INTEGER NOT NULL, `samplerName` TEXT NOT NULL, `sdModelCheckpoint` TEXT NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `batchSize` INTEGER NOT NULL, `cfgScale` REAL NOT NULL, `time` INTEGER NOT NULL, `modelId` INTEGER, `regionRatio` TEXT, `regionCount` INTEGER, `regionUseCommon` INTEGER, `regionEnable` INTEGER, `enableRefiner` INTEGER, `refinerModelName` TEXT, `refinerSwitchAt` REAL, `vaeName` TEXT, `reactorEnabled` INTEGER, `reactorSingleImagePath` TEXT, `reactorSingleImageResultFilename` TEXT, `reactorGenderDetectionSource` INTEGER, `reactorGenderDetectionTarget` INTEGER, `reactorRestoreFace` TEXT, `reactorRestoreFaceVisibility` REAL, `reactorCodeFormerWeightFidelity` REAL, `reactorPostprocessingOrder` INTEGER, `reactorUpscaler` TEXT, `reactorScaleBy` REAL, `reactorUpscalerVisibility` REAL)",
+        "fields": [
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "steps",
+            "columnName": "steps",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "samplerName",
+            "columnName": "samplerName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdModelCheckpoint",
+            "columnName": "sdModelCheckpoint",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "width",
+            "columnName": "width",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batchSize",
+            "columnName": "batchSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cfgScale",
+            "columnName": "cfgScale",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modelId",
+            "columnName": "modelId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "regionRatio",
+            "columnName": "regionRatio",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "regionCount",
+            "columnName": "regionCount",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "regionUseCommon",
+            "columnName": "regionUseCommon",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "regionEnable",
+            "columnName": "regionEnable",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enableRefiner",
+            "columnName": "enableRefiner",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "refinerModelName",
+            "columnName": "refinerModelName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "refinerSwitchAt",
+            "columnName": "refinerSwitchAt",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "vaeName",
+            "columnName": "vaeName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorEnabled",
+            "columnName": "reactorEnabled",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorSingleImagePath",
+            "columnName": "reactorSingleImagePath",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorSingleImageResultFilename",
+            "columnName": "reactorSingleImageResultFilename",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorGenderDetectionSource",
+            "columnName": "reactorGenderDetectionSource",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorGenderDetectionTarget",
+            "columnName": "reactorGenderDetectionTarget",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorRestoreFace",
+            "columnName": "reactorRestoreFace",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorRestoreFaceVisibility",
+            "columnName": "reactorRestoreFaceVisibility",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorCodeFormerWeightFidelity",
+            "columnName": "reactorCodeFormerWeightFidelity",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorPostprocessingOrder",
+            "columnName": "reactorPostprocessingOrder",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorUpscaler",
+            "columnName": "reactorUpscaler",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorScaleBy",
+            "columnName": "reactorScaleBy",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reactorUpscalerVisibility",
+            "columnName": "reactorUpscalerVisibility",
+            "affinity": "REAL",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "historyId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "hr_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hrHistoryId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `enableScale` INTEGER NOT NULL, `hrScale` REAL NOT NULL, `hrDenosingStrength` REAL NOT NULL, `hrUpscaler` TEXT NOT NULL, `historyId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "hrHistoryId",
+            "columnName": "hrHistoryId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enableScale",
+            "columnName": "enableScale",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hrScale",
+            "columnName": "hrScale",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hrDenosingStrength",
+            "columnName": "hrDenosingStrength",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hrUpscaler",
+            "columnName": "hrUpscaler",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "hrHistoryId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "image_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imageHistoryId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `path` TEXT NOT NULL, `favourite` INTEGER NOT NULL, `seed` INTEGER NOT NULL, `historyId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "imageHistoryId",
+            "columnName": "imageHistoryId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "favourite",
+            "columnName": "favourite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seed",
+            "columnName": "seed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "imageHistoryId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "lora",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`title` TEXT NOT NULL DEFAULT '', `loraPromptId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `weight` REAL NOT NULL, `previewPath` TEXT, `hash` TEXT, `civitaiId` INTEGER, `lockPreview` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "loraPromptId",
+            "columnName": "loraPromptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "previewPath",
+            "columnName": "previewPath",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hash",
+            "columnName": "hash",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "civitaiId",
+            "columnName": "civitaiId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lockPreview",
+            "columnName": "lockPreview",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "loraPromptId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "embedding",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`embeddingId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `priority` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "embeddingId",
+            "columnName": "embeddingId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "embeddingId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "img2img",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`img2ImgId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `denoisingStrength` REAL NOT NULL, `resizeMode` INTEGER NOT NULL, `scaleBy` REAL NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `cfgScale` REAL NOT NULL, `path` TEXT NOT NULL, `historyId` INTEGER NOT NULL, `maskPath` TEXT, `inpaint` INTEGER, `maskBlur` REAL, `maskInvert` INTEGER, `inpaintingFill` INTEGER, `inpaintingFullRes` INTEGER, `inpaintingFullResPadding` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "img2ImgId",
+            "columnName": "img2ImgId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "denoisingStrength",
+            "columnName": "denoisingStrength",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resizeMode",
+            "columnName": "resizeMode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scaleBy",
+            "columnName": "scaleBy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "width",
+            "columnName": "width",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cfgScale",
+            "columnName": "cfgScale",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maskPath",
+            "columnName": "maskPath",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inpaint",
+            "columnName": "inpaint",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "maskBlur",
+            "columnName": "maskBlur",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "maskInvert",
+            "columnName": "maskInvert",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inpaintingFill",
+            "columnName": "inpaintingFill",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inpaintingFullRes",
+            "columnName": "inpaintingFullRes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inpaintingFullResPadding",
+            "columnName": "inpaintingFullResPadding",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "img2ImgId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "prompt_extra",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`promptExtraId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `promptId` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `weight` REAL NOT NULL, `historyId` INTEGER NOT NULL, `promptType` INTEGER NOT NULL, `loraPromptId` INTEGER NOT NULL, `regionIndex` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "promptExtraId",
+            "columnName": "promptExtraId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "promptId",
+            "columnName": "promptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "promptType",
+            "columnName": "promptType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loraPromptId",
+            "columnName": "loraPromptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "regionIndex",
+            "columnName": "regionIndex",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "promptExtraId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "control_net_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`controlNetHistoryId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `controlNetId` INTEGER NOT NULL, `historyId` INTEGER NOT NULL, `processorRes` INTEGER NOT NULL, `thresholdA` INTEGER NOT NULL, `thresholdB` INTEGER NOT NULL, `guidanceStart` REAL NOT NULL, `guidanceEnd` REAL NOT NULL, `controlMode` INTEGER NOT NULL, `weight` REAL NOT NULL, `model` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "controlNetHistoryId",
+            "columnName": "controlNetHistoryId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "controlNetId",
+            "columnName": "controlNetId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "processorRes",
+            "columnName": "processorRes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thresholdA",
+            "columnName": "thresholdA",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thresholdB",
+            "columnName": "thresholdB",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "guidanceStart",
+            "columnName": "guidanceStart",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "guidanceEnd",
+            "columnName": "guidanceEnd",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "controlMode",
+            "columnName": "controlMode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "controlNetHistoryId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "prompt_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`promptId` INTEGER NOT NULL, `historyId` INTEGER NOT NULL, PRIMARY KEY(`promptId`, `historyId`))",
+        "fields": [
+          {
+            "fieldPath": "promptId",
+            "columnName": "promptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "promptId",
+            "historyId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "negative_prompt_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`promptId` INTEGER NOT NULL, `historyId` INTEGER NOT NULL, PRIMARY KEY(`promptId`, `historyId`))",
+        "fields": [
+          {
+            "fieldPath": "promptId",
+            "columnName": "promptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "promptId",
+            "historyId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "lora_prompt_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`loraPromptId` INTEGER NOT NULL, `historyId` INTEGER NOT NULL, PRIMARY KEY(`loraPromptId`, `historyId`))",
+        "fields": [
+          {
+            "fieldPath": "loraPromptId",
+            "columnName": "loraPromptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "loraPromptId",
+            "historyId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "embedding_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`embeddingId` INTEGER NOT NULL, `historyId` INTEGER NOT NULL, PRIMARY KEY(`embeddingId`, `historyId`))",
+        "fields": [
+          {
+            "fieldPath": "embeddingId",
+            "columnName": "embeddingId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyId",
+            "columnName": "historyId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "embeddingId",
+            "historyId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "control_net",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`controlNetId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `path` TEXT NOT NULL, `md5` TEXT NOT NULL, `previewPath` TEXT NOT NULL, `time` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "controlNetId",
+            "columnName": "controlNetId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "md5",
+            "columnName": "md5",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "previewPath",
+            "columnName": "previewPath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "controlNetId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "model",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`modelId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `name` TEXT NOT NULL, `coverPath` TEXT, `civitaiApiId` INTEGER, `time` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "modelId",
+            "columnName": "modelId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coverPath",
+            "columnName": "coverPath",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "civitaiApiId",
+            "columnName": "civitaiApiId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "modelId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "lora_trigger",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`promptId` INTEGER NOT NULL, `loraPromptId` INTEGER NOT NULL, PRIMARY KEY(`promptId`, `loraPromptId`))",
+        "fields": [
+          {
+            "fieldPath": "promptId",
+            "columnName": "promptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loraPromptId",
+            "columnName": "loraPromptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "promptId",
+            "loraPromptId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6abb1fe2381c0c5dd30b6053ccb32563')"
+    ]
+  }
+}

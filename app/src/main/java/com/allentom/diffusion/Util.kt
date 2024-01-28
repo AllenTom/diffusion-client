@@ -204,6 +204,20 @@ object Util {
         file.writeBytes(imageBytes)
         return file.absolutePath
     }
+    fun saveReactorSourceFile(context: Context, imgBase64: String, fileName: String): Pair<String,String> {
+        val imageBytes = Base64.decode(imgBase64, Base64.DEFAULT)
+        val uuid = UUID.randomUUID().toString()
+        val ext = fileName.substring(fileName.lastIndexOf(".") + 1)
+        val saveFilename = "${uuid}.${ext}"
+        val saveDir = File(context.filesDir, "reactor_source")
+        if (!saveDir.exists()) {
+            saveDir.mkdir()
+        }
+        val file = File(saveDir, saveFilename)
+        file.writeBytes(imageBytes)
+        return Pair(file.absolutePath,saveFilename)
+    }
+
 
     fun copyImageFileToGallery(context: Context, imagePath: String, fileName: String) {
         val file = File(imagePath)
@@ -225,6 +239,19 @@ object Util {
 
         inputStream.copyTo(outputStream)
         inputStream.close()
+        outputStream.close()
+    }
+    fun saveImageBase64ToGallery(imageBase64: String, fileName: String) {
+        val imageBytes = Base64.decode(imageBase64, Base64.DEFAULT)
+        val picturesDirectory =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val diffusionDirectory = File(picturesDirectory, "Diffusion")
+        if (!diffusionDirectory.exists()) {
+            diffusionDirectory.mkdir()
+        }
+        val newFile = File(diffusionDirectory, fileName)
+        val outputStream: OutputStream = FileOutputStream(newFile)
+        outputStream.write(imageBytes)
         outputStream.close()
     }
 
@@ -408,6 +435,17 @@ object Util {
         combinedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         val combinedBytes = outputStream.toByteArray()
         return Base64.encodeToString(combinedBytes, Base64.DEFAULT)
+    }
+
+    fun generateDataImageString(fileName: String, base64String: String): String {
+        val fileExtension = fileName.substringAfterLast(".", "")
+        val mimeType = when (fileExtension.lowercase().trim()) {
+            "jpg", "jpeg" -> "jpeg"
+            "png" -> "png"
+            "gif" -> "gif"
+            else -> "jpeg" // Default to jpeg if the file extension is not recognized
+        }
+        return "data:image/$mimeType;base64,$base64String"
     }
 
 }

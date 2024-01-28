@@ -2,7 +2,6 @@ package com.allentom.diffusion.store
 
 import android.content.Context
 import android.net.Uri
-import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -16,6 +15,7 @@ import androidx.room.Update
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.ControlNetParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
+import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
 import java.io.Serializable
 
 enum class PromptType(val value: Int) {
@@ -52,7 +52,7 @@ class ImageHistory(
     val historyId: Long
 ) : Serializable
 
-class SaveHistory(
+data class SaveHistory(
     val id: Long = 0,
     val prompt: List<Prompt>,
     val negativePrompt: List<Prompt>,
@@ -79,6 +79,7 @@ class SaveHistory(
     val enableRefiner: Boolean = false,
     val refinerModelName: String? = null,
     val refinerSwitchAt: Float? = null,
+    val reactorParam: ReactorParam? = null,
 ) : Serializable
 
 @Entity(primaryKeys = ["promptId", "historyId"], tableName = "prompt_history")
@@ -494,6 +495,20 @@ data class HistoryWithRelation(
             enableRefiner = historyEntity.enableRefiner ?: false,
             refinerModelName = historyEntity.refinerModelName,
             refinerSwitchAt = historyEntity.refinerSwitchAt,
+            reactorParam = ReactorParam(
+                enabled = historyEntity.reactorEnabled ?: false,
+                singleImageResult = historyEntity.reactorSingleImagePath,
+                singleImageResultFilename = historyEntity.reactorSingleImageResultFilename,
+                codeFormerWeightFidelity = historyEntity.reactorCodeFormerWeightFidelity ?: 0.5f,
+                genderDetectionSource = historyEntity.reactorGenderDetectionSource ?: 0,
+                genderDetectionTarget = historyEntity.reactorGenderDetectionTarget ?: 0,
+                restoreFace = historyEntity.reactorRestoreFace ?: "None",
+                restoreFaceVisibility = historyEntity.reactorRestoreFaceVisibility ?: 1f,
+                postprocessingOrder = historyEntity.reactorPostprocessingOrder ?: true,
+                scaleBy = historyEntity.reactorScaleBy ?: 1f,
+                upscaler = historyEntity.reactorUpscaler ?: "None",
+                upscalerVisibility = historyEntity.reactorUpscalerVisibility ?: 1f,
+            )
         )
         return result
     }
@@ -577,7 +592,21 @@ data class HistoryEntity(
     val refinerModelName: String? = null,
     val refinerSwitchAt: Float? = null,
     val vaeName: String? = null,
-) : Serializable {
+
+    val reactorEnabled: Boolean? = false,
+    val reactorSingleImagePath: String? = null,
+    val reactorSingleImageResultFilename: String? = null,
+    val reactorGenderDetectionSource: Int? = 0,
+    val reactorGenderDetectionTarget: Int? = 0,
+    val reactorRestoreFace: String? = "None",
+    val reactorRestoreFaceVisibility: Float? = 1f,
+    val reactorCodeFormerWeightFidelity: Float? = 0.5f,
+    val reactorPostprocessingOrder: Boolean? = true,
+    val reactorUpscaler: String? = "None",
+    val reactorScaleBy: Float? = 1f,
+    val reactorUpscalerVisibility: Float? = 1f,
+
+    ) : Serializable {
 
     companion object {
         fun fromSaveHistory(saveHistory: SaveHistory): HistoryEntity {
@@ -628,7 +657,7 @@ interface HistoryDao {
 object HistoryStore {
     fun saveHistoryToDatabase(context: Context, history: SaveHistory) {
         val database = AppDatabaseHelper.getDatabase(context)
-        val historyEntity = HistoryEntity.fromSaveHistory(history)
+        var historyEntity = HistoryEntity.fromSaveHistory(history)
         with(history.sdModelCheckpoint) {
             // save model
             val sdModel = DrawViewModel.models.find { it.title == this }
@@ -654,6 +683,34 @@ object HistoryStore {
                     }
                 }
             }
+        }
+        // save reactor
+        if (history.reactorParam?.enabled == true) {
+            if (history.reactorParam.singleImageResult != null && history.reactorParam.singleImageResultFilename != null) {
+                val pair = Util.saveReactorSourceFile(
+                    context,
+                    history.reactorParam.singleImageResult,
+                    history.reactorParam.singleImageResultFilename
+                )
+                historyEntity = historyEntity.copy(
+                    reactorSingleImagePath = pair.first,
+                    reactorSingleImageResultFilename = pair.second
+                )
+            }
+            historyEntity = historyEntity.copy(
+                reactorEnabled = history.reactorParam.enabled,
+                reactorSingleImageResultFilename = history.reactorParam.singleImageResultFilename,
+                reactorCodeFormerWeightFidelity = history.reactorParam.codeFormerWeightFidelity,
+                reactorGenderDetectionSource = history.reactorParam.genderDetectionSource,
+                reactorGenderDetectionTarget = history.reactorParam.genderDetectionTarget,
+                reactorPostprocessingOrder = history.reactorParam.postprocessingOrder,
+                reactorRestoreFace = history.reactorParam.restoreFace,
+                reactorRestoreFaceVisibility = history.reactorParam.restoreFaceVisibility,
+                reactorScaleBy = history.reactorParam.scaleBy,
+                reactorUpscaler = history.reactorParam.upscaler,
+                reactorUpscalerVisibility = history.reactorParam.upscalerVisibility
+            )
+
         }
         val savedHistoryId = database.historyDao().insert(
             historyEntity
@@ -914,12 +971,12 @@ object HistoryStore {
     fun getHistoryById(context: Context, id: Long): SaveHistory? {
         val database = AppDatabaseHelper.getDatabase(context)
         val raw = database.historyDao().getHistoryById(id)
-        val result = raw?.toSaveHistory()
+        var result = raw?.toSaveHistory()
         // load control net
         result?.controlNetParam?.let {
             val controlNet = database.controlNetHistoryDao()
                 .getControlNetHistoryWithControlNetByControlNetId(it.controlNetId)
-            result.controlNetParam = result.controlNetParam?.copy(
+            result!!.controlNetParam = result!!.controlNetParam?.copy(
                 inputImagePath = controlNet?.controlNetEntity?.path,
                 inputImage = Util.readImageWithPathToBase64(
                     controlNet?.controlNetEntity?.path ?: ""
@@ -943,6 +1000,20 @@ object HistoryStore {
             )
             promptObj
         } ?: emptyList()
+        if (result != null) {
+            val reactorSourcePath = result.reactorParam?.singleImageResult
+            reactorSourcePath?.let {
+                result = result!!.copy(
+                    reactorParam = result!!.reactorParam?.copy(
+                        singleImageResult = Util.readImageWithPathToBase64(
+                            it
+                        )
+                    )
+                )
+            }
+
+        }
+
         return result
     }
 

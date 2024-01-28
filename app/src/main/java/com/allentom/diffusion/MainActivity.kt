@@ -44,6 +44,7 @@ import com.allentom.diffusion.ui.screens.prompt.PromptCategoryScreen
 import com.allentom.diffusion.ui.screens.prompt.PromptScreen
 import com.allentom.diffusion.ui.screens.prompt.PromptSearchScreen
 import com.allentom.diffusion.ui.screens.promptdetail.PromptDetailScreen
+import com.allentom.diffusion.ui.screens.reactor.ReactorScreen
 import com.allentom.diffusion.ui.screens.setting.SettingScreen
 import com.allentom.diffusion.ui.screens.tagger.TaggerScreen
 import com.allentom.diffusion.ui.theme.DiffusionTheme
@@ -202,6 +203,9 @@ fun DiffusionApp() {
         }
         composable(Screens.SettingsScreen.route) {
             SettingScreen()
+        }
+        composable(Screens.ReactorScreen.route) {
+            ReactorScreen()
         }
     }
 }

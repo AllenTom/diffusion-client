@@ -42,6 +42,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.allentom.diffusion.R
+import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.entity.Upscale
 import com.allentom.diffusion.api.getApiClient
@@ -56,22 +57,10 @@ import com.allentom.diffusion.ui.screens.extra.ExtraImageParam
 import com.allentom.diffusion.ui.screens.extra.ExtraPanel
 import com.allentom.diffusion.ui.screens.home.HomeViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
+import com.allentom.diffusion.ui.screens.reactor.ReactorViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-
-
-fun useParams(navController: NavController, genHistory: SaveHistory, imgHistory: ImageHistory) {
-    DrawViewModel.inputHeight = genHistory.height.toFloat()
-    DrawViewModel.inputWidth = genHistory.width.toFloat()
-    DrawViewModel.inputSteps = genHistory.steps.toFloat()
-    DrawViewModel.inputPromptText = genHistory.prompt
-    DrawViewModel.inputNegativePromptText = genHistory.negativePrompt
-    DrawViewModel.inputSamplerName = genHistory.samplerName
-//    navController.previousBackStackEntry?.savedStateHandle?.set("action", "useParams")
-    HomeViewModel.selectedIndex = 0
-    navController.popBackStack()
-}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -223,7 +212,7 @@ fun ImageDetail(id: String, navController: NavController) {
                                         scope.launch(Dispatchers.Main) {
                                             Toast.makeText(
                                                 context,
-                                                "Params applied",
+                                                context.getString(R.string.params_applied),
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }
@@ -231,7 +220,22 @@ fun ImageDetail(id: String, navController: NavController) {
 
                                 }
                             },
-                            text = { Text("Apply params") }
+                            text = { Text(stringResource(R.string.apply_params)) }
+                        )
+                        DropdownMenuItem(
+                            onClick = {
+                                expanded = false
+                                galleryItem?.path?.let {
+                                    val imageBase64 = Util.readImageWithPathToBase64(
+                                        it
+                                    )
+                                    ReactorViewModel.targetImage = imageBase64
+                                    ReactorViewModel.targetImageFileName = it.split("/").last()
+                                    navController.navigate(Screens.ReactorScreen.route)
+                                }
+
+                            },
+                            text = { Text(stringResource(R.string.send_to_reactor)) }
                         )
                     }
                 }

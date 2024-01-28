@@ -1,6 +1,7 @@
 package com.allentom.diffusion.composables
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
@@ -28,7 +29,7 @@ fun TextAreaOptionItem(
     ListItem(
         modifier = Modifier.clickable { showDialog = true },
         headlineContent = { Text(text = label) },
-        supportingContent = { Text(text = value) }
+        supportingContent = { Text(text = value.toString()) }
     )
 
     if (showDialog) {
@@ -37,6 +38,7 @@ fun TextAreaOptionItem(
             title = { Text(title) },
             text = {
                 OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
                     value = inputText,
                     onValueChange = { inputText = it },
                     label = { Text(stringResource(R.string.enter_text)) }

@@ -29,6 +29,7 @@ fun TabTools(navController: NavController) {
     val promptIcon = ImageVector.vectorResource(id = R.drawable.ic_prompt_library)
     val extraImageIcon = ImageVector.vectorResource(id = R.drawable.ic_extra_image)
     val modelIcon = ImageVector.vectorResource(id = R.drawable.ic_model)
+    val swapIcon = ImageVector.vectorResource(id = R.drawable.ic_swap)
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
@@ -64,6 +65,13 @@ fun TabTools(navController: NavController) {
             },
             headlineContent = { Text(text = stringResource(id = R.string.tools_extra_image)) },
             leadingContent = { Icon(extraImageIcon, contentDescription = "Extra image") }
+        )
+        ListItem(
+            modifier = Modifier.clickable {
+                navController.navigate(Screens.ReactorScreen.route)
+            },
+            headlineContent = { Text(text = stringResource(id = R.string.reactor)) },
+            leadingContent = { Icon(swapIcon, contentDescription = "Reactor") }
         )
         Divider()
         ListItem(
