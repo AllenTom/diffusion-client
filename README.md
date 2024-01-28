@@ -7,12 +7,16 @@ a powerful stable-diffusion-webui client for android
 ## Feature
 - text to image
 - image to image
+- inpaint image
 - control net
 - lora
 - history management
 - model management
+- control net management
 - tag from image
 - extra image
+- sdxl support
+- reactor (for face swap)
 - link model to civitai model
 ## Preview
 <p float="left">

@@ -6,12 +6,15 @@
 ## 功能
 - 文生图
 - 图生图
+- 局部重绘
 - control net
 - lora
 - 生成历史记录管理
 - 模型管理
 - 图片反推
 - 超分
+- sdxl 支持
+- reactor (换脸插件)
 - 从 civitai 下载元信息
 ## 预览
 <p float="left">
