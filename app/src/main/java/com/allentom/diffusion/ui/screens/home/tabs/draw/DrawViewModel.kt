@@ -749,6 +749,7 @@ object DrawViewModel {
     ): String? {
         var alwaysonScripts = AlwaysonScripts()
         alwaysonScripts = applyAdetailerParam(alwaysonScripts, adetailerParam)
+        alwaysonScripts = applyRegionParams(alwaysonScripts, regionPromptParam)
         val request = Img2ImgRequest(
             prompt = prompt,
             negative_prompt = negativePrompt,
