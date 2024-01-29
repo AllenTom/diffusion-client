@@ -20,6 +20,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
+import com.allentom.diffusion.api.AdeatilerWrapper
+import com.allentom.diffusion.api.AdetailerArg
+import com.allentom.diffusion.api.AdetailerSlotArg
 import com.allentom.diffusion.api.AlwaysonScripts
 import com.allentom.diffusion.api.ControlNetParam
 import com.allentom.diffusion.api.ControlNetWrapper
@@ -58,6 +61,7 @@ import com.allentom.diffusion.store.SaveControlNet
 import com.allentom.diffusion.store.SaveHistory
 import com.allentom.diffusion.store.SaveHrParam
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -146,6 +150,19 @@ suspend fun fetchReactorModelFromApi(): List<String> {
     return emptyList()
 }
 
+suspend fun fetchAdetailerModelFromApi(): List<String> {
+    try {
+        val list = getApiClient().getAdetailerModel()
+        val body = list.body()
+        if (list.isSuccessful && body != null) {
+            return list.body()!!.models
+        }
+    } catch (e: java.lang.Exception) {
+        return emptyList()
+    }
+    return emptyList()
+}
+
 data class GenImageItem(
     val imageBase64: String?,
     val progress: Progress?,
@@ -193,6 +210,94 @@ data class ReactorParam(
     val scaleBy: Float = 1f,
     val upscalerVisibility: Float = 1f,
     val model: String? = null
+)
+
+//{
+//    "ad_model": "face_yolov8n.pt",
+//    "ad_prompt": "",
+//    "ad_negative_prompt": "",
+//    "ad_confidence": 0.3,
+//    "ad_mask_k_largest": 0,
+//    "ad_mask_min_ratio": 0.0,
+//    "ad_mask_max_ratio": 1.0,
+//    "ad_dilate_erode": 32,
+//    "ad_x_offset": 0,
+//    "ad_y_offset": 0,
+//    "ad_mask_merge_invert": "None",
+//    "ad_mask_blur": 4,
+//    "ad_denoising_strength": 0.4,
+//    "ad_inpaint_only_masked": true,
+//    "ad_inpaint_only_masked_padding": 0,
+//    "ad_use_inpaint_width_height": false,
+//    "ad_inpaint_width": 512,
+//    "ad_inpaint_height": 512,
+//    "ad_use_steps": true,
+//    "ad_steps": 28,
+//    "ad_use_cfg_scale": false,
+//    "ad_cfg_scale": 7.0,
+//    "ad_use_checkpoint": false,
+//    "ad_checkpoint": "Use same checkpoint",
+//    "ad_use_vae": false,
+//    "ad_vae": "Use same VAE",
+//    "ad_use_sampler": false,
+//    "ad_sampler": "DPM++ 2M Karras",
+//    "ad_use_noise_multiplier": false,
+//    "ad_noise_multiplier": 1.0,
+//    "ad_use_clip_skip": false,
+//    "ad_clip_skip": 1,
+//    "ad_restore_face": false,
+//    "ad_controlnet_model": "None",
+//    "ad_controlnet_module": "None",
+//    "ad_controlnet_weight": 1.0,
+//    "ad_controlnet_guidance_start": 0.0,
+//    "ad_controlnet_guidance_end": 1.0
+//}
+
+data class AdetailerSlot(
+    val adModel: String = "face_yolov8n.pt",
+    val adPrompt: String = "",
+    val adNegativePrompt: String = "",
+    val adConfidence: Float = 0.3f,
+    val adMaskKLargest: Long = 0,
+    val adMaskMinRatio: Float = 0f,
+    val adMaskMaxRatio: Float = 1f,
+    val adDilateErode: Long = 32,
+    val adXOffset: Long = 0,
+    val adYOffset: Long = 0,
+    val adMaskMergeInvert: String = "None",
+    val adMaskBlur: Long = 4,
+    val adDenoisingStrength: Float = 0.4f,
+    val adInpaintOnlyMasked: Boolean = true,
+    val adInpaintOnlyMaskedPadding: Long = 0,
+    val adUseInpaintWidthHeight: Boolean = false,
+    val adInpaintWidth: Long = 512,
+    val adInpaintHeight: Long = 512,
+    val adUseSteps: Boolean = true,
+    val adSteps: Long = 28,
+    val adUseCfgScale: Boolean = false,
+    val adCfgScale: Float = 7.0f,
+    val adUseCheckpoint: Boolean = false,
+    val adCheckpoint: String = "Use same checkpoint",
+    val adUseVae: Boolean = false,
+    val adVae: String = "Use same VAE",
+    val adUseSampler: Boolean = false,
+    val adSampler: String = "DPM++ 2M Karras",
+    val adUseNoiseMultiplier: Boolean = false,
+    val adNoiseMultiplier: Float = 1.0f,
+    val adUseClipSkip: Boolean = false,
+    val adClipSkip: Long = 1,
+    val adRestoreFace: Boolean = false,
+    val adControlnetModel: String = "None",
+    val adControlnetModule: String = "None",
+    val adControlnetWeight: Float = 1.0f,
+    val adControlnetGuidanceStart: Float = 0.0f,
+    val adControlnetGuidanceEnd: Float = 1.0f
+)
+
+data class AdetailerParam(
+    val enabled: Boolean = false,
+    val skipImg2img: Boolean = false,
+    val slots: List<AdetailerSlot> = listOf(AdetailerSlot())
 )
 
 object DrawViewModel {
@@ -270,6 +375,9 @@ object DrawViewModel {
     var reactorModelList by mutableStateOf<List<String>>(emptyList())
 
     var currentHistory by mutableStateOf<SaveHistory?>(null)
+
+    var adetailerParam by mutableStateOf<AdetailerParam>(AdetailerParam())
+    var adetailerModelList by mutableStateOf<List<String>>(emptyList())
     fun startGenerating(count: Int) {
         isGenerating = true
         totalGenCount = count
@@ -416,6 +524,9 @@ object DrawViewModel {
         history.reactorParam?.let {
             reactorParam = it
         }
+        history.adetailerParam?.let {
+            adetailerParam = it
+        }
     }
 
     fun applyControlNetParams(context: Context, history: SaveControlNet) {
@@ -435,32 +546,22 @@ object DrawViewModel {
         }
     }
 
-    suspend fun text2Image(
-        prompt: String,
-        negativePrompt: String,
-        width: Int,
-        height: Int,
-        steps: Int,
-        samplerName: String,
-        nIter: Int,
-        cfgScale: Float,
-        seed: Int,
-        enableScale: Boolean = false,
-        hrScale: Float = 2f,
-        hrDenosingStrength: Float = 0.7f,
-        hrUpscaler: String? = "None",
-        controlNetParam: ControlNetParam? = null,
-        regionPromptParam: RegionPromptParam? = null,
-        refinerModel: String? = null,
-        refinerSwitchAt: Float? = null,
-        reactorParam: ReactorParam? = null
-    ): String? {
-        var alwaysonScripts = AlwaysonScripts()
+    fun applyControlParams(
+        alwaysonScripts: AlwaysonScripts,
+        controlNetParam: ControlNetParam?
+    ): AlwaysonScripts {
         if (controlNetParam != null) {
             alwaysonScripts.controlNet = ControlNetWrapper(
                 args = listOf(controlNetParam)
             )
         }
+        return alwaysonScripts
+    }
+
+    fun applyRegionParams(
+        alwaysonScripts: AlwaysonScripts,
+        regionPromptParam: RegionPromptParam?
+    ): AlwaysonScripts {
         if (regionPromptParam != null && regionPromptParam.regionCount > 1 && regionPromptParam.enable) {
             var param = RegionalPrompterParam(
                 active = true,
@@ -471,6 +572,13 @@ object DrawViewModel {
                 args = param.toParamArray()
             )
         }
+        return alwaysonScripts
+    }
+
+    fun applyReactorParam(
+        alwaysonScripts: AlwaysonScripts,
+        reactorParam: ReactorParam?
+    ): AlwaysonScripts {
         if (reactorParam != null && reactorParam.enabled) {
             reactorParam.singleImageResultFilename
             val args = ReactorParamRequest(
@@ -494,6 +602,96 @@ object DrawViewModel {
                 args = args.toParamArray()
             )
         }
+        return alwaysonScripts
+    }
+
+    fun applyAdetailerParam(
+        alwaysonScripts: AlwaysonScripts,
+        adetailerParam: AdetailerParam?
+    ): AlwaysonScripts {
+        if (adetailerParam != null && adetailerParam.enabled) {
+            val slots = adetailerParam.slots.map { slotParam ->
+                AdetailerSlotArg(
+                    adModel = slotParam.adModel,
+                    adPrompt = slotParam.adPrompt,
+                    adNegativePrompt = slotParam.adNegativePrompt,
+                    adConfidence = slotParam.adConfidence,
+                    adMaskKLargest = slotParam.adMaskKLargest,
+                    adMaskMinRatio = slotParam.adMaskMinRatio,
+                    adMaskMaxRatio = slotParam.adMaskMaxRatio,
+                    adDilateErode = slotParam.adDilateErode,
+                    adXOffset = slotParam.adXOffset,
+                    adYOffset = slotParam.adYOffset,
+                    adMaskMergeInvert = slotParam.adMaskMergeInvert,
+                    adMaskBlur = slotParam.adMaskBlur,
+                    adDenoisingStrength = slotParam.adDenoisingStrength,
+                    adInpaintOnlyMasked = slotParam.adInpaintOnlyMasked,
+                    adInpaintOnlyMaskedPadding = slotParam.adInpaintOnlyMaskedPadding,
+                    adUseInpaintWidthHeight = slotParam.adUseInpaintWidthHeight,
+                    adInpaintWidth = slotParam.adInpaintWidth,
+                    adInpaintHeight = slotParam.adInpaintHeight,
+                    adUseSteps = slotParam.adUseSteps,
+                    adSteps = slotParam.adSteps,
+                    adUseCfgScale = slotParam.adUseCfgScale,
+                    adCfgScale = slotParam.adCfgScale,
+                    adUseCheckpoint = slotParam.adUseCheckpoint,
+                    adCheckpoint = slotParam.adCheckpoint,
+                    adUseVae = slotParam.adUseVae,
+                    adVae = slotParam.adVae,
+                    adUseSampler = slotParam.adUseSampler,
+                    adSampler = slotParam.adSampler,
+                    adUseNoiseMultiplier = slotParam.adUseNoiseMultiplier,
+                    adNoiseMultiplier = slotParam.adNoiseMultiplier,
+                    adUseClipSkip = slotParam.adUseClipSkip,
+                    adClipSkip = slotParam.adClipSkip,
+                    adRestoreFace = slotParam.adRestoreFace,
+                    adControlnetModel = slotParam.adControlnetModel,
+                    adControlnetModule = slotParam.adControlnetModule,
+                    adControlnetWeight = slotParam.adControlnetWeight,
+                    adControlnetGuidanceStart = slotParam.adControlnetGuidanceStart,
+                    adControlnetGuidanceEnd = slotParam.adControlnetGuidanceEnd
+                )
+            }
+            val args = AdetailerArg(
+                enabled = true,
+                skipImg2img = false,
+                slot = slots
+            )
+            alwaysonScripts.adetailer = AdeatilerWrapper(
+                args = args.toParamArray()
+            )
+        }
+        return alwaysonScripts
+    }
+
+
+    suspend fun text2Image(
+        prompt: String,
+        negativePrompt: String,
+        width: Int,
+        height: Int,
+        steps: Int,
+        samplerName: String,
+        nIter: Int,
+        cfgScale: Float,
+        seed: Int,
+        enableScale: Boolean = false,
+        hrScale: Float = 2f,
+        hrDenosingStrength: Float = 0.7f,
+        hrUpscaler: String? = "None",
+        controlNetParam: ControlNetParam? = null,
+        regionPromptParam: RegionPromptParam? = null,
+        refinerModel: String? = null,
+        refinerSwitchAt: Float? = null,
+        reactorParam: ReactorParam? = null,
+        adetailerParam: AdetailerParam? = null
+    ): String? {
+        var alwaysonScripts = AlwaysonScripts()
+        alwaysonScripts = applyControlParams(alwaysonScripts, controlNetParam)
+        alwaysonScripts = applyRegionParams(alwaysonScripts, regionPromptParam)
+        alwaysonScripts = applyReactorParam(alwaysonScripts, reactorParam)
+        alwaysonScripts = applyAdetailerParam(alwaysonScripts, adetailerParam)
+
         // print alwayson scripts in json
         Log.d("prompt", "prompt: $prompt")
         Log.d("alwayson", gson.toJson(alwaysonScripts))
@@ -542,14 +740,15 @@ object DrawViewModel {
         resizeMode: Int?,
         denoisingStrength: Float?,
         scaleBy: Float?,
-        mask: String = "",
+        mask: String? = null,
         inpaintingMaskInvert: Int = 0,
         maskBlur: Float = 4f,
         inpaintingFill: Int = 0,
         inpaintFullRes: Int = 1,
         inpaintFullResPadding: Int = 32,
-
-        ): String? {
+    ): String? {
+        var alwaysonScripts = AlwaysonScripts()
+        alwaysonScripts = applyAdetailerParam(alwaysonScripts, adetailerParam)
         val request = Img2ImgRequest(
             prompt = prompt,
             negative_prompt = negativePrompt,
@@ -565,12 +764,13 @@ object DrawViewModel {
             image_cfg_scale = cfgScale,
             denoising_strength = denoisingStrength ?: 0.75f,
             scale_by = scaleBy ?: 1f,
-            mask = mask.trim(),
+            mask = if (inputImg2ImgInpaint) mask?.trim() else null,
             inpainting_mask_invert = inpaintingMaskInvert,
             mask_blur = maskBlur,
             inpainting_fill = inpaintingFill,
             inpaint_full_res = inpaintFullRes,
-            inpaint_full_res_padding = inpaintFullResPadding
+            inpaint_full_res_padding = inpaintFullResPadding,
+            alwayson_scripts = alwaysonScripts
         )
         val list = getApiClient().img2img(
             request = request
@@ -737,7 +937,8 @@ object DrawViewModel {
                                 regionPromptParam = regionPromptParam,
                                 refinerModel = if (enableRefiner) refinerModel else null,
                                 refinerSwitchAt = if (enableRefiner) refinerSwitchAt else null,
-                                reactorParam = reactorParam
+                                reactorParam = reactorParam,
+                                adetailerParam = adetailerParam
                             )?.let {
                                 resultImage = it
                             }
@@ -892,7 +1093,8 @@ object DrawViewModel {
                     enableRefiner = enableRefiner,
                     refinerModelName = refinerModel,
                     refinerSwitchAt = refinerSwitchAt,
-                    reactorParam = reactorParam
+                    reactorParam = reactorParam,
+                    adetailerParam = adetailerParam
                 )
                 genScope?.launch(Dispatchers.IO) {
                     HistoryStore.saveHistoryToDatabase(context, saveHistory)
@@ -1073,6 +1275,14 @@ object DrawViewModel {
         Log.d(
             "initViewModel",
             "Call time for fetchReactorModelFromApi: ${endTime - startTime} ms"
+        )
+
+        startTime = System.currentTimeMillis()
+        adetailerModelList = fetchAdetailerModelFromApi()
+        endTime = System.currentTimeMillis()
+        Log.d(
+            "initViewModel",
+            "Call time for fetchAdetailerModelFromApi: ${endTime - startTime} ms"
         )
 
         // check controlnet version

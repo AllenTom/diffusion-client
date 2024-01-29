@@ -9,7 +9,8 @@ object ConstValues {
     lateinit var InpaintingFillOptions: List<String>
     lateinit var InpaintingFullResOptions: List<String>
     lateinit var ReactorGenderDetectionOptions: List<String>
-    lateinit var ReactorRestoreFaceOption:List<String>
+    lateinit var ReactorRestoreFaceOption: List<String>
+    lateinit var AdetailerMaskMergeOptions: List<String>
     fun initValues(context: Context) {
         Img2ImgResizeModeList = listOf(
             context.getString(R.string.just_resize),
@@ -48,7 +49,12 @@ object ConstValues {
             context.getString(R.string.reactor_gender_detect_male_only)
         )
         ReactorRestoreFaceOption = listOf(
-            "None","CodeFormer","GFPGAN"
+            "None", "CodeFormer", "GFPGAN"
+        )
+        AdetailerMaskMergeOptions = listOf(
+            context.getString(R.string.none),
+            context.getString(R.string.merge),
+            context.getString(R.string.merge_and_invert)
         )
 
     }

@@ -17,6 +17,7 @@ a powerful stable-diffusion-webui client for android
 - extra image
 - sdxl support
 - reactor (for face swap)
+- regional prompter
 - link model to civitai model
 ## Preview
 <p float="left">

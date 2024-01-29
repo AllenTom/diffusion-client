@@ -29,7 +29,7 @@ fun TextAreaOptionItem(
     ListItem(
         modifier = Modifier.clickable { showDialog = true },
         headlineContent = { Text(text = label) },
-        supportingContent = { Text(text = value.toString()) }
+        supportingContent = { Text(text = value) }
     )
 
     if (showDialog) {

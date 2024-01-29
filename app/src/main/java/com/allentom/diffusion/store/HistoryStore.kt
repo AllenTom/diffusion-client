@@ -14,6 +14,8 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.ControlNetParam
+import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerParam
+import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerSlot
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
 import java.io.Serializable
@@ -80,6 +82,7 @@ data class SaveHistory(
     val refinerModelName: String? = null,
     val refinerSwitchAt: Float? = null,
     val reactorParam: ReactorParam? = null,
+    val adetailerParam: AdetailerParam? = null,
 ) : Serializable
 
 @Entity(primaryKeys = ["promptId", "historyId"], tableName = "prompt_history")
@@ -365,6 +368,103 @@ interface Img2ImgDao {
     fun getImg2ImgParam(historyId: Long): Img2ImgEntity?
 }
 
+//val enabled: Boolean = false,
+//val skipImg2img: Boolean = false,
+//val adModel: String = "face_yolov8n.pt",
+//val adPrompt: String = "",
+//val adNegativePrompt: String = "",
+//val adConfidence: Float = 0.3f,
+//val adMaskKLargest: Long = 0,
+//val adMaskMinRatio: Float = 0f,
+//val adMaskMaxRatio: Float = 1f,
+//val adDilateErode: Long = 32,
+//val adXOffset: Long = 0,
+//val adYOffset: Long = 0,
+//val adMaskMergeInvert: String = "None",
+//val adMaskBlur: Long = 4,
+//val adDenoisingStrength: Float = 0.4f,
+//val adInpaintOnlyMasked: Boolean = true,
+//val adInpaintOnlyMaskedPadding: Long = 0,
+//val adUseInpaintWidthHeight: Boolean = false,
+//val adInpaintWidth: Long = 512,
+//val adInpaintHeight: Long = 512,
+//val adUseSteps: Boolean = true,
+//val adSteps: Long = 28,
+//val adUseCfgScale: Boolean = false,
+//val adCfgScale: Float = 7.0f,
+//val adUseCheckpoint: Boolean = false,
+//val adCheckpoint: String = "Use same checkpoint",
+//val adUseVae: Boolean = false,
+//val adVae: String = "Use same VAE",
+//val adUseSampler: Boolean = false,
+//val adSampler: String = "DPM++ 2M Karras",
+//val adUseNoiseMultiplier: Boolean = false,
+//val adNoiseMultiplier: Float = 1.0f,
+//val adUseClipSkip: Boolean = false,
+//val adClipSkip: Long = 1,
+//val adRestoreFace: Boolean = false,
+//val adControlnetModel: String = "None",
+//val adControlnetModule: String = "None",
+//val adControlnetWeight: Float = 1.0f,
+//val adControlnetGuidanceStart: Float = 0.0f,
+//val adControlnetGuidanceEnd: Float = 1.0f
+@Entity(tableName = "adetailer")
+data class AdetailerEntity(
+    @PrimaryKey(autoGenerate = true)
+    var adId: Long = 0,
+    var historyId: Long = 0,
+    var enabled: Boolean = false,
+    var skipImg2img: Boolean = false,
+    var adModel: String = "",
+    var adPrompt: String = "",
+    var adNegativePrompt: String = "",
+    var adConfidence: Float = 0.3f,
+    var adMaskKLargest: Long = 0,
+    var adMaskMinRatio: Float = 0f,
+    var adMaskMaxRatio: Float = 1f,
+    var adDilateErode: Long = 32,
+    var adXOffset: Long = 0,
+    var adYOffset: Long = 0,
+    var adMaskMergeInvert: String = "None",
+    var adMaskBlur: Long = 4,
+    var adDenoisingStrength: Float = 0.4f,
+    var adInpaintOnlyMasked: Boolean = true,
+    var adInpaintOnlyMaskedPadding: Long = 0,
+    var adUseInpaintWidthHeight: Boolean = false,
+    var adInpaintWidth: Long = 512,
+    var adInpaintHeight: Long = 512,
+    var adUseSteps: Boolean = true,
+    var adSteps: Long = 28,
+    var adUseCfgScale: Boolean = false,
+    var adCfgScale: Float = 7.0f,
+    var adUseCheckpoint: Boolean = false,
+    var adCheckpoint: String = "Use same checkpoint",
+    var adUseVae: Boolean = false,
+    var adVae: String = "Use same VAE",
+    var adUseSampler: Boolean = false,
+    var adSampler: String = "DPM++ 2M Karras",
+    var adUseNoiseMultiplier: Boolean = false,
+    var adNoiseMultiplier: Float = 1.0f,
+    var adUseClipSkip: Boolean = false,
+    var adClipSkip: Long = 1,
+    var adRestoreFace: Boolean = false,
+    var adControlnetModel: String = "None",
+    var adControlnetModule: String = "None",
+    var adControlnetWeight: Float = 1.0f,
+    var adControlnetGuidanceStart: Float = 0.0f,
+    var adControlnetGuidanceEnd: Float = 1.0f
+
+)
+
+@Dao
+interface AdetailerDao {
+    @Insert
+    fun insert(adetailerEntity: AdetailerEntity)
+
+    @Update
+    fun update(adetailerEntity: AdetailerEntity)
+}
+
 data class HistoryWithRelation(
     @Embedded val historyEntity: HistoryEntity,
     @Relation(
@@ -429,6 +529,11 @@ data class HistoryWithRelation(
         entityColumn = "modelId",
     )
     val modelEntity: ModelEntity? = null,
+    @Relation(
+        parentColumn = "historyId",
+        entityColumn = "historyId",
+    )
+    val adetailerEntityList: List<AdetailerEntity>? = null,
 ) {
     fun toSaveHistory(): SaveHistory {
         val result = SaveHistory(
@@ -508,8 +613,48 @@ data class HistoryWithRelation(
                 scaleBy = historyEntity.reactorScaleBy ?: 1f,
                 upscaler = historyEntity.reactorUpscaler ?: "None",
                 upscalerVisibility = historyEntity.reactorUpscalerVisibility ?: 1f,
-            )
+            ),
+            adetailerParam = let {
+                if (adetailerEntityList.isNullOrEmpty()) {
+                    return@let null
+                }
+
+                val isEnable = adetailerEntityList.all { it.enabled }
+                val isSkipImg2img = adetailerEntityList.all { it.skipImg2img }
+                AdetailerParam(
+                    enabled = isEnable,
+                    skipImg2img = isSkipImg2img,
+                    slots = adetailerEntityList.map {
+                        AdetailerSlot(
+                            adModel = it.adModel,
+                            adPrompt = it.adPrompt,
+                            adNegativePrompt = it.adNegativePrompt,
+                            adConfidence = it.adConfidence,
+                            adMaskKLargest = it.adMaskKLargest,
+                            adMaskMinRatio = it.adMaskMinRatio,
+                            adMaskMaxRatio = it.adMaskMaxRatio,
+                            adDilateErode = it.adDilateErode,
+                            adXOffset = it.adXOffset,
+                            adYOffset = it.adYOffset,
+                            adMaskMergeInvert = it.adMaskMergeInvert,
+                            adMaskBlur = it.adMaskBlur,
+                            adDenoisingStrength = it.adDenoisingStrength,
+                            adInpaintOnlyMasked = it.adInpaintOnlyMasked,
+                            adInpaintOnlyMaskedPadding = it.adInpaintOnlyMaskedPadding,
+                            adUseInpaintWidthHeight = it.adUseInpaintWidthHeight,
+                            adInpaintWidth = it.adInpaintWidth,
+                            adInpaintHeight = it.adInpaintHeight,
+                            adUseSteps = it.adUseSteps,
+                            adSteps = it.adSteps,
+                            adUseCfgScale = it.adUseCfgScale,
+                            adCfgScale = it.adCfgScale,
+                            adUseCheckpoint = it.adUseCheckpoint,
+                        )
+                    },
+                )
+            }
         )
+
         return result
     }
 }
@@ -941,6 +1086,55 @@ object HistoryStore {
                         controlMode = controlNetParam.controlMode,
                         weight = controlNetParam.weight,
                         model = controlNetParam.model,
+                    )
+                )
+            }
+        }
+        history.adetailerParam?.let {
+            it.slots.forEach {
+                database.adetailerDao().insert(
+                    AdetailerEntity(
+                        historyId = savedHistoryId,
+                        enabled = history.adetailerParam.enabled,
+                        skipImg2img = history.adetailerParam.skipImg2img,
+                        adModel = it.adModel,
+                        adPrompt = it.adPrompt,
+                        adNegativePrompt = it.adNegativePrompt,
+                        adConfidence = it.adConfidence,
+                        adMaskKLargest = it.adMaskKLargest,
+                        adMaskMinRatio = it.adMaskMinRatio,
+                        adMaskMaxRatio = it.adMaskMaxRatio,
+                        adDilateErode = it.adDilateErode,
+                        adXOffset = it.adXOffset,
+                        adYOffset = it.adYOffset,
+                        adMaskMergeInvert = it.adMaskMergeInvert,
+                        adMaskBlur = it.adMaskBlur,
+                        adDenoisingStrength = it.adDenoisingStrength,
+                        adInpaintOnlyMasked = it.adInpaintOnlyMasked,
+                        adInpaintOnlyMaskedPadding = it.adInpaintOnlyMaskedPadding,
+                        adUseInpaintWidthHeight = it.adUseInpaintWidthHeight,
+                        adInpaintWidth = it.adInpaintWidth,
+                        adInpaintHeight = it.adInpaintHeight,
+                        adUseSteps = it.adUseSteps,
+                        adSteps = it.adSteps,
+                        adUseCfgScale = it.adUseCfgScale,
+                        adCfgScale = it.adCfgScale,
+                        adUseCheckpoint = it.adUseCheckpoint,
+                        adCheckpoint = it.adCheckpoint,
+                        adUseVae = it.adUseVae,
+                        adVae = it.adVae,
+                        adUseSampler = it.adUseSampler,
+                        adSampler = it.adSampler,
+                        adUseNoiseMultiplier = it.adUseNoiseMultiplier,
+                        adNoiseMultiplier = it.adNoiseMultiplier,
+                        adUseClipSkip = it.adUseClipSkip,
+                        adClipSkip = it.adClipSkip,
+                        adRestoreFace = it.adRestoreFace,
+                        adControlnetModel = it.adControlnetModel,
+                        adControlnetModule = it.adControlnetModule,
+                        adControlnetWeight = it.adControlnetWeight,
+                        adControlnetGuidanceStart = it.adControlnetGuidanceStart,
+                        adControlnetGuidanceEnd = it.adControlnetGuidanceEnd,
                     )
                 )
             }

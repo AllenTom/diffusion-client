@@ -2,6 +2,7 @@ package com.allentom.diffusion.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +49,7 @@ import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryView(
     currentHistory: SaveHistory,
@@ -60,6 +64,9 @@ fun HistoryView(
     val scope = rememberCoroutineScope()
 
     var promptActionState = rememberPromptActionState()
+    var adetailerCurrentSlot by remember {
+        mutableStateOf(0)
+    }
 
     if (isImage2ImageInputPreviewOpen) {
         currentHistory.img2imgParam?.let {
@@ -530,6 +537,219 @@ fun HistoryView(
                         value = { Text(text = reactorParam.upscalerVisibility.toString()) })
                 }
             }
+
+        }
+        currentHistory.adetailerParam?.let {
+            if (it.enabled) {
+                with(it) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Divider()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SectionTitle(title = stringResource(id = R.string.adetailer))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                    ) {
+                        for (i in slots.indices) {
+                            FilterChip(
+                                selected = adetailerCurrentSlot == i,
+                                onClick = {
+                                    adetailerCurrentSlot = i
+                                },
+                                label = {
+                                    Text(text = stringResource(R.string.slot, i + 1))
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    it.slots.getOrNull(adetailerCurrentSlot)?.let {
+                        Column {
+                            with(it) {
+                                FlowRow(
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    ParamItem(label = stringResource(id = R.string.model),
+                                        value = {
+                                            Text(text = adModel)
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(id = R.string.prompts),
+                                        value = {
+                                            Text(text = adPrompt)
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(id = R.string.param_negative_prompt),
+                                        value = {
+                                            Text(text = adNegativePrompt)
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(id = R.string.detection_model_confidence_threshold),
+                                        value = {
+                                            Text(text = adConfidence.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(id = R.string.mask_only_the_top_k_largest_0_to_disable),
+                                        value = {
+                                            Text(text = adMaskKLargest.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.mask_min_area_ratio),
+                                        value = {
+                                            Text(text = adMaskMinRatio.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.mask_max_area_ratio),
+                                        value = {
+                                            Text(text = adMaskMaxRatio.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.mask_x_offset),
+                                        value = {
+                                            Text(text = adXOffset.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.mask_y_offset),
+                                        value = {
+                                            Text(text = adYOffset.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.mask_erosion_dilation),
+                                        value = {
+                                            Text(text = adDilateErode.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.mask_merge_mode),
+                                        value = {
+                                            Text(text = adMaskMergeInvert)
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.inpaint_mask_blur),
+                                        value = {
+                                            Text(text = adMaskBlur.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.inpaint_denoising_strength),
+                                        value = {
+                                            Text(text = adDenoisingStrength.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.inpaint_only_masked),
+                                        value = {
+                                            Text(text = adInpaintOnlyMasked.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.inpaint_only_masked_padding_pixels),
+                                        value = {
+                                            Text(text = adInpaintOnlyMaskedPadding.toString())
+                                        }
+                                    )
+                                    if (adUseInpaintWidthHeight) {
+                                        ParamItem(label = stringResource(R.string.inpaint_width),
+                                            value = {
+                                                Text(text = adInpaintWidth.toString())
+                                            }
+                                        )
+                                        ParamItem(label = stringResource(R.string.inpaint_height),
+                                            value = {
+                                                Text(text = adInpaintHeight.toString())
+                                            }
+                                        )
+                                    }
+                                    if (adUseSteps) {
+                                        ParamItem(label = stringResource(R.string.param_steps),
+                                            value = {
+                                                Text(text = adSteps.toString())
+                                            }
+                                        )
+                                    }
+                                    if (adUseCfgScale) {
+                                        ParamItem(label = stringResource(R.string.param_cfg_scale),
+                                            value = {
+                                                Text(text = adCfgScale.toString())
+                                            }
+                                        )
+                                    }
+
+                                    if (adUseCheckpoint) {
+                                        ParamItem(label = stringResource(R.string.model),
+                                            value = {
+                                                Text(text = adCheckpoint)
+                                            }
+                                        )
+                                    }
+                                    if (adUseVae) {
+                                        ParamItem(label = stringResource(R.string.vae),
+                                            value = {
+                                                Text(text = adVae)
+                                            }
+                                        )
+                                    }
+                                    if (adUseSampler) {
+                                        ParamItem(label = stringResource(R.string.param_sampler),
+                                            value = {
+                                                Text(text = adSampler)
+                                            }
+                                        )
+                                    }
+                                    if (adUseNoiseMultiplier) {
+                                        ParamItem(label = stringResource(R.string.noise_multiplier),
+                                            value = {
+                                                Text(text = adNoiseMultiplier.toString())
+                                            }
+                                        )
+                                    }
+                                    if (adUseClipSkip) {
+                                        ParamItem(label = stringResource(R.string.clip_skip),
+                                            value = {
+                                                Text(text = adClipSkip.toString())
+                                            }
+                                        )
+                                    }
+                                    ParamItem(label = stringResource(R.string.restore_face),
+                                        value = {
+                                            Text(
+                                                text = if (adRestoreFace) stringResource(R.string.yes) else stringResource(
+                                                    R.string.no
+                                                )
+                                            )
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.controlnet_model),
+                                        value = {
+                                            Text(text = adControlnetModel)
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.controlnet_weight),
+                                        value = {
+                                            Text(text = adControlnetWeight.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.controlnet_guidance_start),
+                                        value = {
+                                            Text(text = adControlnetGuidanceStart.toString())
+                                        }
+                                    )
+                                    ParamItem(label = stringResource(R.string.controlnet_guidance_end),
+                                        value = {
+                                            Text(text = adControlnetGuidanceEnd.toString())
+                                        }
+                                    )
+
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+            }
+
 
         }
     }

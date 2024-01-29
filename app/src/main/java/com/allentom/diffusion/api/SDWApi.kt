@@ -1,5 +1,6 @@
 package com.allentom.diffusion.api
 
+import com.allentom.diffusion.api.entity.AdetailerModelList
 import com.allentom.diffusion.api.entity.ControlModelList
 import com.allentom.diffusion.api.entity.ControlNetDetectResult
 import com.allentom.diffusion.api.entity.ControlNetModule
@@ -184,61 +185,61 @@ data class RegionalPrompterParam(
 //True, #26 Randomly select an image from the path
 data class ReactorParamRequest(
     // #0
-    val singleSourceImage:String = "",
+    val singleSourceImage: String = "",
     // #1
-    val enable:Boolean = false,
+    val enable: Boolean = false,
     // #2
-    val sourceImageAbove:String = "0",
+    val sourceImageAbove: String = "0",
     // #3
-    val targetImageResult:String = "0",
+    val targetImageResult: String = "0",
     // #4
-    val model:String = "inswapper_128.onnx",
+    val model: String = "inswapper_128.onnx",
     // #5 Restore Face
-    val restoreFace:String = "CodeFormer",
+    val restoreFace: String = "CodeFormer",
     // #6 Restore Face Visibility
-    val restoreFaceVisibility:Float = 1f,
+    val restoreFaceVisibility: Float = 1f,
     // #7 Postprocessing Order
-    val postprocessingOrder:Boolean = true,
+    val postprocessingOrder: Boolean = true,
     // #8 Upscaler
-    val upscaler:String = "None",
+    val upscaler: String = "None",
     // #9 Scale by
-    val scaleBy:Float = 1f,
+    val scaleBy: Float = 1f,
     // #10 Upscaler Visibility (if scale = 1)
-    val upscalerVisibility:Float = 1f,
+    val upscalerVisibility: Float = 1f,
     // #11 Swap in source image
-    val  swapInSourceImage:Boolean = false,
+    val swapInSourceImage: Boolean = false,
     // #12 Swap in generated image
-    val swapInGeneratedImage:Boolean = true,
+    val swapInGeneratedImage: Boolean = true,
     // #13 Console Log Level
-    val consoleLogLevel:Int = 2,
+    val consoleLogLevel: Int = 2,
     // #14 Gender Detection (Source)
-    val genderDetectionSource:Int = 1,
+    val genderDetectionSource: Int = 1,
     // #15 Gender Detection (Target)
-    val genderDetectionTarget:Int = 1,
+    val genderDetectionTarget: Int = 1,
     // Save Original (Swap in generated only)
-    val saveOriginalSwapInGeneratedOnly:Boolean = false,
+    val saveOriginalSwapInGeneratedOnly: Boolean = false,
     // CodeFormer Weight (Fidelity)
-    val codeFormerWeightFidelity:Float = 0.8f,
+    val codeFormerWeightFidelity: Float = 0.8f,
     // Source Image Hash Check
-    val sourceImageHashCheck:Boolean = false,
+    val sourceImageHashCheck: Boolean = false,
     // Target Image Hash Check
-    val targetImageHashCheck:Boolean = false,
+    val targetImageHashCheck: Boolean = false,
     //Execution Provider
-    val executionProvider:String = "CPU",
+    val executionProvider: String = "CPU",
     //Face Mask Correction
-    val faceMaskCorrection:Boolean = false,
+    val faceMaskCorrection: Boolean = false,
     //Select Source
-    val selectSource:Int = 0,
+    val selectSource: Int = 0,
     //Choose Face Model
-    val chooseFaceModel:String = "None",
+    val chooseFaceModel: String = "None",
     //Source Folder
-    val sourceFolder:String = "",
+    val sourceFolder: String = "",
     //Multiple Source Images
-    val multipleSourceImages:String? = "",
+    val multipleSourceImages: String? = "",
     //Random Image
-    val randomImage:Boolean = false,
+    val randomImage: Boolean = false,
 ) {
-    fun toParamArray():List<Any?>{
+    fun toParamArray(): List<Any?> {
         return listOf(
             singleSourceImage,
             enable,
@@ -270,6 +271,140 @@ data class ReactorParamRequest(
         )
     }
 }
+data class AdetailerSlotArg(
+    @SerializedName("ad_model")
+    val adModel: String,
+    @SerializedName("ad_prompt")
+    val adPrompt: String,
+    @SerializedName("ad_negative_prompt")
+    val adNegativePrompt: String,
+    @SerializedName("ad_confidence")
+    val adConfidence: Float,
+    @SerializedName("ad_mask_k_largest")
+    val adMaskKLargest: Long,
+    @SerializedName("ad_mask_min_ratio")
+    val adMaskMinRatio: Float,
+    @SerializedName("ad_mask_max_ratio")
+    val adMaskMaxRatio: Float,
+    @SerializedName("ad_dilate_erode")
+    val adDilateErode: Long,
+    @SerializedName("ad_x_offset")
+    val adXOffset: Long,
+    @SerializedName("ad_y_offset")
+    val adYOffset: Long,
+    @SerializedName("ad_mask_merge_invert")
+    val adMaskMergeInvert: String,
+    @SerializedName("ad_mask_blur")
+    val adMaskBlur: Long,
+    @SerializedName("ad_denoising_strength")
+    val adDenoisingStrength: Float,
+    @SerializedName("ad_inpaint_only_masked")
+    val adInpaintOnlyMasked: Boolean,
+    @SerializedName("ad_inpaint_only_masked_padding")
+    val adInpaintOnlyMaskedPadding: Long,
+    @SerializedName("ad_use_inpaint_width_height")
+    val adUseInpaintWidthHeight: Boolean,
+    @SerializedName("ad_inpaint_width")
+    val adInpaintWidth: Long,
+    @SerializedName("ad_inpaint_height")
+    val adInpaintHeight: Long,
+    @SerializedName("ad_use_steps")
+    val adUseSteps: Boolean,
+    @SerializedName("ad_steps")
+    val adSteps: Long,
+    @SerializedName("ad_use_cfg_scale")
+    val adUseCfgScale: Boolean,
+    @SerializedName("ad_cfg_scale")
+    val adCfgScale: Float,
+    @SerializedName("ad_use_checkpoint")
+    val adUseCheckpoint: Boolean,
+    @SerializedName("ad_checkpoint")
+    val adCheckpoint: String,
+    @SerializedName("ad_use_vae")
+    val adUseVae: Boolean,
+    @SerializedName("ad_vae")
+    val adVae: String,
+    @SerializedName("ad_use_sampler")
+    val adUseSampler: Boolean,
+    @SerializedName("ad_sampler")
+    val adSampler: String,
+    @SerializedName("ad_use_noise_multiplier")
+    val adUseNoiseMultiplier: Boolean,
+    @SerializedName("ad_noise_multiplier")
+    val adNoiseMultiplier: Float,
+    @SerializedName("ad_use_clip_skip")
+    val adUseClipSkip: Boolean,
+    @SerializedName("ad_clip_skip")
+    val adClipSkip: Long,
+    @SerializedName("ad_restore_face")
+    val adRestoreFace: Boolean,
+    @SerializedName("ad_controlnet_model")
+    val adControlnetModel: String,
+    @SerializedName("ad_controlnet_module")
+    val adControlnetModule: String,
+    @SerializedName("ad_controlnet_weight")
+    val adControlnetWeight: Float,
+    @SerializedName("ad_controlnet_guidance_start")
+    val adControlnetGuidanceStart: Float,
+    @SerializedName("ad_controlnet_guidance_end")
+    val adControlnetGuidanceEnd: Float,
+)
+data class AdetailerArg(
+    val enabled: Boolean = false,
+    val skipImg2img: Boolean = false,
+    val slot:List<AdetailerSlotArg> = listOf(),
+) {
+    fun toParamArray(): List<Any> {
+        return listOf(
+            enabled,
+            skipImg2img,
+        ) + slot.map {
+            with(it) {
+                hashMapOf(
+                    "ad_model" to adModel,
+                    "ad_prompt" to adPrompt,
+                    "ad_negative_prompt" to adNegativePrompt,
+                    "ad_confidence" to adConfidence,
+                    "ad_mask_k_largest" to adMaskKLargest,
+                    "ad_mask_min_ratio" to adMaskMinRatio,
+                    "ad_mask_max_ratio" to adMaskMaxRatio,
+                    "ad_dilate_erode" to adDilateErode,
+                    "ad_x_offset" to adXOffset,
+                    "ad_y_offset" to adYOffset,
+                    "ad_mask_merge_invert" to adMaskMergeInvert,
+                    "ad_mask_blur" to adMaskBlur,
+                    "ad_denoising_strength" to adDenoisingStrength,
+                    "ad_inpaint_only_masked" to adInpaintOnlyMasked,
+                    "ad_inpaint_only_masked_padding" to adInpaintOnlyMaskedPadding,
+                    "ad_use_inpaint_width_height" to adUseInpaintWidthHeight,
+                    "ad_inpaint_width" to adInpaintWidth,
+                    "ad_inpaint_height" to adInpaintHeight,
+                    "ad_use_steps" to adUseSteps,
+                    "ad_steps" to adSteps,
+                    "ad_use_cfg_scale" to adUseCfgScale,
+                    "ad_cfg_scale" to adCfgScale,
+                    "ad_use_checkpoint" to adUseCheckpoint,
+                    "ad_checkpoint" to adCheckpoint,
+                    "ad_use_vae" to adUseVae,
+                    "ad_vae" to adVae,
+                    "ad_use_sampler" to adUseSampler,
+                    "ad_sampler" to adSampler,
+                    "ad_use_noise_multiplier" to adUseNoiseMultiplier,
+                    "ad_noise_multiplier" to adNoiseMultiplier,
+                    "ad_use_clip_skip" to adUseClipSkip,
+                    "ad_clip_skip" to adClipSkip,
+                    "ad_restore_face" to adRestoreFace,
+                    "ad_controlnet_model" to adControlnetModel,
+                    "ad_controlnet_module" to adControlnetModule,
+                    "ad_controlnet_weight" to adControlnetWeight,
+                    "ad_controlnet_guidance_start" to adControlnetGuidanceStart,
+                    "ad_controlnet_guidance_end" to adControlnetGuidanceEnd,
+                )
+            }
+        }
+    }
+
+}
 
 data class AlwaysonScripts(
     @SerializedName("controlnet")
@@ -278,6 +413,7 @@ data class AlwaysonScripts(
     var regionalPrompter: RegionalPrompterWrapper? = null,
     @SerializedName("reactor")
     var reactor: ReactorWrapper? = null,
+    @SerializedName("ADetailer") var adetailer: AdeatilerWrapper? = null,
 )
 
 data class ControlNetWrapper(
@@ -289,9 +425,15 @@ data class RegionalPrompterWrapper(
     @SerializedName("args")
     val args: List<Any>? = null
 )
+
 data class ReactorWrapper(
     @SerializedName("args")
     val args: List<Any?>? = null
+)
+
+data class AdeatilerWrapper(
+    @SerializedName("args")
+    val args: List<Any>? = null
 )
 
 data class Txt2ImgRequest(
@@ -337,7 +479,7 @@ data class Img2ImgRequest(
     val denoising_strength: Float = 0.75f,
     val scale_by: Float = 1f,
     // mask
-    val mask: String = "",
+    val mask: String? = null,
     //Mask mode
     val inpainting_mask_invert: Int = 0,
     //Mask blur
@@ -348,6 +490,7 @@ data class Img2ImgRequest(
     val inpaint_full_res: Int = 1,
     //inpaint_full_res_padding
     val inpaint_full_res_padding: Int = 32,
+
 )
 
 data class InterrogateRequest(
@@ -384,6 +527,7 @@ data class ControlNetDetectRequest(
     @SerializedName("controlnet_threshold_b") val controlNetThresholdB: Float = 64f,
     @SerializedName("controlnet_input_images") val controlNetInputImages: List<String> = listOf(),
 )
+
 data class ReactorRequestBody(
     @SerializedName("source_image")
     val sourceImage: String,
@@ -413,6 +557,7 @@ data class ReactorRequestBody(
     @SerializedName("result_file_path")
     val resultFilePath: String,
 )
+
 interface SDWApi {
     @GET("/sdapi/v1/samplers")
     suspend fun getSamplers(): Response<List<Sampler>>
@@ -479,11 +624,16 @@ interface SDWApi {
 
     @GET("/sdapi/v1/sd-vae")
     suspend fun getVaeList(): Response<List<Vae>>
+
     @GET("/reactor/upscalers")
     suspend fun getReactorUpscaler(): Response<ReactorUpscaleList>
 
     @GET("/reactor/models")
     suspend fun getReactorModel(): Response<ReactorModelList>
+
+    @GET("/adetailer/v1/ad_model")
+    suspend fun getAdetailerModel(): Response<AdetailerModelList>
+
     @GET("/diffusionhelper/hash")
     suspend fun getHash(
         @Query("modelType")
@@ -494,8 +644,6 @@ interface SDWApi {
 
     @GET("/diffusionhelper/ping")
     suspend fun ping(): Response<HelperPing>
-
-
 
 
     @POST("/reactor/image")

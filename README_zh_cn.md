@@ -15,6 +15,8 @@
 - 超分
 - sdxl 支持
 - reactor (换脸插件)
+- 区域提示词插件
+- Adetailer 细节修复插件
 - 从 civitai 下载元信息
 ## 预览
 <p float="left">
