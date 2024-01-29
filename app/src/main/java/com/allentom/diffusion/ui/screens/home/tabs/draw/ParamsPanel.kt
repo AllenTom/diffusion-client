@@ -629,6 +629,17 @@ fun ReactorPanel(
                 )
             }
         )
+        TextPickUpItem(
+            label = stringResource(R.string.model),
+            value = reactorParam.model,
+            options = DrawViewModel.reactorModelList
+        ) {
+            onValueChange(
+                reactorParam.copy(
+                    model = it
+                )
+            )
+        }
 
     }
 }

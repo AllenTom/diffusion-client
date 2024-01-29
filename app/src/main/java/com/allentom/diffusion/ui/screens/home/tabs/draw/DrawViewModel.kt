@@ -133,6 +133,19 @@ suspend fun fetchReactorUpscalerFromApi(): List<String> {
     return emptyList()
 }
 
+suspend fun fetchReactorModelFromApi(): List<String> {
+    try {
+        val list = getApiClient().getReactorModel()
+        val body = list.body()
+        if (list.isSuccessful && body != null) {
+            return list.body()!!.models
+        }
+    } catch (e: java.lang.Exception) {
+        return emptyList()
+    }
+    return emptyList()
+}
+
 data class GenImageItem(
     val imageBase64: String?,
     val progress: Progress?,
@@ -179,6 +192,7 @@ data class ReactorParam(
     val upscaler: String = "None",
     val scaleBy: Float = 1f,
     val upscalerVisibility: Float = 1f,
+    val model: String? = null
 )
 
 object DrawViewModel {
@@ -253,6 +267,7 @@ object DrawViewModel {
 
     var reactorParam by mutableStateOf<ReactorParam>(ReactorParam())
     var reactorUpscalerList by mutableStateOf<List<String>>(emptyList())
+    var reactorModelList by mutableStateOf<List<String>>(emptyList())
 
     var currentHistory by mutableStateOf<SaveHistory?>(null)
     fun startGenerating(count: Int) {
@@ -472,7 +487,8 @@ object DrawViewModel {
                 restoreFace = reactorParam.restoreFace,
                 restoreFaceVisibility = reactorParam.restoreFaceVisibility,
                 codeFormerWeightFidelity = reactorParam.codeFormerWeightFidelity,
-                postprocessingOrder = reactorParam.postprocessingOrder
+                postprocessingOrder = reactorParam.postprocessingOrder,
+                model = reactorParam.model ?: "inswapper_128.onnx",
             )
             alwaysonScripts.reactor = ReactorWrapper(
                 args = args.toParamArray()
@@ -1046,6 +1062,17 @@ object DrawViewModel {
         Log.d(
             "initViewModel",
             "Call time for fetchReactorUpscalerFromApi: ${endTime - startTime} ms"
+        )
+
+        startTime = System.currentTimeMillis()
+        reactorModelList = fetchReactorModelFromApi()
+        if (reactorModelList.isNotEmpty()) {
+            reactorParam = reactorParam.copy(model = reactorModelList.first())
+        }
+        endTime = System.currentTimeMillis()
+        Log.d(
+            "initViewModel",
+            "Call time for fetchReactorModelFromApi: ${endTime - startTime} ms"
         )
 
         // check controlnet version

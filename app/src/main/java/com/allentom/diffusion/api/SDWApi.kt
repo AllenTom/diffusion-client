@@ -14,6 +14,7 @@ import com.allentom.diffusion.api.entity.ModelHash
 import com.allentom.diffusion.api.entity.Option
 import com.allentom.diffusion.api.entity.Progress
 import com.allentom.diffusion.api.entity.RactorResultImage
+import com.allentom.diffusion.api.entity.ReactorModelList
 import com.allentom.diffusion.api.entity.ReactorUpscaleList
 import com.allentom.diffusion.api.entity.SDWEmbeddingList
 import com.allentom.diffusion.api.entity.Sampler
@@ -480,6 +481,9 @@ interface SDWApi {
     suspend fun getVaeList(): Response<List<Vae>>
     @GET("/reactor/upscalers")
     suspend fun getReactorUpscaler(): Response<ReactorUpscaleList>
+
+    @GET("/reactor/models")
+    suspend fun getReactorModel(): Response<ReactorModelList>
     @GET("/diffusionhelper/hash")
     suspend fun getHash(
         @Query("modelType")
