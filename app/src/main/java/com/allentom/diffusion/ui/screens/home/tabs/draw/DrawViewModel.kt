@@ -746,10 +746,14 @@ object DrawViewModel {
         inpaintingFill: Int = 0,
         inpaintFullRes: Int = 1,
         inpaintFullResPadding: Int = 32,
+        regionPromptParam: RegionPromptParam? = null,
+        reactorParam: ReactorParam? = null,
+        adetailerParam: AdetailerParam? = null
     ): String? {
         var alwaysonScripts = AlwaysonScripts()
         alwaysonScripts = applyAdetailerParam(alwaysonScripts, adetailerParam)
         alwaysonScripts = applyRegionParams(alwaysonScripts, regionPromptParam)
+        alwaysonScripts = applyReactorParam(alwaysonScripts, reactorParam)
         val request = Img2ImgRequest(
             prompt = prompt,
             negative_prompt = negativePrompt,
@@ -974,10 +978,12 @@ object DrawViewModel {
                                 maskBlur = inputImg2ImgMaskBlur,
                                 inpaintingFill = inputImg2ImgInpaintingFill,
                                 inpaintFullRes = inputImg2ImgInpaintingFullRes,
-                                inpaintFullResPadding = inputImg2ImgInpaintingFullResPadding
+                                inpaintFullResPadding = inputImg2ImgInpaintingFullResPadding,
+                                adetailerParam = adetailerParam,
+                                regionPromptParam = regionPromptParam,
+                                reactorParam = reactorParam
                             )?.let {
                                 resultImage = it
-
                             }
                         } catch (e: ApiException) {
                             genItemList.getOrNull(currentGenIndex)?.let {
