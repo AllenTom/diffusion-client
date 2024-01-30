@@ -134,7 +134,12 @@ fun ParamsPanel(
             }
 
             2 -> {
-                ControlNetPanel()
+                ControlNetPanel(
+                    onValueChange = {
+                        DrawViewModel.inputControlNetParams = it
+                    },
+                    controlNetParam = DrawViewModel.inputControlNetParams
+                )
             }
 
             3 -> {
@@ -330,64 +335,150 @@ fun HiresFixPanel() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ControlNetPanel() {
+fun ControlNetPanel(
+    onValueChange: (ControlNetParam) -> Unit,
+    controlNetParam: ControlNetParam
+) {
+    var selectedSlot by remember { mutableIntStateOf(0) }
+    var isEditMode by remember { mutableStateOf(false) }
+    fun onIndexUpdate(slot: ControlNetSlot) {
+        onValueChange(
+            controlNetParam.copy(
+                slots = controlNetParam.slots.mapIndexed { index, controlNetSlot ->
+                    if (index == selectedSlot) {
+                        slot
+                    } else {
+                        controlNetSlot
+                    }
+                }
+            )
+        )
+    }
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState())
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        SwitchOptionItem(
-            label = stringResource(R.string.enable),
-            value = DrawViewModel.inputControlNetEnable
+        Row(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            DrawViewModel.inputControlNetEnable = it
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp, end = 16.dp)
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                for (i in 0..<controlNetParam.slots.size) {
+                    FilterChip(
+                        selected = i == selectedSlot,
+                        onClick = {
+                            selectedSlot = i
+                        },
+                        label = {
+                            Text(text = stringResource(id = R.string.slot, i + 1))
+                        },
+                        trailingIcon = {
+                            if (isEditMode && controlNetParam.slots.size > 1) {
+                                IconButton(onClick = {
+                                    onValueChange(
+                                        controlNetParam.copy(
+                                            slots = controlNetParam.slots.filterIndexed { index, _ ->
+                                                index != i
+                                            }
+                                        )
+                                    )
+                                }) {
+                                    Icon(Icons.Default.Delete, contentDescription = null)
+                                }
+                            }
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                if (isEditMode && controlNetParam.slots.size < 3) {
+                    IconButton(onClick = {
+                        onValueChange(
+                            controlNetParam.copy(
+                                slots = controlNetParam.slots + ControlNetSlot()
+                            )
+                        )
+                    }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            IconButton(onClick = {
+                isEditMode = !isEditMode
+            }) {
+                Icon(Icons.Default.Edit, contentDescription = null)
+            }
         }
-        SliderOptionItem(
-            label = stringResource(R.string.param_guidance_start),
-            value = DrawViewModel.inputControlNetGuidanceStart,
-            valueRange = 0f..1f,
-            baseFloat = 0.01f,
-            onValueChangeFloat = {
-                DrawViewModel.inputControlNetGuidanceStart = it
-            })
-        SliderOptionItem(
-            label = stringResource(R.string.param_guidance_end),
-            value = DrawViewModel.inputControlNetGuidanceEnd,
-            valueRange = 0f..1f,
-            baseFloat = 0.01f,
-            onValueChangeFloat = {
-                DrawViewModel.inputControlNetGuidanceEnd = it
-            })
-        TextPickUpItem(
-            label = stringResource(R.string.param_control_mode),
-            value = ConstValues.ControlNetModeList[DrawViewModel.inputControlNetControlMode],
-            options = ConstValues.ControlNetModeList
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-            DrawViewModel.inputControlNetControlMode =
-                ConstValues.ControlNetModeList.indexOf(it)
-        }
-        SliderOptionItem(
-            label = stringResource(R.string.param_control_weight),
-            value = DrawViewModel.inputControlNetControlWeight,
-            valueRange = 0f..2f,
-            baseFloat = 0.05f,
-            onValueChangeFloat = {
-                DrawViewModel.inputControlNetControlWeight = it
-            })
-        TextPickUpItem(
-            label = stringResource(R.string.param_control_model),
-            value = DrawViewModel.inputControlNetControlModel,
-            options = DrawViewModel.controlNetModelList
-        ) {
-            DrawViewModel.inputControlNetControlModel = it
-        }
-        ImageBase64PickupOptionItem(
-            label = stringResource(R.string.param_control_image),
-            value = DrawViewModel.inputContentNetImageBase64
-        ) { uri, it, _, _, _ ->
-            DrawViewModel.inputContentNetImageBase64 = it
-            DrawViewModel.inputContentNetImagePath = uri.toString()
+            val currentParam = controlNetParam.slots.getOrNull(selectedSlot)
+            currentParam?.let { slot ->
+                SwitchOptionItem(
+                    label = stringResource(R.string.enable),
+                    value = slot.enabled
+                ) {
+                    onIndexUpdate(slot.copy(enabled = it))
+                }
+                SliderOptionItem(
+                    label = stringResource(R.string.param_guidance_start),
+                    value = slot.guidanceStart,
+                    valueRange = 0f..1f,
+                    baseFloat = 0.01f,
+                    onValueChangeFloat = {
+                        onIndexUpdate(slot.copy(guidanceStart = it))
+                    })
+                SliderOptionItem(
+                    label = stringResource(R.string.param_guidance_end),
+                    value = slot.guidanceEnd,
+                    valueRange = 0f..1f,
+                    baseFloat = 0.01f,
+                    onValueChangeFloat = {
+                        onIndexUpdate(slot.copy(guidanceEnd = it))
+                    })
+                TextPickUpItem(
+                    label = stringResource(R.string.param_control_mode),
+                    value = ConstValues.ControlNetModeList[slot.controlMode],
+                    options = ConstValues.ControlNetModeList
+                ) {
+                    onIndexUpdate(slot.copy(controlMode = ConstValues.ControlNetModeList.indexOf(it)))
+                }
+                SliderOptionItem(
+                    label = stringResource(R.string.param_control_weight),
+                    value = slot.weight,
+                    valueRange = 0f..2f,
+                    baseFloat = 0.05f,
+                    onValueChangeFloat = {
+                        onIndexUpdate(slot.copy(weight = it))
+                    })
+                TextPickUpItem(
+                    label = stringResource(R.string.param_control_model),
+                    value = slot.model,
+                    options = DrawViewModel.controlNetModelList
+                ) {
+                    onIndexUpdate(slot.copy(model = it))
+                }
+                ImageBase64PickupOptionItem(
+                    label = stringResource(R.string.param_control_image),
+                    value = slot.inputImage
+                ) { uri, it, _, _, _ ->
+                    onIndexUpdate(slot.copy(inputImage = it, inputImagePath = uri.toString()))
+                }
+            }
+
         }
     }
+
+
 }
 
 @Composable

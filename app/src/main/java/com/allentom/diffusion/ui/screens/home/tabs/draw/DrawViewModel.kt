@@ -24,7 +24,7 @@ import com.allentom.diffusion.api.AdeatilerWrapper
 import com.allentom.diffusion.api.AdetailerArg
 import com.allentom.diffusion.api.AdetailerSlotArg
 import com.allentom.diffusion.api.AlwaysonScripts
-import com.allentom.diffusion.api.ControlNetParam
+import com.allentom.diffusion.api.ControlNetArg
 import com.allentom.diffusion.api.ControlNetWrapper
 import com.allentom.diffusion.api.Img2ImgRequest
 import com.allentom.diffusion.api.OptionsRequestBody
@@ -61,7 +61,6 @@ import com.allentom.diffusion.store.SaveControlNet
 import com.allentom.diffusion.store.SaveHistory
 import com.allentom.diffusion.store.SaveHrParam
 import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -300,6 +299,24 @@ data class AdetailerParam(
     val slots: List<AdetailerSlot> = listOf(AdetailerSlot())
 )
 
+data class ControlNetParam(
+    val slots: List<ControlNetSlot> = listOf(ControlNetSlot())
+)
+
+data class ControlNetSlot(
+    val controlNetHistoryId: Long = 0,
+    val controlNetId: Long = 0,
+    val historyId: Long = 0,
+    val enabled: Boolean = false,
+    val guidanceStart: Float = 0f,
+    val guidanceEnd: Float = 1f,
+    val controlMode: Int = 0,
+    val weight: Float = 1f,
+    val model: String? = null,
+    val inputImage: String? = null,
+    val inputImagePath: String? = null
+)
+
 object DrawViewModel {
     var genScope: CoroutineScope? = null
     var inputPromptText by mutableStateOf(
@@ -337,15 +354,10 @@ object DrawViewModel {
     var upscalers by mutableStateOf<List<Upscale>>(emptyList())
     var loraList by mutableStateOf<List<Lora>>(emptyList())
     var inputLoraList by mutableStateOf<List<LoraPrompt>>(emptyList())
-    var inputControlNetEnable by mutableStateOf(false)
-    var inputControlNetGuidanceStart by mutableFloatStateOf(0f)
-    var inputControlNetGuidanceEnd by mutableFloatStateOf(1f)
-    var inputControlNetControlMode by mutableIntStateOf(0)
-    var inputControlNetControlWeight by mutableFloatStateOf(1f)
-    var inputControlNetControlModel by mutableStateOf<String?>(null)
-    var inputContentNetImageBase64 by mutableStateOf<String?>(null)
-    var inputContentNetImagePath by mutableStateOf<String?>(null)
+
+    var inputControlNetParams by mutableStateOf(ControlNetParam())
     var controlNetModelList by mutableStateOf<List<String>>(emptyList())
+
     var enableControlNetFeat by mutableStateOf(false)
     var inputImg2ImgImgBase64 by mutableStateOf<String?>(null)
     var inputImg2ImgImgFilename by mutableStateOf<String?>(null)
@@ -509,14 +521,7 @@ object DrawViewModel {
         }
 
         history.controlNetParam?.let {
-            inputControlNetEnable = it.enabled
-            inputControlNetGuidanceStart = it.guidanceStart
-            inputControlNetGuidanceEnd = it.guidanceEnd
-            inputControlNetControlMode = it.controlMode
-            inputControlNetControlWeight = it.weight
-            inputControlNetControlModel = it.model
-            inputContentNetImageBase64 = it.inputImage
-            inputContentNetImagePath = it.inputImagePath
+            inputControlNetParams = it
         }
         // for lora
         inputLoraList = history.loraPrompt
@@ -529,21 +534,37 @@ object DrawViewModel {
         }
     }
 
-    fun applyControlNetParams(context: Context, history: SaveControlNet) {
-        val imageBase64 = Util.readImageWithPathToBase64(history.path)
-        inputContentNetImageBase64 = imageBase64
-        inputContentNetImagePath = history.path
+    fun applyControlNetParams(context: Context, slotIndex: Int, saveControlNet: SaveControlNet) {
+        val imageBase64 = Util.readImageWithPathToBase64(saveControlNet.path)
         // find history use
         val saveControlNetHistory =
-            HistoryStore.findLatestControlNetUse(context = context, controlNetId = history.id)
-        saveControlNetHistory?.let {
-            inputControlNetControlMode = it.controlMode
-            inputControlNetControlWeight = it.weight
-            inputControlNetGuidanceStart = it.guidanceStart
-            inputControlNetGuidanceEnd = it.guidanceEnd
-            inputControlNetEnable = true
-            inputControlNetControlModel = it.model
-        }
+            HistoryStore.findLatestControlNetUse(
+                context = context,
+                controlNetId = saveControlNet.id
+            )
+        inputControlNetParams = inputControlNetParams.copy(
+            slots = inputControlNetParams.slots.mapIndexed { index, slot ->
+                if (index == slotIndex) {
+                    slot.copy(
+                        controlNetHistoryId = saveControlNet.id,
+                        controlNetId = saveControlNetHistory?.controlNetId ?: slot.controlNetId,
+                        historyId = saveControlNetHistory?.historyId ?: slot.historyId,
+                        enabled = true,
+                        inputImage = imageBase64,
+                        inputImagePath = saveControlNet.path,
+                        controlMode = saveControlNetHistory?.controlMode ?: slot.controlMode,
+                        weight = saveControlNetHistory?.weight ?: slot.weight,
+                        guidanceStart = saveControlNetHistory?.guidanceStart ?: slot.guidanceStart,
+                        guidanceEnd = saveControlNetHistory?.guidanceEnd ?: slot.guidanceEnd,
+                        model = saveControlNetHistory?.model ?: slot.model
+                    )
+                } else {
+                    slot
+                }
+            }
+
+        )
+
     }
 
     fun applyControlParams(
@@ -552,7 +573,18 @@ object DrawViewModel {
     ): AlwaysonScripts {
         if (controlNetParam != null) {
             alwaysonScripts.controlNet = ControlNetWrapper(
-                args = listOf(controlNetParam)
+                args = controlNetParam.slots.map {
+                    ControlNetArg(
+                        enabled = it.enabled,
+                        guidanceStart = it.guidanceStart,
+                        guidanceEnd = it.guidanceEnd,
+                        controlMode = it.controlMode,
+                        weight = it.weight,
+                        model = it.model ?: "",
+                        inputImage = it.inputImage ?: "",
+                        inputImagePath = it.inputImagePath
+                    )
+                }
             )
         }
         return alwaysonScripts
@@ -867,17 +899,8 @@ object DrawViewModel {
                 }
                 val saveImagePaths = emptyList<ImageHistory>().toMutableList()
                 var controlNetParam: ControlNetParam? = null
-                if (enableControlNetFeat && inputControlNetEnable) {
-                    controlNetParam = ControlNetParam(
-                        enabled = inputControlNetEnable,
-                        guidanceStart = inputControlNetGuidanceStart,
-                        guidanceEnd = inputControlNetGuidanceEnd,
-                        controlMode = inputControlNetControlMode,
-                        weight = inputControlNetControlWeight,
-                        inputImage = inputContentNetImageBase64 ?: "",
-                        model = inputControlNetControlModel ?: "",
-                        inputImagePath = inputContentNetImagePath
-                    )
+                if (enableControlNetFeat) {
+                    controlNetParam = inputControlNetParams
                 }
                 for (genIndex in 0 until genTotalCount) {
                     val seed = inputSeed.let {

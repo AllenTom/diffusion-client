@@ -44,7 +44,6 @@ import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.SaveHistory
 import com.allentom.diffusion.ui.screens.historydetail.ParamItem
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
-import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,6 +64,9 @@ fun HistoryView(
 
     var promptActionState = rememberPromptActionState()
     var adetailerCurrentSlot by remember {
+        mutableStateOf(0)
+    }
+    var controlCurrentSlotIndex by remember {
         mutableStateOf(0)
     }
 
@@ -431,42 +433,65 @@ fun HistoryView(
                     value = { Text(text = it.hrUpscaler) })
             }
         }
-        currentHistory.controlNetParam?.takeIf { it.enabled }?.let {
+        val controlNetSlots = currentHistory.controlNetParam?.slots
+        if (!controlNetSlots.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Divider()
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(title = stringResource(id = R.string.param_control_net))
             Spacer(modifier = Modifier.height(8.dp))
-            Column {
-                Box(
-                    modifier = Modifier
-                        .height(120.dp)
-                        .fillMaxWidth(),
-                ) {
-                    AsyncImage(
-                        model = it.inputImagePath,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                for (i in controlNetSlots.indices) {
+                    FilterChip(
+                        selected = i == controlCurrentSlotIndex,
+                        onClick = {
+                            controlCurrentSlotIndex = i
+                        },
+                        label = {
+                            Text(text = stringResource(R.string.slot, i + 1))
+                        }
                     )
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                FlowRow(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    ParamItem(label = stringResource(id = R.string.param_guidance_start),
-                        value = { Text(text = it.guidanceStart.toString()) })
-                    ParamItem(label = stringResource(id = R.string.param_guidance_end),
-                        value = { Text(text = it.guidanceEnd.toString()) })
-                    ParamItem(label = stringResource(id = R.string.param_control_mode),
-                        value = { Text(text = ConstValues.ControlNetModeList[it.controlMode]) })
-                    ParamItem(
-                        label = stringResource(id = R.string.param_control_weight),
-                        value = { Text(text = it.weight.toString()) })
-                    ParamItem(label = stringResource(id = R.string.param_control_model),
-                        value = { Text(text = it.model) })
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            val currentSlot = controlNetSlots.getOrNull(controlCurrentSlotIndex)
+            currentSlot?.let {
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .height(120.dp)
+                            .fillMaxWidth(),
+                    ) {
+                        AsyncImage(
+                            model = it.inputImagePath,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    FlowRow(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        ParamItem(label = stringResource(id = R.string.param_guidance_start),
+                            value = { Text(text = it.guidanceStart.toString()) })
+                        ParamItem(label = stringResource(id = R.string.param_guidance_end),
+                            value = { Text(text = it.guidanceEnd.toString()) })
+                        ParamItem(label = stringResource(id = R.string.param_control_mode),
+                            value = { Text(text = ConstValues.ControlNetModeList[it.controlMode]) })
+                        ParamItem(
+                            label = stringResource(id = R.string.param_control_weight),
+                            value = { Text(text = it.weight.toString()) })
+                        ParamItem(label = stringResource(id = R.string.param_control_model),
+                            value = { Text(text = it.model.toString()) })
+                    }
                 }
             }
 

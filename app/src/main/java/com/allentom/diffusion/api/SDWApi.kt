@@ -39,7 +39,7 @@ import retrofit2.http.Query
 //"control_mode": 2,
 //"weight": 1.0,
 //"model": "control_sd15_depth [fef5e48e]",
-data class ControlNetParam(
+data class ControlNetArg(
     @SerializedName("enabled")
     val enabled: Boolean = false,
     @SerializedName("processor_res")
@@ -418,7 +418,7 @@ data class AlwaysonScripts(
 
 data class ControlNetWrapper(
     @SerializedName("args")
-    val args: List<ControlNetParam> = listOf(),
+    val args: List<ControlNetArg> = listOf(),
 )
 
 data class RegionalPrompterWrapper(

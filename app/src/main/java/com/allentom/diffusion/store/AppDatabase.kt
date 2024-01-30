@@ -25,7 +25,7 @@ import androidx.room.RoomDatabase
         ModelEntity::class,
         LoraTriggerCrossRef::class,
         AdetailerEntity::class
-    ], version = 9, exportSchema = true, autoMigrations = [
+    ], version = 10, exportSchema = true, autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
@@ -34,6 +34,7 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 6, to = 7),
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
+        AutoMigration(from = 9, to = 10),
     ]
 )
 abstract class AppDatabase : RoomDatabase() {

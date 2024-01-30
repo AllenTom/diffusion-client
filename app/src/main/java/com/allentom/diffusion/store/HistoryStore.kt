@@ -13,9 +13,11 @@ import androidx.room.Relation
 import androidx.room.Transaction
 import androidx.room.Update
 import com.allentom.diffusion.Util
-import com.allentom.diffusion.api.ControlNetParam
+import com.allentom.diffusion.api.ControlNetArg
 import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerSlot
+import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetParam
+import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetSlot
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
 import java.io.Serializable
@@ -516,7 +518,7 @@ data class HistoryWithRelation(
         parentColumn = "historyId",
         entityColumn = "historyId",
     )
-    val controlNetHistoryEntity: ControlNetHistoryEntity? = null,
+    val controlNetHistoryEntity: List<ControlNetHistoryEntity> = emptyList(),
 
     @Relation(
         parentColumn = "historyId",
@@ -590,7 +592,21 @@ data class HistoryWithRelation(
                 hrUpscaler = "None",
             ),
             img2imgParam = img2imgParam?.toImg2imgParam(),
-            controlNetParam = controlNetHistoryEntity?.toControlNetParam(),
+            controlNetParam = ControlNetParam(
+                slots = controlNetHistoryEntity.map {
+                    ControlNetSlot(
+                        enabled = true,
+                        guidanceStart = it.guidanceStart,
+                        guidanceEnd = it.guidanceEnd,
+                        controlMode = it.controlMode,
+                        weight = it.weight,
+                        model = it.model,
+                        historyId = it.historyId,
+                        controlNetId = it.controlNetId,
+                        controlNetHistoryId = it.controlNetHistoryId,
+                    )
+                },
+            ),
             model = modelEntity,
             regionCount = historyEntity.regionCount,
             regionRatio = historyEntity.regionRatio,
@@ -674,19 +690,17 @@ data class ControlNetHistoryEntity(
     val weight: Float,
     val model: String,
 ) {
-    fun toControlNetParam(): ControlNetParam {
-        return ControlNetParam(
+    fun toControlNetSlot(): ControlNetSlot {
+        return ControlNetSlot(
+            controlNetHistoryId = controlNetHistoryId,
+            controlNetId = controlNetId,
+            historyId = historyId,
             enabled = true,
-            processorRes = processorRes,
-            thresholdA = thresholdA,
-            thresholdB = thresholdB,
             guidanceStart = guidanceStart,
             guidanceEnd = guidanceEnd,
             controlMode = controlMode,
             weight = weight,
             model = model,
-            historyId = historyId,
-            controlNetId = controlNetId,
         )
     }
 }
@@ -1038,57 +1052,60 @@ object HistoryStore {
             )
         }
         history.controlNetParam?.let { controlNetParam ->
-            val md5 = Util.getMd5FromImageBase64(controlNetParam.inputImage)
-            val db = AppDatabaseHelper.getDatabase(context)
-            val controlNetEntity = db.controlNetDao().getByMd5(md5)
-            val savedControlNetEntity = controlNetEntity
-                ?: db.controlNetDao().insert(
-                    ControlNetEntity(
-                        path = Util.saveControlNetToAppData(
-                            context,
-                            Uri.parse(controlNetParam.inputImagePath!!),
-                        ),
-                        md5 = md5,
-                        time = System.currentTimeMillis()
-                    )
-                ).let {
-                    db.controlNetDao().getById(it)
-                }
-            savedControlNetEntity?.let {
-                val controlNetId = savedControlNetEntity.controlNetId
-                history.imagePaths.firstOrNull()?.let { imgHistory ->
-                    controlNetEntity?.let {
-                        if (it.previewPath.isNotEmpty()) {
-                            return@let
-                        }
-                        val previewPath = Util.saveControlNetPreviewToAppData(
-                            context,
-                            imgHistory.path,
-                            md5
+            controlNetParam.slots.forEach { slot ->
+                val md5 = Util.getMd5FromImageBase64(slot.inputImage!!)
+                val db = AppDatabaseHelper.getDatabase(context)
+                val controlNetEntity = db.controlNetDao().getByMd5(md5)
+                val savedControlNetEntity = controlNetEntity
+                    ?: db.controlNetDao().insert(
+                        ControlNetEntity(
+                            path = Util.saveControlNetToAppData(
+                                context,
+                                Uri.parse(slot.inputImagePath!!),
+                            ),
+                            md5 = md5,
+                            time = System.currentTimeMillis()
                         )
-                        database.controlNetDao().update(
-                            it.copy(
-                                previewPath = previewPath
-                            )
-                        )
+                    ).let {
+                        db.controlNetDao().getById(it)
                     }
+                savedControlNetEntity?.let {
+                    val controlNetId = savedControlNetEntity.controlNetId
+                    history.imagePaths.firstOrNull()?.let { imgHistory ->
+                        controlNetEntity?.let {
+                            if (it.previewPath.isNotEmpty()) {
+                                return@let
+                            }
+                            val previewPath = Util.saveControlNetPreviewToAppData(
+                                context,
+                                imgHistory.path,
+                                md5
+                            )
+                            database.controlNetDao().update(
+                                it.copy(
+                                    previewPath = previewPath
+                                )
+                            )
+                        }
 
-                }
-                db.controlNetHistoryDao().insert(
-                    ControlNetHistoryEntity(
-                        controlNetId = controlNetId,
-                        historyId = savedHistoryId,
-                        processorRes = controlNetParam.processorRes,
-                        thresholdA = controlNetParam.thresholdA,
-                        thresholdB = controlNetParam.thresholdB,
-                        guidanceStart = controlNetParam.guidanceStart,
-                        guidanceEnd = controlNetParam.guidanceEnd,
-                        controlMode = controlNetParam.controlMode,
-                        weight = controlNetParam.weight,
-                        model = controlNetParam.model,
+                    }
+                    db.controlNetHistoryDao().insert(
+                        ControlNetHistoryEntity(
+                            controlNetId = controlNetId,
+                            historyId = savedHistoryId,
+                            guidanceStart = slot.guidanceStart,
+                            guidanceEnd = slot.guidanceEnd,
+                            controlMode = slot.controlMode,
+                            weight = slot.weight,
+                            model = slot.model!!,
+                            processorRes = 0,
+                            thresholdA = 0,
+                            thresholdB = 0,
+                        )
                     )
-                )
+                }
             }
+
         }
         history.adetailerParam?.let {
             it.slots.forEach {
@@ -1167,16 +1184,24 @@ object HistoryStore {
         val raw = database.historyDao().getHistoryById(id)
         var result = raw?.toSaveHistory()
         // load control net
-        result?.controlNetParam?.let {
-            val controlNet = database.controlNetHistoryDao()
-                .getControlNetHistoryWithControlNetByControlNetId(it.controlNetId)
-            result!!.controlNetParam = result!!.controlNetParam?.copy(
-                inputImagePath = controlNet?.controlNetEntity?.path,
-                inputImage = Util.readImageWithPathToBase64(
-                    controlNet?.controlNetEntity?.path ?: ""
-                )
-            )
-        }
+        result?.controlNetParam = ControlNetParam(
+            slots = result?.controlNetParam?.slots?.map {
+                val controlNet = database.controlNetHistoryDao()
+                    .getControlNetHistoryWithControlNetByControlNetId(it.controlNetId)
+                if (controlNet != null) {
+                    return@map it.copy(
+                        inputImagePath = controlNet.controlNetEntity.path,
+                        inputImage = Util.readImageWithPathToBase64(
+                            controlNet.controlNetEntity.path
+                        )
+                    )
+                } else {
+                    return@map it
+                }
+
+            } ?: emptyList()
+        )
+
         // load lora data
         result?.loraPrompt = raw?.loraPrompts?.map { loraPromptEntity: LoraPromptEntity ->
             val loraWithRelation =

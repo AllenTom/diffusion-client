@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -139,7 +140,13 @@ fun ControlNetScreen(navController: NavController) {
             },
             text = {
                 Column {
-                    Text(text = stringResource(id = R.string.importing,currentImportIndex.toString(),totalImportCount.toString()))
+                    Text(
+                        text = stringResource(
+                            id = R.string.importing,
+                            currentImportIndex.toString(),
+                            totalImportCount.toString()
+                        )
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     LinearProgressIndicator(
                         progress = currentImportIndex.toFloat() / totalImportCount.toFloat(),
@@ -166,12 +173,12 @@ fun ControlNetScreen(navController: NavController) {
                         currentImportIndex += 1
                     }
                     refresh()
-                }catch (e:Exception) {
+                } catch (e: Exception) {
                     scope.launch(Dispatchers.Main) {
                         Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                     }
 
-                }finally {
+                } finally {
                     isImportProgressDialogShow = false
                 }
 
@@ -253,10 +260,10 @@ fun ControlNetScreen(navController: NavController) {
                 onDismiss = {
                     currentControlNet = null
                 },
-                onUseParams = {
+                onUseParams = { index ->
                     currentControlNet?.let {
                         scope.launch(Dispatchers.IO) {
-                            DrawViewModel.applyControlNetParams(context, saveControlNet)
+                            DrawViewModel.applyControlNetParams(context, index, it)
                         }
                         HomeViewModel.selectedIndex = 0
                         navController.popBackStack()
@@ -342,11 +349,14 @@ fun ControlNetScreen(navController: NavController) {
 fun ControlInfoBottomSheet(
     controlNet: SaveControlNet,
     onDismiss: () -> Unit,
-    onUseParams: () -> Unit
+    onUseParams: (index: Int) -> Unit
 ) {
     val modalBottomSheetState = rememberModalBottomSheetState()
     var imageActionDialogOpen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var selectedSlotToAdd by remember {
+        mutableStateOf(0)
+    }
     if (imageActionDialogOpen) {
         AlertDialog(
             onDismissRequest = {
@@ -422,8 +432,23 @@ fun ControlInfoBottomSheet(
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    DrawViewModel.inputControlNetParams.slots.indices.forEach { index ->
+                        FilterChip(
+                            label = { Text(text = stringResource(id = R.string.slot, index + 1)) },
+                            selected = index == selectedSlotToAdd,
+                            onClick = {
+                                selectedSlotToAdd = index
+                            },
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
                 Button(onClick = {
-                    onUseParams()
+                    onUseParams(selectedSlotToAdd)
                     onDismiss()
                 }, modifier = Modifier.fillMaxWidth()) {
                     Text(text = stringResource(R.string.use_control_net))
