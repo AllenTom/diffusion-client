@@ -61,9 +61,9 @@ import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.HistoryView
 import com.allentom.diffusion.composables.ImageUriPreviewDialog
 import com.allentom.diffusion.composables.IsWideWindow
-import com.allentom.diffusion.store.HistoryStore
-import com.allentom.diffusion.store.ImageHistory
-import com.allentom.diffusion.store.SaveHistory
+import com.allentom.diffusion.store.history.HistoryStore
+import com.allentom.diffusion.store.history.ImageHistory
+import com.allentom.diffusion.store.history.SaveHistory
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.reactor.ReactorViewModel
 import kotlinx.coroutines.Dispatchers

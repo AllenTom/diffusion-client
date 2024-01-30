@@ -27,8 +27,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
-import com.allentom.diffusion.store.HistoryStore
-import com.allentom.diffusion.store.ImageHistory
+import com.allentom.diffusion.store.history.HistoryStore
+import com.allentom.diffusion.store.history.ImageHistory
 import com.allentom.diffusion.ui.screens.home.HomeViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

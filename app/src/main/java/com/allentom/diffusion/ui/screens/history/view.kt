@@ -36,8 +36,8 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.DrawBar
-import com.allentom.diffusion.store.HistoryStore
-import com.allentom.diffusion.store.SaveHistory
+import com.allentom.diffusion.store.history.HistoryStore
+import com.allentom.diffusion.store.history.SaveHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

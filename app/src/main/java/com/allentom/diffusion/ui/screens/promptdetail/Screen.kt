@@ -28,8 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.allentom.diffusion.composables.DrawBar
-import com.allentom.diffusion.store.HistoryWithRelation
-import com.allentom.diffusion.store.ImageHistory
+import com.allentom.diffusion.store.history.HistoryWithRelation
+import com.allentom.diffusion.store.history.ImageHistory
 import com.allentom.diffusion.store.PromptStore
 import com.allentom.diffusion.store.SavePrompt
 import kotlinx.coroutines.Dispatchers

@@ -41,7 +41,7 @@ import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
-import com.allentom.diffusion.store.SaveHistory
+import com.allentom.diffusion.store.history.SaveHistory
 import com.allentom.diffusion.ui.screens.historydetail.ParamItem
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
 import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel

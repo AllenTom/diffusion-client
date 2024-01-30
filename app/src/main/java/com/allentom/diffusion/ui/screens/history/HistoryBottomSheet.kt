@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.allentom.diffusion.Util
-import com.allentom.diffusion.store.SaveHistory
+import com.allentom.diffusion.store.history.SaveHistory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

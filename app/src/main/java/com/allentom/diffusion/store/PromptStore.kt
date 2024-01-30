@@ -15,6 +15,7 @@ import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import com.allentom.diffusion.api.getApiClient
+import com.allentom.diffusion.store.history.HistoryWithRelation
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
@@ -23,7 +24,6 @@ import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
 import kotlinx.coroutines.flow.Flow
 import java.io.Serializable
-import kotlin.random.Random
 
 class EmbeddingPrompt(
     var text: String,

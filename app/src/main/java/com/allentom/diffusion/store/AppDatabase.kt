@@ -5,6 +5,30 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.allentom.diffusion.store.history.AdetailerDao
+import com.allentom.diffusion.store.history.AdetailerEntity
+import com.allentom.diffusion.store.history.ControlNetHistoryDao
+import com.allentom.diffusion.store.history.ControlNetHistoryEntity
+import com.allentom.diffusion.store.history.EmbeddingHistoryCrossRef
+import com.allentom.diffusion.store.history.EmbeddingHistoryDao
+import com.allentom.diffusion.store.history.HistoryDao
+import com.allentom.diffusion.store.history.HistoryEntity
+import com.allentom.diffusion.store.history.HrHistoryDao
+import com.allentom.diffusion.store.history.HrHistoryEntity
+import com.allentom.diffusion.store.history.ImageHistoryDao
+import com.allentom.diffusion.store.history.ImageHistoryEntity
+import com.allentom.diffusion.store.history.Img2ImgDao
+import com.allentom.diffusion.store.history.Img2ImgEntity
+import com.allentom.diffusion.store.history.LoraPromptHistoryCrossRef
+import com.allentom.diffusion.store.history.LoraPromptHistoryDao
+import com.allentom.diffusion.store.history.NegativePromptHistoryCrossRef
+import com.allentom.diffusion.store.history.NegativePromptHistoryDao
+import com.allentom.diffusion.store.history.PromptExtraDao
+import com.allentom.diffusion.store.history.PromptExtraEntity
+import com.allentom.diffusion.store.history.PromptHistoryCrossRef
+import com.allentom.diffusion.store.history.PromptHistoryDao
 
 @Database(
     entities = [
@@ -37,6 +61,8 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 9, to = 10),
     ]
 )
+
+
 abstract class AppDatabase : RoomDatabase() {
     abstract fun promptDao(): PromptDao
     abstract fun loraPromptDao(): LoraPromptDao
@@ -46,8 +72,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun historyDao(): HistoryDao
     abstract fun loraPromptHistoryDao(): LoraPromptHistoryDao
     abstract fun promptHistoryDao(): PromptHistoryDao
-    abstract fun promptExtraDao(): PromptExtraDao
     abstract fun negativePromptHistoryDao(): NegativePromptHistoryDao
+    abstract fun promptExtraDao(): PromptExtraDao
+
     abstract fun embeddingDao(): EmbeddingDao
     abstract fun embeddingHistoryDao(): EmbeddingHistoryDao
     abstract fun controlNetHistoryDao(): ControlNetHistoryDao
