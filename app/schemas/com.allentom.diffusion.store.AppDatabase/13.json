@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "0d94bacfd4de6839fe7db1781491f470",
+    "identityHash": "4e62fd81521175274dbd25b125f3f774",
     "entities": [
       {
         "tableName": "prompt",
@@ -617,7 +617,7 @@
       },
       {
         "tableName": "control_net_history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`controlNetHistoryId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `controlNetId` INTEGER NOT NULL, `historyId` INTEGER NOT NULL, `processorRes` INTEGER NOT NULL, `thresholdA` INTEGER NOT NULL, `thresholdB` INTEGER NOT NULL, `guidanceStart` REAL NOT NULL, `guidanceEnd` REAL NOT NULL, `controlMode` INTEGER NOT NULL, `weight` REAL NOT NULL, `model` TEXT NOT NULL, `enabled` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`controlNetHistoryId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `controlNetId` INTEGER NOT NULL, `historyId` INTEGER NOT NULL, `processorRes` INTEGER NOT NULL, `thresholdA` INTEGER NOT NULL, `thresholdB` INTEGER NOT NULL, `guidanceStart` REAL NOT NULL, `guidanceEnd` REAL NOT NULL, `controlMode` INTEGER NOT NULL, `weight` REAL NOT NULL, `model` TEXT NOT NULL, `active` INTEGER)",
         "fields": [
           {
             "fieldPath": "controlNetHistoryId",
@@ -686,8 +686,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "enabled",
-            "columnName": "enabled",
+            "fieldPath": "active",
+            "columnName": "active",
             "affinity": "INTEGER",
             "notNull": false
           }
@@ -1250,7 +1250,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d94bacfd4de6839fe7db1781491f470')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4e62fd81521175274dbd25b125f3f774')"
     ]
   }
 }

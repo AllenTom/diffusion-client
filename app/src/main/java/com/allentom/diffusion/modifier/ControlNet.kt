@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import com.allentom.diffusion.R
 import com.allentom.diffusion.service.Text2ImageParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ExtraGenModifyInput

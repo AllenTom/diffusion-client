@@ -31,7 +31,7 @@ data class ControlNetHistoryEntity(
     val controlMode: Int,
     val weight: Float,
     val model: String,
-//    val enabled: Boolean? = false,
+    val active: Boolean? = false,
 ) {
     fun toControlNetSlot(): ControlNetSlot {
         return ControlNetSlot(
@@ -43,9 +43,8 @@ data class ControlNetHistoryEntity(
             controlMode = controlMode,
             weight = weight,
             model = model,
-            enabled = false,
-
-            )
+            enabled = active ?: false
+        )
     }
 }
 
@@ -125,6 +124,7 @@ fun SaveHistory.saveControlNet(context: Context) {
                         processorRes = 0,
                         thresholdA = 0,
                         thresholdB = 0,
+                        active = slot.enabled
                     )
                 )
             }
@@ -136,17 +136,7 @@ fun SaveHistory.saveControlNet(context: Context) {
 fun HistoryWithRelation.toControlNetParam(): ControlNetParam {
     return ControlNetParam(
         slots = controlNetHistoryEntity.map {
-            ControlNetSlot(
-                enabled = false,
-                guidanceStart = it.guidanceStart,
-                guidanceEnd = it.guidanceEnd,
-                controlMode = it.controlMode,
-                weight = it.weight,
-                model = it.model,
-                historyId = it.historyId,
-                controlNetId = it.controlNetId,
-                controlNetHistoryId = it.controlNetHistoryId,
-            )
+            it.toControlNetSlot()
         },
     )
 }

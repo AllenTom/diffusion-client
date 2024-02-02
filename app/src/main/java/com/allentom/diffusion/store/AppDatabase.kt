@@ -50,7 +50,7 @@ import com.allentom.diffusion.store.history.XYZHistoryEntity
         LoraTriggerCrossRef::class,
         AdetailerEntity::class,
         XYZHistoryEntity::class
-    ], version = 12, exportSchema = true, autoMigrations = [
+    ], version = 13, exportSchema = true, autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
@@ -62,6 +62,7 @@ import com.allentom.diffusion.store.history.XYZHistoryEntity
         AutoMigration(from = 9, to = 10),
         AutoMigration(from = 10, to = 11),
         AutoMigration(from = 11, to = 12),
+        AutoMigration(from = 12, to = 13),
     ]
 )
 
