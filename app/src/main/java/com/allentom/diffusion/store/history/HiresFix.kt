@@ -1,6 +1,7 @@
 package com.allentom.diffusion.store.history
 
 import android.content.Context
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.Insert
@@ -8,14 +9,18 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import com.allentom.diffusion.store.AppDatabaseHelper
-import com.allentom.diffusion.store.Prompt
 import java.io.Serializable
 
-class SaveHrParam(
+data class SaveHrParam(
     val enableScale: Boolean,
     val hrScale: Float,
     val hrDenosingStrength: Float,
     val hrUpscaler: String,
+    val hrMode: String = "scale",
+    val hrResizeWidth: Long = 0,
+    val hrResizeHeight: Long = 0,
+    val hrSteps: Long = 0,
+    val historyId: Long = 0,
 ) : Serializable {
     fun toEntity(): HrHistoryEntity {
         return HrHistoryEntity(
@@ -23,7 +28,11 @@ class SaveHrParam(
             hrScale = hrScale,
             hrDenosingStrength = hrDenosingStrength,
             hrUpscaler = hrUpscaler,
-            historyId = 0,
+            hrSteps = hrSteps,
+            hrResizeWidth = hrResizeWidth,
+            hrResizeHeight = hrResizeHeight,
+            hrMode = hrMode,
+            historyId = historyId,
         )
     }
 }
@@ -36,6 +45,14 @@ data class HrHistoryEntity(
     val hrScale: Float,
     val hrDenosingStrength: Float,
     val hrUpscaler: String,
+    @ColumnInfo(defaultValue = "scale")
+    val hrMode: String = "scale",
+    @ColumnInfo(defaultValue = "0")
+    val hrResizeWidth: Long = 0,
+    @ColumnInfo(defaultValue = "0")
+    val hrResizeHeight: Long = 0,
+    @ColumnInfo(defaultValue = "0")
+    val hrSteps: Long = 0,
     val historyId: Long,
 ) {
     companion object {
@@ -45,6 +62,10 @@ data class HrHistoryEntity(
                 hrScale = hrParam.hrScale,
                 hrDenosingStrength = hrParam.hrDenosingStrength,
                 hrUpscaler = hrParam.hrUpscaler,
+                hrSteps = hrParam.hrSteps,
+                hrResizeWidth = hrParam.hrResizeWidth,
+                hrResizeHeight = hrParam.hrResizeHeight,
+                hrMode = hrParam.hrMode,
                 historyId = historyId,
             )
         }
@@ -57,6 +78,11 @@ data class HrHistoryEntity(
             hrScale = hrScale,
             hrDenosingStrength = hrDenosingStrength,
             hrUpscaler = hrUpscaler,
+            hrMode = hrMode,
+            hrResizeWidth = hrResizeWidth,
+            hrResizeHeight = hrResizeHeight,
+            hrSteps = hrSteps,
+            historyId = historyId,
         )
     }
 }
@@ -88,5 +114,10 @@ fun HistoryWithRelation.toHiresFixParam(): SaveHrParam {
         hrScale = 1.0f,
         hrDenosingStrength = 0.0f,
         hrUpscaler = "None",
+        historyId = historyEntity.historyId,
+        hrSteps = hrParamEntity?.hrSteps ?: 0,
+        hrResizeWidth = hrParamEntity?.hrResizeWidth ?: 0,
+        hrResizeHeight = hrParamEntity?.hrResizeHeight ?: 0,
+        hrMode = hrParamEntity?.hrMode ?: "scale",
     )
 }

@@ -17,6 +17,7 @@ import com.allentom.diffusion.api.RegionalPrompterWrapper
 import com.allentom.diffusion.api.Txt2ImgRequest
 import com.allentom.diffusion.api.entity.throwApiExceptionIfNotSuccessful
 import com.allentom.diffusion.api.getApiClient
+import com.allentom.diffusion.store.history.SaveHrParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
@@ -151,6 +152,7 @@ fun applyAdetailerParam(
     }
     return alwaysonScripts
 }
+
 data class Text2ImageParam(
     val prompt: String,
     val negativePrompt: String,
@@ -161,21 +163,18 @@ data class Text2ImageParam(
     val nIter: Int,
     val cfgScale: Float,
     val seed: Int,
-    val enableScale: Boolean = false,
-    val hrScale: Float = 2f,
-    val hrDenosingStrength: Float = 0.7f,
-    val hrUpscaler: String? = "None",
-    val hrSecondPassSteps:Int = 0,
+    val hiresFixParam: SaveHrParam? = null,
     val controlNetParam: ControlNetParam? = null,
     val regionPromptParam: RegionPromptParam? = null,
     val refinerModel: String? = null,
     val refinerSwitchAt: Float? = null,
     val reactorParam: ReactorParam? = null,
     val adetailerParam: AdetailerParam? = null,
-    val overrideSetting:OverrideSetting? = null
+    val overrideSetting: OverrideSetting? = null
 )
+
 suspend fun text2Image(
-    param:Text2ImageParam
+    param: Text2ImageParam
 ): String? {
     with(param) {
         var alwaysonScripts = AlwaysonScripts()
@@ -187,7 +186,7 @@ suspend fun text2Image(
         Log.d("prompt", "prompt: $prompt")
         Log.d("alwayson", DrawViewModel.gson.toJson(alwaysonScripts))
 
-        val request = Txt2ImgRequest(
+        var request = Txt2ImgRequest(
             prompt = prompt,
             negativePrompt = negativePrompt,
             width = width,
@@ -197,15 +196,24 @@ suspend fun text2Image(
             nIterate = 1,
             cfgScale = cfgScale.toInt(),
             seed = seed,
-            enableHr = enableScale,
-            hrScale = hrScale,
-            denoisingStrength = hrDenosingStrength,
-            hrUpscaler = hrUpscaler ?: "None",
             alwaysonScripts = alwaysonScripts,
             refinerCheckpoint = refinerModel,
             refinerSwitchAt = refinerSwitchAt,
             overrideSetting = overrideSetting,
         )
+
+        hiresFixParam?.let {
+            request = request.copy(
+                enableHr = it.enableScale,
+                hrScale = if (it.hrMode == "scale") it.hrScale else 1f,
+                denoisingStrength = it.hrDenosingStrength,
+                hrUpscaler = it.hrUpscaler,
+                hrSecondPassSteps = it.hrSteps,
+                hrResizeX = if (it.hrMode == "resize") it.hrResizeWidth else 0,
+                hrResizeY = if (it.hrMode == "resize") it.hrResizeHeight else 0,
+            )
+        }
+
         val list = getApiClient().txt2img(
             request = request
         )
@@ -219,28 +227,29 @@ suspend fun text2Image(
 }
 
 data class Img2imgGenerateParam(
-   val prompt: String,
-   val negativePrompt: String,
-   val width: Int,
-   val height: Int,
-   val steps: Int,
-   val samplerName: String,
-   val cfgScale: Float,
-   val seed: Int,
-   val imgBase64: String?,
-   val resizeMode: Int?,
-   val denoisingStrength: Float?,
-   val scaleBy: Float?,
-   val mask: String? = null,
-   val inpaintingMaskInvert: Int = 0,
-   val maskBlur: Float = 4f,
-   val inpaintingFill: Int = 0,
-   val inpaintFullRes: Int = 1,
-   val inpaintFullResPadding: Int = 32,
-   val regionPromptParam: RegionPromptParam? = null,
-   val reactorParam: ReactorParam? = null,
-   val adetailerParam: AdetailerParam? = null
+    val prompt: String,
+    val negativePrompt: String,
+    val width: Int,
+    val height: Int,
+    val steps: Int,
+    val samplerName: String,
+    val cfgScale: Float,
+    val seed: Int,
+    val imgBase64: String?,
+    val resizeMode: Int?,
+    val denoisingStrength: Float?,
+    val scaleBy: Float?,
+    val mask: String? = null,
+    val inpaintingMaskInvert: Int = 0,
+    val maskBlur: Float = 4f,
+    val inpaintingFill: Int = 0,
+    val inpaintFullRes: Int = 1,
+    val inpaintFullResPadding: Int = 32,
+    val regionPromptParam: RegionPromptParam? = null,
+    val reactorParam: ReactorParam? = null,
+    val adetailerParam: AdetailerParam? = null
 )
+
 suspend fun img2Image(
     param: Img2imgGenerateParam
 ): String? {

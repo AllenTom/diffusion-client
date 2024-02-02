@@ -113,7 +113,12 @@ fun ParamsPanel(
             }
 
             1 -> {
-                HiresFixPanel()
+                HiresFixPanel(
+                    onValueChange = {
+                        DrawViewModel.inputHiresFixParam = it
+                    },
+                    param = DrawViewModel.inputHiresFixParam
+                )
             }
             2 -> {
                 ControlNetPanel(

@@ -471,11 +471,15 @@ data class Txt2ImgRequest(
     @SerializedName("denoising_strength")
     val denoisingStrength: Float = 0.7f,
     @SerializedName("hr_second_pass_steps")
-    val hrSecondPassSteps: Int = 0,
+    val hrSecondPassSteps: Long = 0,
     @SerializedName("hr_scale")
     val hrScale: Float = 1f,
     @SerializedName("hr_upscaler")
     val hrUpscaler: String = "None",
+    @SerializedName("hr_resize_x")
+    val hrResizeX: Long = 0,
+    @SerializedName("hr_resize_y")
+    val hrResizeY: Long = 0,
     @SerializedName("alwayson_scripts")
     val alwaysonScripts: AlwaysonScripts? = AlwaysonScripts(null),
     @SerializedName("refiner_checkpoint")

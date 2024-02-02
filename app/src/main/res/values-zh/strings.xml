@@ -273,4 +273,5 @@
     <string name="mod_slot">插槽</string>
     <string name="mod_hrupscaler">超分采样器</string>
     <string name="mod_hirstep">超分步数</string>
+    <string name="mode">模式</string>
 </resources>

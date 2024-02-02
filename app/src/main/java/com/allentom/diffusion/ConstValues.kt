@@ -11,6 +11,7 @@ object ConstValues {
     lateinit var ReactorGenderDetectionOptions: List<String>
     lateinit var ReactorRestoreFaceOption: List<String>
     lateinit var AdetailerMaskMergeOptions: List<String>
+    lateinit var HiresFixModeList: List<String>
     fun initValues(context: Context) {
         Img2ImgResizeModeList = listOf(
             context.getString(R.string.just_resize),
@@ -55,6 +56,11 @@ object ConstValues {
             context.getString(R.string.none),
             context.getString(R.string.merge),
             context.getString(R.string.merge_and_invert)
+        )
+
+        HiresFixModeList = listOf(
+            context.getString(R.string.param_scale_by),
+            context.getString(R.string.resize_and_fill),
         )
 
     }

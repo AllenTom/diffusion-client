@@ -10,31 +10,31 @@ import com.allentom.diffusion.ui.screens.home.tabs.draw.ModifierLibrary
 import com.allentom.diffusion.ui.screens.home.tabs.draw.TextOptionListModifier
 
 fun registerModifier(context: Context) {
-    ModifierLibrary.registerModifier(context,"step") {
+    ModifierLibrary.registerModifier(context, "step") {
         StepModifier()
     }
-    ModifierLibrary.registerModifier(context,"cfgScale") {
+    ModifierLibrary.registerModifier(context, "cfgScale") {
         CFGScaleModifier()
     }
-    ModifierLibrary.registerModifier(context,"sampler") {
+    ModifierLibrary.registerModifier(context, "sampler") {
         SamplerModifier()
     }
-    ModifierLibrary.registerModifier(context,"sdModel") {
+    ModifierLibrary.registerModifier(context, "sdModel") {
         ModelModifier()
     }
-    ModifierLibrary.registerModifier(context,"controlNetSlotEnable") {
+    ModifierLibrary.registerModifier(context, "controlNetSlotEnable") {
         ControlNetSlotEnableModifier()
     }
-    ModifierLibrary.registerModifier(context,"AdetailerSlotEnable") {
+    ModifierLibrary.registerModifier(context, "AdetailerSlotEnable") {
         AdetailerSlotEnableModifier()
     }
-    ModifierLibrary.registerModifier(context,"ReactorEnable") {
+    ModifierLibrary.registerModifier(context, "ReactorEnable") {
         ReactorEnableModifier()
     }
-    ModifierLibrary.registerModifier(context,"vaeModel") {
+    ModifierLibrary.registerModifier(context, "vaeModel") {
         VaeModifier()
     }
-    ModifierLibrary.registerModifier(context,"hiresSampler") {
+    ModifierLibrary.registerModifier(context, "hiresSampler") {
         HiresSamplerModifier()
     }
 }
@@ -134,7 +134,11 @@ class VaeModifier : TextOptionListModifier() {
 
 class HiresSamplerModifier : TextOptionListModifier() {
     override fun onText2ImageParamChange(param: Text2ImageParam, index: Int): Text2ImageParam {
-        return param.copy(hrUpscaler = args[index])
+        return param.copy(
+            hiresFixParam = param.hiresFixParam?.copy(
+                hrUpscaler = args[index]
+            )
+        )
     }
 
     override fun getKey(): String {
@@ -152,7 +156,11 @@ class HiresSamplerModifier : TextOptionListModifier() {
 
 class HiresStepModifier : IntListModifier() {
     override fun onText2ImageParamChange(param: Text2ImageParam, index: Int): Text2ImageParam {
-        return param.copy(hrSecondPassSteps = args[index])
+        return param.copy(
+            hiresFixParam = param.hiresFixParam?.copy(
+                hrSteps = args[index].toLong()
+            )
+        )
     }
 
     override fun getKey(): String {

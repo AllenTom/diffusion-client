@@ -354,12 +354,25 @@ object DrawViewModel {
     var genXYZ by mutableStateOf<DisplayAxis?>(null)
 
     var displayResultIndex by mutableStateOf(0)
-    var inputEnableHiresFix by mutableStateOf(false)
-    var inputHrScale by mutableFloatStateOf(2f)
-    var inputHrSteps by mutableFloatStateOf(0f)
-    var inputHrDenoisingStrength by mutableFloatStateOf(0.7f)
-    var inputUpscaler by mutableStateOf<String>("None")
+
+    // hires fix
+    var inputHiresFixParam by mutableStateOf<SaveHrParam>(
+        SaveHrParam(
+            enableScale = false,
+            hrScale = 2f,
+            hrDenosingStrength = 0.7f,
+            hrUpscaler = "None",
+        )
+    )
+
+    //    var inputEnableHiresFix by mutableStateOf(false)
+//    var inputHrScale by mutableFloatStateOf(2f)
+//    var inputHrSteps by mutableFloatStateOf(0f)
+//    var inputHrDenoisingStrength by mutableFloatStateOf(0.7f)
+//    var inputUpscaler by mutableStateOf("None")
     var upscalers by mutableStateOf<List<Upscale>>(emptyList())
+
+    //lora
     var loraList by mutableStateOf<List<Lora>>(emptyList())
     var inputLoraList by mutableStateOf<List<LoraPrompt>>(emptyList())
 
@@ -499,11 +512,8 @@ object DrawViewModel {
         refinerSwitchAt = history.refinerSwitchAt ?: 0.8f
 
 
+        inputHiresFixParam = history.hrParam
 
-        inputUpscaler = history.hrParam.hrUpscaler
-        inputHrScale = history.hrParam.hrScale
-        inputHrDenoisingStrength = history.hrParam.hrDenosingStrength
-        inputEnableHiresFix = history.hrParam.enableScale
 
         history.img2imgParam?.let { img2imgParam: Img2imgParam ->
             val inputImageBase64 = Util.readImageWithPathToBase64(img2imgParam.path)
@@ -714,10 +724,7 @@ object DrawViewModel {
                                 nIter = inputNiter.toInt(),
                                 cfgScale = inputCfgScale,
                                 seed = seed,
-                                enableScale = inputEnableHiresFix,
-                                hrScale = inputHrScale,
-                                hrDenosingStrength = inputHrDenoisingStrength,
-                                hrUpscaler = inputUpscaler,
+                                hiresFixParam = inputHiresFixParam,
                                 controlNetParam = controlNetParam,
                                 regionPromptParam = regionPromptParam,
                                 refinerModel = if (enableRefiner) refinerModel else null,
@@ -889,12 +896,7 @@ object DrawViewModel {
                     cfgScale = inputCfgScale,
                     loraPrompt = inputLoraList,
                     embeddingPrompt = embeddingList,
-                    hrParam = SaveHrParam(
-                        enableScale = inputEnableHiresFix,
-                        hrScale = inputHrScale,
-                        hrDenosingStrength = inputHrDenoisingStrength,
-                        hrUpscaler = inputUpscaler
-                    ),
+                    hrParam = inputHiresFixParam,
                     img2imgParam = img2ImgParam,
                     controlNetParam = controlNetParam,
                     regionRatio = regionPromptParam.dividerText,

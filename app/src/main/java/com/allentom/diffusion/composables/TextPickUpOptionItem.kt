@@ -28,6 +28,7 @@ fun TextPickUpItem(
     value: String?,
     title: String = label,
     options: List<String>,
+    onGetDisplayValue: (index: Int, value: String) -> String = { _, newVal -> newVal },
     onValueChange: (String) -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -61,7 +62,7 @@ fun TextPickUpItem(
                                 },
                             headlineContent = {
                                 Text(
-                                    text = options[index],
+                                    text = onGetDisplayValue(index, options[index]),
                                     color = if (options[index] == value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
                             }
