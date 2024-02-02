@@ -1,6 +1,7 @@
 package com.allentom.diffusion.ui.screens.extra
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -26,6 +27,13 @@ import java.io.Serializable
 //    "upscale_first": false,
 //    "image": ""
 //}
+data class InputImageItem(
+    val uri: Uri,
+    val name: String,
+    val resultImage: String? = null,
+    val isGenerating: Boolean = false,
+    val isExport: Boolean = false,
+)
 data class ExtraImageParam(
     val resizeMode: Int = 0,
     val showExtrasResults: Boolean = true,
@@ -66,12 +74,24 @@ data class ExtraImageParam(
 object ExtraViewModel : ViewModel() {
     var extraParam by mutableStateOf(ExtraImageParam())
     var imageName by mutableStateOf(null as String?)
-    var Resultimage by mutableStateOf(null as String?)
     var upscalerList by mutableStateOf<List<Upscale>>(emptyList())
     var isProcessing by mutableStateOf(false)
-
+    var inputImages by mutableStateOf(emptyList<InputImageItem>())
+    var stopFlag by mutableStateOf(false)
     fun saveToCache(context: Context) {
         AppConfigStore.config = AppConfigStore.config.copy(extraImageHistory = extraParam.copy(image = null))
         AppConfigStore.saveData(context)
+    }
+
+    fun onStartGenerating(onlyIndex: Int? = null) {
+        inputImages = inputImages.mapIndexed { index, inputImageItem ->
+            if (onlyIndex != null) {
+                if (index != onlyIndex) {
+                    return@mapIndexed inputImageItem
+                }
+                return@mapIndexed inputImageItem.copy(isGenerating = true, resultImage = null)
+            }
+            inputImageItem.copy(isGenerating = true, resultImage = null)
+        }
     }
 }

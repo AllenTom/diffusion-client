@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
@@ -36,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
 import com.allentom.diffusion.composables.IsWideWindow
@@ -63,8 +65,8 @@ fun DisplayBase64Image(base64String: String) {
         }
     }
     imageBitmap.value?.let { bitmap ->
-        Image(
-            bitmap = bitmap.asImageBitmap(),
+        AsyncImage(
+            model = bitmap,
             contentDescription = "Base64 Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit

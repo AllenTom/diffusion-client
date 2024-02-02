@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.net.Uri
 import android.os.Environment
+import android.provider.OpenableColumns
 import android.util.Base64
 import androidx.compose.ui.graphics.asImageBitmap
 import com.allentom.diffusion.store.Prompt
@@ -204,7 +205,12 @@ object Util {
         file.writeBytes(imageBytes)
         return file.absolutePath
     }
-    fun saveReactorSourceFile(context: Context, imgBase64: String, fileName: String): Pair<String,String> {
+
+    fun saveReactorSourceFile(
+        context: Context,
+        imgBase64: String,
+        fileName: String
+    ): Pair<String, String> {
         val imageBytes = Base64.decode(imgBase64, Base64.DEFAULT)
         val uuid = UUID.randomUUID().toString()
         val ext = fileName.substring(fileName.lastIndexOf(".") + 1)
@@ -215,7 +221,7 @@ object Util {
         }
         val file = File(saveDir, saveFilename)
         file.writeBytes(imageBytes)
-        return Pair(file.absolutePath,saveFilename)
+        return Pair(file.absolutePath, saveFilename)
     }
 
 
@@ -241,11 +247,16 @@ object Util {
         inputStream.close()
         outputStream.close()
     }
-    fun saveImageBase64ToGallery(imageBase64: String, fileName: String) {
+
+    fun saveImageBase64ToGallery(
+        imageBase64: String,
+        fileName: String,
+        folderName: String = "Diffusion"
+    ) {
         val imageBytes = Base64.decode(imageBase64, Base64.DEFAULT)
         val picturesDirectory =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val diffusionDirectory = File(picturesDirectory, "Diffusion")
+        val diffusionDirectory = File(picturesDirectory, folderName)
         if (!diffusionDirectory.exists()) {
             diffusionDirectory.mkdir()
         }
@@ -351,6 +362,7 @@ object Util {
         }
         return Prompt(text = parseText, piority = piority)
     }
+
     fun randomColor(): Int {
         val random = java.util.Random()
         return android.graphics.Color.argb(
@@ -375,7 +387,12 @@ object Util {
         return Pair(imageBitmap.width, imageBitmap.height)
     }
 
-    fun calculateActualSize(containerWidth: Int, containerHeight: Int, imageWidth: Int, imageHeight: Int): Pair<Int, Int> {
+    fun calculateActualSize(
+        containerWidth: Int,
+        containerHeight: Int,
+        imageWidth: Int,
+        imageHeight: Int
+    ): Pair<Int, Int> {
         val containerRatio = containerWidth.toFloat() / containerHeight.toFloat()
         val imageRatio = imageWidth.toFloat() / imageHeight.toFloat()
 
@@ -447,5 +464,28 @@ object Util {
         }
         return "data:image/$mimeType;base64,$base64String"
     }
+
+//    fun getRealFileNameFromUri(context: Context, uri: Uri): String? {
+//        var result: String? = null
+//        if (uri.scheme == "content") {
+//            val cursor = context.contentResolver.query(uri, null, null, null, null)
+//            try {
+//                if (cursor != null && cursor.moveToFirst()) {
+//                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+//                    result = cursor.getString()
+//                }
+//            } finally {
+//                cursor?.close()
+//            }
+//        }
+//        if (result == null) {
+//            result = uri.path
+//            val cut = result?.lastIndexOf('/')
+//            if (cut != -1) {
+//                result = result?.substring(cut + 1)
+//            }
+//        }
+//        return result
+//    }
 
 }
