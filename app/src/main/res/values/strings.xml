@@ -263,4 +263,13 @@
     <string name="merge_and_invert">Merge and Invert</string>
     <string name="none">None</string>
     <string name="slot">Slot %1$s</string>
+    <string name="mod_adetailer_enable">Adetailer Enable</string>
+    <string name="mod_contronnetslotenable">ContronNetSlotEnable</string>
+    <string name="mod_reactorenable">ReactorEnable</string>
+    <string name="mod_value">Value</string>
+    <string name="xaxis">xAxis</string>
+    <string name="yaxis">yAxis</string>
+    <string name="mod_slot">Slot</string>
+    <string name="mod_hrupscaler">HrUpscaler</string>
+    <string name="mod_hirstep">Hires Steps</string>
 </resources>

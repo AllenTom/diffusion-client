@@ -264,4 +264,13 @@
     <string name="merge_and_invert">合并并反选</string>
     <string name="none">无</string>
     <string name="slot">插槽 %1$s</string>
+    <string name="mod_adetailer_enable">Adetailer 开关</string>
+    <string name="mod_contronnetslotenable">ControlNet 开关</string>
+    <string name="mod_reactorenable">换脸开关</string>
+    <string name="mod_value">值</string>
+    <string name="xaxis">X 轴</string>
+    <string name="yaxis">Y 轴</string>
+    <string name="mod_slot">插槽</string>
+    <string name="mod_hrupscaler">超分采样器</string>
+    <string name="mod_hirstep">超分步数</string>
 </resources>

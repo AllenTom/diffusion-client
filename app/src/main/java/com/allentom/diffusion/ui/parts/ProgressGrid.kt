@@ -4,19 +4,24 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -38,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -45,12 +51,14 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
+import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.GenImageItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.max
 
 
 @Composable
@@ -200,8 +208,7 @@ fun GenProgressGrid(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
 
-                    Box(
-                    ) {
+                    Box() {
                         Icon(
                             Icons.Rounded.MoreVert,
                             contentDescription = null,
@@ -286,100 +293,154 @@ fun GenProgressGrid(
                 .weight(1f)
         ) {
             if (DrawViewModel.genItemList.isNotEmpty()) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    items(DrawViewModel.genItemList.size) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .height(120.dp)
-                                .border(
-                                    DrawViewModel.displayResultIndex.let { currentIndex ->
-                                        if (currentIndex == it) 4.dp else 0.dp
-                                    },
-                                    MaterialTheme.colorScheme.secondary,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .clickable {
-
-                                    DrawViewModel.displayResultIndex = it
-
+                val displayXYZ = DrawViewModel.genXYZ
+                if (displayXYZ == null) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        items(DrawViewModel.genItemList.size) {
+                            GenItem(index = it)
+                        }
+                    }
+                } else {
+                    val yAxisCount = max(displayXYZ.yAxisValues.size, 1)
+                    LazyColumn {
+                        item {
+                            for (i in 0 until yAxisCount) {
+                                val yAxisValue = displayXYZ.yAxisValues.getOrNull(i)
+                                yAxisValue?.let {
+                                    Text(
+                                        text = "${displayXYZ.yAxisName} = $yAxisValue"
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
-                                .clip(RoundedCornerShape(8.dp))
-                        ) {
-                            val imageItem = DrawViewModel.genItemList[it]
-                            if (imageItem.error != null) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(120.dp)
-                                        .padding(8.dp)
-                                        .align(
-                                            Alignment.Center
-                                        )
+                                Row(
+                                    modifier = Modifier.horizontalScroll(rememberScrollState())
                                 ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.align(Alignment.Center)
-                                    ) {
-                                        Icon(
-                                            Icons.Filled.Warning,
-                                            contentDescription = "Error"
-                                        )
-                                        Text(text = stringResource(id = R.string.error))
-                                    }
-                                }
-                            } else {
-                                val imageBase64 = imageItem.getDisplayImageBase64()
-                                if (imageBase64 != null) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-
-                                    ) {
-                                        DisplayBase64Image(imageBase64)
-                                    }
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(120.dp)
-                                            .padding(8.dp)
-                                            .align(
-                                                Alignment.Center
-                                            )
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier.align(Alignment.Center)
+                                    val xAxisCount = max(displayXYZ.xAxisValues.size, 1)
+                                    for (j in 0 until (xAxisCount)) {
+                                        val currentIndex = i * (xAxisCount) + j
+                                        Box(
+                                            modifier = Modifier.width(120.dp)
                                         ) {
-                                            if (imageItem.isInterrupted) {
-                                                Text(text = stringResource(R.string.interrupted))
-                                            } else {
-                                                CircularProgressIndicator(
-                                                    modifier = Modifier.width(32.dp),
-                                                    color = MaterialTheme.colorScheme.secondary,
-                                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                                    progress = imageItem.progress?.progress
-                                                        ?: 0f
-                                                )
-                                                Text(text = stringResource(id = R.string.generating))
-                                            }
+                                            GenItem(
+                                                currentIndex
+                                            )
                                         }
+                                        Spacer(modifier = Modifier.width(8.dp))
                                     }
                                 }
+//                                LazyVerticalGrid(
+//                                    columns = GridCells.Fixed(3),
+//                                    modifier = Modifier
+//                                        .fillMaxWidth(),
+//                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+//                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+//                                ) {
+//                                    items(xyzParam.xAxis!!.getGenCount()) {
+//                                        GenItem(index = it * i)
+//                                    }
+//                                }
                             }
+                        }
+
+                    }
+                }
+
+            }
+        }
+    }
+
+}
+
+@Composable
+fun GenItem(index: Int) {
+    Box(
+        modifier = Modifier
+            .aspectRatio(DrawViewModel.inputWidth / DrawViewModel.inputHeight)
+            .sizeIn(maxHeight = 90.dp, maxWidth = 90.dp)
+            .border(
+                DrawViewModel.displayResultIndex.let { currentIndex ->
+                    if (currentIndex == index) 4.dp else 0.dp
+                },
+                DrawViewModel.displayResultIndex.let { currentIndex ->
+                    if (currentIndex == index) MaterialTheme.colorScheme.secondary
+                    else Color.Transparent
+                },
+                RoundedCornerShape(8.dp)
+            )
+            .clickable {
+
+                DrawViewModel.displayResultIndex = index
+
+            }
+            .clip(RoundedCornerShape(8.dp))
+    ) {
+        val imageItem = DrawViewModel.genItemList[index]
+        if (imageItem.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(8.dp)
+                    .align(
+                        Alignment.Center
+                    )
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Icon(
+                        Icons.Filled.Warning,
+                        contentDescription = "Error"
+                    )
+                    Text(text = stringResource(id = R.string.error))
+                }
+            }
+        } else {
+            val imageBase64 = imageItem.getDisplayImageBase64()
+            if (imageBase64 != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+
+                ) {
+                    DisplayBase64Image(imageBase64)
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .padding(8.dp)
+                        .align(
+                            Alignment.Center
+                        )
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        if (imageItem.isInterrupted) {
+                            Text(text = stringResource(R.string.interrupted))
+                        } else {
+                            CircularProgressIndicator(
+                                modifier = Modifier.width(32.dp),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                progress = imageItem.progress?.progress
+                                    ?: 0f
+                            )
+                            Text(text = stringResource(id = R.string.generating))
                         }
                     }
                 }
             }
         }
     }
-
 }

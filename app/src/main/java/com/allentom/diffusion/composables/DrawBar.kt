@@ -41,20 +41,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
-import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.store.Prompt
 import com.allentom.diffusion.ui.DrawBarViewModel
 import com.allentom.diffusion.ui.parts.GenProgressGrid
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
-import com.allentom.diffusion.ui.screens.home.tabs.draw.ParamsModalBottomSheet
+import com.allentom.diffusion.ui.screens.home.tabs.draw.panels.ParamsModalBottomSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -40,6 +40,8 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
 import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.ui.parts.GenProgressGrid
+import com.allentom.diffusion.ui.screens.home.tabs.draw.panels.ParamsModalBottomSheet
+import com.allentom.diffusion.ui.screens.home.tabs.draw.panels.ParamsPanel
 import com.origeek.imageViewer.previewer.ImagePreviewer
 import com.origeek.imageViewer.previewer.rememberPreviewerState
 import kotlinx.coroutines.Dispatchers

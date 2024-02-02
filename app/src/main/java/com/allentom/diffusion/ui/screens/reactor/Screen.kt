@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,12 +46,10 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.ReactorRequestBody
 import com.allentom.diffusion.api.getApiClient
-import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
 import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
-import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorPanel
-import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
+import com.allentom.diffusion.ui.screens.home.tabs.draw.panels.ReactorPanel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID

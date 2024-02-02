@@ -271,6 +271,7 @@ data class ReactorParamRequest(
         )
     }
 }
+
 data class AdetailerSlotArg(
     @SerializedName("ad_model")
     val adModel: String,
@@ -349,10 +350,11 @@ data class AdetailerSlotArg(
     @SerializedName("ad_controlnet_guidance_end")
     val adControlnetGuidanceEnd: Float,
 )
+
 data class AdetailerArg(
     val enabled: Boolean = false,
     val skipImg2img: Boolean = false,
-    val slot:List<AdetailerSlotArg> = listOf(),
+    val slot: List<AdetailerSlotArg> = listOf(),
 ) {
     fun toParamArray(): List<Any> {
         return listOf(
@@ -436,25 +438,52 @@ data class AdeatilerWrapper(
     val args: List<Any>? = null
 )
 
+data class OverrideSetting(
+    @SerializedName("sd_model_checkpoint")
+    val sdModelCheckpoint: String? = null,
+    @SerializedName("sd_vae")
+    val sdVae: String? = null,
+)
+
 data class Txt2ImgRequest(
-    val batch_size: Int = 1,
+    @SerializedName("batch_size")
+    val batchSize: Int = 1,
+    @SerializedName("prompt")
     val prompt: String,
+    @SerializedName("width")
     val width: Int = 512,
+    @SerializedName("height")
     val height: Int = 512,
-    val negative_prompt: String,
+    @SerializedName("negative_prompt")
+    val negativePrompt: String,
+    @SerializedName("steps")
     val steps: Int = 20,
-    val sampler_name: String = "dimm",
-    val n_iter: Int = 1,
-    val cfg_scale: Int = 7,
+    @SerializedName("sampler_name")
+    val samplerName: String = "dimm",
+    @SerializedName("n_iter")
+    val nIterate: Int = 1,
+    @SerializedName("cfg_scale")
+    val cfgScale: Int = 7,
+    @SerializedName("seed")
     val seed: Int = -1,
-    val enable_hr: Boolean = false,
-    val denoising_strength: Float = 0.7f,
-    val hr_scale: Float = 1f,
-//    val hr_steps:Int = 0,
-    val hr_upscaler: String = "None",
-    val alwayson_scripts: AlwaysonScripts? = AlwaysonScripts(null),
-    val refiner_checkpoint: String? = null,
-    val refiner_switch_at: Float? = null,
+    @SerializedName("enable_hr")
+    val enableHr: Boolean = false,
+    @SerializedName("denoising_strength")
+    val denoisingStrength: Float = 0.7f,
+    @SerializedName("hr_second_pass_steps")
+    val hrSecondPassSteps: Int = 0,
+    @SerializedName("hr_scale")
+    val hrScale: Float = 1f,
+    @SerializedName("hr_upscaler")
+    val hrUpscaler: String = "None",
+    @SerializedName("alwayson_scripts")
+    val alwaysonScripts: AlwaysonScripts? = AlwaysonScripts(null),
+    @SerializedName("refiner_checkpoint")
+    val refinerCheckpoint: String? = null,
+    @SerializedName("refiner_switch_at")
+    val refinerSwitchAt: Float? = null,
+    @SerializedName("override_settings")
+    val overrideSetting: OverrideSetting? = null,
 )
 
 //"resize_mode": 0,
@@ -491,7 +520,7 @@ data class Img2ImgRequest(
     //inpaint_full_res_padding
     val inpaint_full_res_padding: Int = 32,
 
-)
+    )
 
 data class InterrogateRequest(
     val image: String,

@@ -5,8 +5,6 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.allentom.diffusion.store.history.AdetailerDao
 import com.allentom.diffusion.store.history.AdetailerEntity
 import com.allentom.diffusion.store.history.ControlNetHistoryDao
@@ -29,6 +27,8 @@ import com.allentom.diffusion.store.history.PromptExtraDao
 import com.allentom.diffusion.store.history.PromptExtraEntity
 import com.allentom.diffusion.store.history.PromptHistoryCrossRef
 import com.allentom.diffusion.store.history.PromptHistoryDao
+import com.allentom.diffusion.store.history.XYZDao
+import com.allentom.diffusion.store.history.XYZHistoryEntity
 
 @Database(
     entities = [
@@ -48,8 +48,9 @@ import com.allentom.diffusion.store.history.PromptHistoryDao
         ControlNetEntity::class,
         ModelEntity::class,
         LoraTriggerCrossRef::class,
-        AdetailerEntity::class
-    ], version = 10, exportSchema = true, autoMigrations = [
+        AdetailerEntity::class,
+        XYZHistoryEntity::class
+    ], version = 12, exportSchema = true, autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
@@ -59,6 +60,8 @@ import com.allentom.diffusion.store.history.PromptHistoryDao
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10),
+        AutoMigration(from = 10, to = 11),
+        AutoMigration(from = 11, to = 12),
     ]
 )
 
@@ -85,6 +88,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun loraTriggerDao(): LoraTriggerDao
 
     abstract fun adetailerDao(): AdetailerDao
+
+    abstract fun xyzDao(): XYZDao
 
 }
 

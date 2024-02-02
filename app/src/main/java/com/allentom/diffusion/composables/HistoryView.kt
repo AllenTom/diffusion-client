@@ -777,6 +777,41 @@ fun HistoryView(
 
 
         }
+        currentHistory.xyzParam?.let {
+            if (it.enable) {
+                with(it) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Divider()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SectionTitle(title = "XYZ")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    xAxis?.let {
+                        ParamItem(label = "X Axis",
+                            value = {
+                                Text(text = it.getKey())
+                            }
+                        )
+                        ParamItem(label = "X Axis Value",
+                            value = {
+                                Text(text = it.getStringValue())
+                            }
+                        )
+                    }
+                    yAxis?.let {
+                        ParamItem(label = "Y Axis",
+                            value = {
+                                Text(text = it.getKey())
+                            }
+                        )
+                        ParamItem(label = "Y Axis Value",
+                            value = {
+                                Text(text = it.getStringValue())
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
 

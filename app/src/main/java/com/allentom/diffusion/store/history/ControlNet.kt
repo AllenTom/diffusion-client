@@ -31,19 +31,21 @@ data class ControlNetHistoryEntity(
     val controlMode: Int,
     val weight: Float,
     val model: String,
+//    val enabled: Boolean? = false,
 ) {
     fun toControlNetSlot(): ControlNetSlot {
         return ControlNetSlot(
             controlNetHistoryId = controlNetHistoryId,
             controlNetId = controlNetId,
             historyId = historyId,
-            enabled = true,
             guidanceStart = guidanceStart,
             guidanceEnd = guidanceEnd,
             controlMode = controlMode,
             weight = weight,
             model = model,
-        )
+            enabled = false,
+
+            )
     }
 }
 
@@ -135,7 +137,7 @@ fun HistoryWithRelation.toControlNetParam(): ControlNetParam {
     return ControlNetParam(
         slots = controlNetHistoryEntity.map {
             ControlNetSlot(
-                enabled = true,
+                enabled = false,
                 guidanceStart = it.guidanceStart,
                 guidanceEnd = it.guidanceEnd,
                 controlMode = it.controlMode,

@@ -30,6 +30,7 @@ import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetSlot
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
+import com.allentom.diffusion.ui.screens.home.tabs.draw.XYZParam
 import java.io.Serializable
 
 class ImageHistory(
@@ -70,6 +71,7 @@ data class SaveHistory(
     val refinerSwitchAt: Float? = null,
     val reactorParam: ReactorParam? = null,
     val adetailerParam: AdetailerParam? = null,
+    val xyzParam: XYZParam? = null
 ) : Serializable
 
 @Entity(tableName = "image_history")
@@ -192,6 +194,12 @@ data class HistoryWithRelation(
         entityColumn = "historyId",
     )
     val adetailerEntityList: List<AdetailerEntity>? = null,
+
+    @Relation(
+        parentColumn = "historyId",
+        entityColumn = "historyId",
+    )
+    val xyzHistoryEntity: XYZHistoryEntity? = null,
 ) {
     fun toSaveHistory(): SaveHistory {
         val result = SaveHistory(
@@ -222,13 +230,12 @@ data class HistoryWithRelation(
             refinerModelName = historyEntity.refinerModelName,
             refinerSwitchAt = historyEntity.refinerSwitchAt,
             reactorParam = toReactorParam(),
-            adetailerParam = toAdetailerParam()
+            adetailerParam = toAdetailerParam(),
+            xyzParam = toSaveXYZParam()
         )
-
         return result
     }
 }
-
 
 
 @Entity(tableName = "history")
@@ -378,17 +385,16 @@ object HistoryStore {
         val savedHistoryId = database.historyDao().insert(
             historyEntity
         )
-        history.copy(id = savedHistoryId).let {
-            with(it) {
-                saveHistoryPrompt(context, PromptType.Prompt)
-                saveHistoryPrompt(context, PromptType.NegativePrompt)
-                saveLora(context)
-                saveEmbedding(context)
-                saveHiresFix(context)
-                saveImg2Img(context)
-                saveControlNet(context)
-                saveAdetailer(context)
-            }
+        with(history.copy(id = savedHistoryId)) {
+            saveHistoryPrompt(context, PromptType.Prompt)
+            saveHistoryPrompt(context, PromptType.NegativePrompt)
+            saveLora(context)
+            saveEmbedding(context)
+            saveHiresFix(context)
+            saveImg2Img(context)
+            saveControlNet(context)
+            saveAdetailer(context)
+            saveXYZParam(context)
         }
         history.imagePaths.forEach { imageHistory ->
             database.imageHistoryDao().insert(

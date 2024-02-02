@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.allentom.diffusion.api.civitai.CivitaiApiHelper
 import com.allentom.diffusion.api.getApiClient
+import com.allentom.diffusion.modifier.registerModifier
 import com.allentom.diffusion.store.ControlNetStore
 import com.allentom.diffusion.ui.screens.civitai.CivitaiModelImageScreen
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageDetailScreen
@@ -34,6 +35,7 @@ import com.allentom.diffusion.ui.screens.history.HistoryListView
 import com.allentom.diffusion.ui.screens.historydetail.HistoryDetailScreen
 import com.allentom.diffusion.ui.screens.home.HomePage
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
+import com.allentom.diffusion.ui.screens.home.tabs.draw.ModifierLibrary
 import com.allentom.diffusion.ui.screens.imagedetail.ImageDetail
 import com.allentom.diffusion.ui.screens.login.LoginScreen
 import com.allentom.diffusion.ui.screens.lora.detail.LoraDetailScreen
@@ -96,6 +98,8 @@ class MainActivity : ComponentActivity() {
                 controlNetPathFile.mkdir()
             }
         }
+        ModifierLibrary.init(this)
+        registerModifier(this)
     }
 }
 
