@@ -1,5 +1,6 @@
 package com.allentom.diffusion.ui.screens.historydetail
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -358,10 +359,11 @@ fun FirstScreen(
                         onClick = {
                             isActionMenuShow = false
                             scope.launch {
-                                val imageBase64 =
-                                    Util.readImageWithPathToBase64(it.path)
-                                ReactorViewModel.targetImage = imageBase64
-                                ReactorViewModel.targetImageFileName = it.path.split("/").last()
+                                ReactorViewModel.addToReactorImages(
+                                    uri = Uri.parse(it.path),
+                                    name = it.path.split("/").last()
+                                )
+                                Util.readImageWithPathToBase64(it.path)
                                 navController.navigate(Screens.ReactorScreen.route)
                             }
                         }

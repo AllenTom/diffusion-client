@@ -225,11 +225,10 @@ fun ImageDetail(id: String, navController: NavController) {
                             onClick = {
                                 expanded = false
                                 galleryItem?.path?.let {
-                                    val imageBase64 = Util.readImageWithPathToBase64(
-                                        it
+                                    ReactorViewModel.addToReactorImages(
+                                        Uri.parse(it),
+                                        it.substringAfterLast("/")
                                     )
-                                    ReactorViewModel.targetImage = imageBase64
-                                    ReactorViewModel.targetImageFileName = it.split("/").last()
                                     navController.navigate(Screens.ReactorScreen.route)
                                 }
 
