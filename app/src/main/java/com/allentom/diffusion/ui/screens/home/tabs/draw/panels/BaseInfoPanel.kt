@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.allentom.diffusion.R
+import com.allentom.diffusion.composables.CanvasSizeItem
 import com.allentom.diffusion.composables.EmbeddingSelectOptionItem
 import com.allentom.diffusion.composables.LoraSelectOptionItem
 import com.allentom.diffusion.composables.PromptSelectOptionItem
@@ -59,6 +60,16 @@ fun BaseInfoPanel(
             embeddingList = DrawViewModel.embeddingModels
         ) {
             DrawViewModel.embeddingList = it
+        }
+        CanvasSizeItem(
+            width = DrawViewModel.inputWidth.toInt(),
+            height = DrawViewModel.inputHeight.toInt(),
+            label = stringResource(
+                R.string.size
+            )
+        ) { width, height ->
+            DrawViewModel.inputWidth = width.toFloat()
+            DrawViewModel.inputHeight = height.toFloat()
         }
         SliderOptionItem(
             label = stringResource(R.string.param_width),

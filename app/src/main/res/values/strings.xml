@@ -273,4 +273,5 @@
     <string name="mod_hrupscaler">HrUpscaler</string>
     <string name="mod_hirstep">Hires Steps</string>
     <string name="mode">Mode</string>
+    <string name="size">Size</string>
 </resources>
