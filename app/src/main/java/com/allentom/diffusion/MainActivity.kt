@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.allentom.diffusion
 
 import android.Manifest.permission.POST_NOTIFICATIONS
@@ -48,6 +46,7 @@ import com.allentom.diffusion.ui.screens.prompt.PromptSearchScreen
 import com.allentom.diffusion.ui.screens.promptdetail.PromptDetailScreen
 import com.allentom.diffusion.ui.screens.reactor.ReactorScreen
 import com.allentom.diffusion.ui.screens.setting.SettingScreen
+import com.allentom.diffusion.ui.screens.style.StyleScreen
 import com.allentom.diffusion.ui.screens.tagger.TaggerScreen
 import com.allentom.diffusion.ui.theme.DiffusionTheme
 import kotlinx.coroutines.Dispatchers
@@ -210,6 +209,9 @@ fun DiffusionApp() {
         }
         composable(Screens.ReactorScreen.route) {
             ReactorScreen()
+        }
+        composable(Screens.StylesScreen.route) {
+            StyleScreen()
         }
     }
 }

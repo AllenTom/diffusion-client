@@ -27,6 +27,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -47,20 +49,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
-import com.allentom.diffusion.Util
-import com.allentom.diffusion.store.Prompt
-import com.allentom.diffusion.store.PromptStore
-import com.allentom.diffusion.store.SavePrompt
+import com.allentom.diffusion.store.prompt.Prompt
+import com.allentom.diffusion.store.prompt.PromptStore
+import com.allentom.diffusion.store.prompt.PromptStyle
+import com.allentom.diffusion.store.prompt.SavePrompt
+import com.allentom.diffusion.store.prompt.StyleStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.RegionPromptParam
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 
 @OptIn(
@@ -361,9 +367,16 @@ fun PromptSelectDialog(
                         }
                     }
                     if (selectIndex == 1) {
-                        PromptLibraryPanel(onAddPrompt = {
-                            selectedPromptList = selectedPromptList + it
-                        }, regionParam = inputRegionParam)
+                        PromptLibraryPanel(
+                            onAddPrompt = {
+                                selectedPromptList = selectedPromptList + it
+                            },
+                            onAddStyle = {
+                                selectedPromptList = selectedPromptList + it
+                            },
+                            regionParam = inputRegionParam,
+                            enableSearchStyle = true
+                        )
                     }
                     if (selectIndex == 2) {
                         inputRegionParam?.let {
@@ -408,7 +421,9 @@ fun PromptSelectDialog(
 @Composable
 fun PromptLibraryPanel(
     onAddPrompt: (Prompt) -> Unit = {},
-    regionParam: RegionPromptParam? = null
+    onAddStyle: (List<Prompt>) -> Unit = {},
+    regionParam: RegionPromptParam? = null,
+    enableSearchStyle: Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -419,24 +434,50 @@ fun PromptLibraryPanel(
     var searchResults by remember {
         mutableStateOf<List<SavePrompt>>(emptyList())
     }
+    var searchStyleResults by remember {
+        mutableStateOf<List<PromptStyle>>(emptyList())
+    }
     var regionIndexToAdd by remember {
         mutableStateOf(0)
     }
+    var searchType by remember {
+        mutableStateOf("prompt")
+    }
+    var isSearchTypeMenuShow by remember {
+        mutableStateOf(false)
+    }
+    val searchTypeItems = listOf("prompt", "style")
 
     fun refreshSearchResult() {
         scope.launch(Dispatchers.IO) {
-            if (inputPromptText.isNotEmpty()) {
-                PromptStore.searchPrompt(
-                    context,
-                    inputPromptText,
-                    emptyList()
-                )
-                    .let { results ->
-                        searchResults = results
+            when (searchType) {
+                "prompt" -> {
+                    if (inputPromptText.isNotEmpty()) {
+                        PromptStore.searchPrompt(
+                            context,
+                            inputPromptText,
+                            emptyList()
+                        )
+                            .let { results ->
+                                searchResults = results
+                            }
+                    } else {
+                        searchResults =
+                            PromptStore.getTopNPrompt(context, 10)
                     }
-            } else {
-                searchResults =
-                    PromptStore.getTopNPrompt(context, 10)
+                }
+
+                "style" -> {
+                    if (inputPromptText.isNotEmpty()) {
+                        StyleStore.searchStyleByName(
+                            context,
+                            inputPromptText
+                        )
+                            .let { results ->
+                                searchStyleResults = results
+                            }
+                    }
+                }
             }
         }
     }
@@ -476,56 +517,144 @@ fun PromptLibraryPanel(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
-
         }
-        OutlinedTextField(
-            value = inputPromptText,
-            onValueChange = { newValue ->
-                inputPromptText = newValue
-                searchJob?.cancel()
-                searchJob = coroutineScope.launch {
-                    delay(500L)  // delay for 300ms
-                    refreshSearchResult()
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.clickable {
-                        onAddPrompt(
-                            Prompt(
-                                text = inputPromptText,
-                                piority = 0,
-                                regionIndex = regionIndexToAdd
-                            )
-                        )
-                        inputPromptText = ""
-                    }
-                )
-            },
-
-            )
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-            modifier = Modifier.weight(1f)
+        Row(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            items(searchResults.size) {
-                val prompt = searchResults[it]
-                Column(
-                    modifier = Modifier
-                        .clickable {
-                            onAddPrompt(prompt.toPrompt().copy(regionIndex = regionIndexToAdd))
-                            refreshSearchResult()
+            OutlinedTextField(
+                value = inputPromptText,
+                onValueChange = { newValue ->
+                    inputPromptText = newValue
+                    searchJob?.cancel()
+                    searchJob = coroutineScope.launch {
+                        delay(500L)  // delay for 300ms
+                        refreshSearchResult()
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                trailingIcon = {
+                    if (searchType == "prompt") {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.clickable {
+                                onAddPrompt(
+                                    Prompt(
+                                        text = inputPromptText,
+                                        piority = 0,
+                                        regionIndex = regionIndexToAdd
+                                    )
+                                )
+                                inputPromptText = ""
+                            }
+                        )
+                    }
+                },
+                prefix = {
+                    if (enableSearchStyle) {
+                        Row {
+                            Box(
+                                modifier = Modifier
+                            ) {
+                                Text(
+                                    text = ConstValues.SearchTypeMapping[searchType] ?: searchType,
+                                    modifier = Modifier
+                                        .clickable {
+                                            isSearchTypeMenuShow = true
+                                        },
+                                )
+                                DropdownMenu(
+                                    expanded = isSearchTypeMenuShow,
+                                    onDismissRequest = { isSearchTypeMenuShow = false }
+                                ) {
+                                    searchTypeItems.forEach {
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                searchType = it
+                                                isSearchTypeMenuShow = false
+                                                refreshSearchResult()
+                                            },
+                                            text = {
+                                                Text(text = ConstValues.SearchTypeMapping[it] ?: it)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
                         }
-                        .padding(4.dp)
-                        .fillMaxWidth()
+                    }
+                },
+                maxLines = 1
+            )
+        }
 
+        Spacer(modifier = Modifier.height(16.dp))
+        when (searchType) {
+            "prompt" -> {
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = prompt.text)
-                    if (prompt.text != prompt.nameCn) {
-                        Text(text = prompt.nameCn)
+                    items(searchResults.size) {
+                        val prompt = searchResults[it]
+                        Column(
+                            modifier = Modifier
+                                .clickable {
+                                    onAddPrompt(
+                                        prompt
+                                            .toPrompt()
+                                            .copy(regionIndex = regionIndexToAdd)
+                                    )
+                                    refreshSearchResult()
+                                }
+                                .padding(4.dp)
+                                .fillMaxWidth()
+
+                        ) {
+                            Text(text = prompt.text)
+                            if (prompt.text != prompt.nameCn) {
+                                Text(text = prompt.nameCn)
+                            }
+                        }
+                    }
+                }
+            }
+
+            "style" -> {
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(searchStyleResults.size) {
+                        val styleItem = searchStyleResults[it]
+                        Column(
+                            modifier = Modifier
+                                .clickable {
+                                    onAddStyle(styleItem.prompts.map {
+                                        it.copy(
+                                            regionIndex = regionIndexToAdd
+                                        )
+                                    })
+                                    refreshSearchResult()
+                                }
+                                .padding(4.dp)
+                                .fillMaxWidth()
+
+                        ) {
+                            Text(
+                                text = styleItem.name, style = TextStyle(
+                                    fontSize = 16.sp
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row {
+                                styleItem.prompts.subList(0, min(3, styleItem.prompts.size - 1))
+                                    .forEach {
+                                        SmallPrompt(prompt = it)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                            }
+
+                        }
                     }
                 }
             }

@@ -16,7 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.api.entity.Embedding
-import com.allentom.diffusion.store.EmbeddingPrompt
+import com.allentom.diffusion.store.prompt.EmbeddingPrompt
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

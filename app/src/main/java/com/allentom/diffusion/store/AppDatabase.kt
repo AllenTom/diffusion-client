@@ -29,6 +29,18 @@ import com.allentom.diffusion.store.history.PromptHistoryCrossRef
 import com.allentom.diffusion.store.history.PromptHistoryDao
 import com.allentom.diffusion.store.history.XYZDao
 import com.allentom.diffusion.store.history.XYZHistoryEntity
+import com.allentom.diffusion.store.prompt.EmbeddingDao
+import com.allentom.diffusion.store.prompt.EmbeddingEntity
+import com.allentom.diffusion.store.prompt.LoraPromptDao
+import com.allentom.diffusion.store.prompt.LoraPromptEntity
+import com.allentom.diffusion.store.prompt.LoraTriggerCrossRef
+import com.allentom.diffusion.store.prompt.LoraTriggerDao
+import com.allentom.diffusion.store.prompt.PromptDao
+import com.allentom.diffusion.store.prompt.SavePrompt
+import com.allentom.diffusion.store.prompt.StyleDao
+import com.allentom.diffusion.store.prompt.StyleEntity
+import com.allentom.diffusion.store.prompt.StylePromptCrossRef
+import com.allentom.diffusion.store.prompt.StylePromptDao
 
 @Database(
     entities = [
@@ -49,8 +61,10 @@ import com.allentom.diffusion.store.history.XYZHistoryEntity
         ModelEntity::class,
         LoraTriggerCrossRef::class,
         AdetailerEntity::class,
-        XYZHistoryEntity::class
-    ], version = 14, exportSchema = true, autoMigrations = [
+        XYZHistoryEntity::class,
+        StyleEntity::class,
+        StylePromptCrossRef::class,
+    ], version = 15, exportSchema = true, autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
@@ -64,6 +78,7 @@ import com.allentom.diffusion.store.history.XYZHistoryEntity
         AutoMigration(from = 11, to = 12),
         AutoMigration(from = 12, to = 13),
         AutoMigration(from = 13, to = 14),
+        AutoMigration(from = 14, to = 15),
     ]
 )
 
@@ -79,19 +94,16 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun promptHistoryDao(): PromptHistoryDao
     abstract fun negativePromptHistoryDao(): NegativePromptHistoryDao
     abstract fun promptExtraDao(): PromptExtraDao
-
     abstract fun embeddingDao(): EmbeddingDao
     abstract fun embeddingHistoryDao(): EmbeddingHistoryDao
     abstract fun controlNetHistoryDao(): ControlNetHistoryDao
     abstract fun controlNetDao(): ControlNetDao
-
     abstract fun modelDao(): ModelDao
-
     abstract fun loraTriggerDao(): LoraTriggerDao
-
     abstract fun adetailerDao(): AdetailerDao
-
     abstract fun xyzDao(): XYZDao
+    abstract fun styleDao(): StyleDao
+    abstract fun stylePromptDao(): StylePromptDao
 
 }
 

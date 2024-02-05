@@ -30,6 +30,7 @@ fun TabTools(navController: NavController) {
     val extraImageIcon = ImageVector.vectorResource(id = R.drawable.ic_extra_image)
     val modelIcon = ImageVector.vectorResource(id = R.drawable.ic_model)
     val swapIcon = ImageVector.vectorResource(id = R.drawable.ic_swap)
+    val promptStyleIcon = ImageVector.vectorResource(id = R.drawable.ic_style)
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
@@ -54,13 +55,6 @@ fun TabTools(navController: NavController) {
         )
         ListItem(
             modifier = Modifier.clickable {
-                navController.navigate(Screens.PromptList.route)
-            },
-            headlineContent = { Text(text = stringResource(id = R.string.tools_prompt_library)) },
-            leadingContent = { Icon(promptIcon, contentDescription = "Prompt library") }
-        )
-        ListItem(
-            modifier = Modifier.clickable {
                 navController.navigate(Screens.ExtraImage.route)
             },
             headlineContent = { Text(text = stringResource(id = R.string.tools_extra_image)) },
@@ -76,6 +70,20 @@ fun TabTools(navController: NavController) {
         Divider()
         ListItem(
             modifier = Modifier.clickable {
+                navController.navigate(Screens.PromptList.route)
+            },
+            headlineContent = { Text(text = stringResource(id = R.string.tools_prompt_library)) },
+            leadingContent = { Icon(promptIcon, contentDescription = "Prompt library") }
+        )
+        ListItem(
+            modifier = Modifier.clickable {
+                navController.navigate(Screens.StylesScreen.route)
+            },
+            headlineContent = { Text("Styles") },
+            leadingContent = { Icon(promptStyleIcon, contentDescription = "Styles") }
+        )
+        ListItem(
+            modifier = Modifier.clickable {
                 navController.navigate(Screens.ModelList.route)
             },
             headlineContent = { Text(text = stringResource(id = R.string.tools_model)) },
@@ -89,17 +97,17 @@ fun TabTools(navController: NavController) {
             headlineContent = { Text(text = stringResource(id = R.string.tools_lora)) },
             leadingContent = { Icon(modelIcon, contentDescription = "Lora") }
         )
-
         Divider()
         ListItem(
             modifier = Modifier.clickable {
                 navController.navigate(Screens.SettingsScreen.route)
             },
             headlineContent = {
-            Text(text= stringResource(id = R.string.settings_screen_title))
-        }, leadingContent = {
-            Icon(Icons.Default.Settings, contentDescription = "Settings")
-        })
+                Text(text = stringResource(id = R.string.settings_screen_title))
+            }, leadingContent = {
+                Icon(Icons.Default.Settings, contentDescription = "Settings")
+            }
+        )
         Spacer(modifier = Modifier.weight(1f))
         DrawBar()
     }

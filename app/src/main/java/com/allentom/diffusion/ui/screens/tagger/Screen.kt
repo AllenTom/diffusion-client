@@ -49,7 +49,7 @@ import com.allentom.diffusion.composables.ActionItem
 import com.allentom.diffusion.composables.BottomActionSheet
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.TextPickUpItem
-import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.launch
 

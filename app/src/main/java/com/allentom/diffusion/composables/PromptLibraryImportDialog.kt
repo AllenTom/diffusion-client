@@ -1,6 +1,5 @@
 package com.allentom.diffusion.composables
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -27,8 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
-import com.allentom.diffusion.store.PromptStore
-import com.allentom.diffusion.store.SavePrompt
+import com.allentom.diffusion.store.prompt.PromptStore
+import com.allentom.diffusion.store.prompt.SavePrompt
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap

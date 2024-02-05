@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.allentom.diffusion.R
-import com.allentom.diffusion.store.SavePrompt
+import com.allentom.diffusion.store.prompt.SavePrompt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

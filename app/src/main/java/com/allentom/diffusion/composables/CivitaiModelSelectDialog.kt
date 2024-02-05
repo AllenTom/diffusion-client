@@ -46,8 +46,8 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.api.entity.Lora
-import com.allentom.diffusion.store.LoraPrompt
-import com.allentom.diffusion.store.PromptStore
+import com.allentom.diffusion.store.prompt.LoraPrompt
+import com.allentom.diffusion.store.prompt.PromptStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

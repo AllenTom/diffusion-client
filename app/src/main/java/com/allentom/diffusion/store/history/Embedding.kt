@@ -6,9 +6,8 @@ import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.Update
 import com.allentom.diffusion.store.AppDatabaseHelper
-import com.allentom.diffusion.store.EmbeddingEntity
-import com.allentom.diffusion.store.EmbeddingPrompt
-import com.allentom.diffusion.store.LoraPrompt
+import com.allentom.diffusion.store.prompt.EmbeddingEntity
+import com.allentom.diffusion.store.prompt.EmbeddingPrompt
 
 @Entity(primaryKeys = ["embeddingId", "historyId"], tableName = "embedding_history")
 data class EmbeddingHistoryCrossRef(

@@ -47,7 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
-import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.ui.DrawBarViewModel
 import com.allentom.diffusion.ui.parts.GenProgressGrid
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel

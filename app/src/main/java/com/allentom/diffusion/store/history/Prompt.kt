@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import com.allentom.diffusion.store.AppDatabaseHelper
-import com.allentom.diffusion.store.Prompt
-import com.allentom.diffusion.store.SavePrompt
+import com.allentom.diffusion.store.prompt.Prompt
+import com.allentom.diffusion.store.prompt.SavePrompt
 
 enum class PromptType(val value: Int) {
     Prompt(0),

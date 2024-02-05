@@ -1,6 +1,5 @@
 package com.allentom.diffusion.store.history
 
-import com.allentom.diffusion.store.Prompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
 
 fun HistoryWithRelation.toReactorParam(): ReactorParam {

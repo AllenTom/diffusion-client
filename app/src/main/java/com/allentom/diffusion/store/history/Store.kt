@@ -1,7 +1,6 @@
 package com.allentom.diffusion.store.history
 
 import android.content.Context
-import android.net.Uri
 import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -14,20 +13,16 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.AppDatabaseHelper
-import com.allentom.diffusion.store.ControlNetEntity
-import com.allentom.diffusion.store.EmbeddingEntity
-import com.allentom.diffusion.store.EmbeddingPrompt
-import com.allentom.diffusion.store.LoraPrompt
-import com.allentom.diffusion.store.LoraPromptEntity
+import com.allentom.diffusion.store.prompt.EmbeddingEntity
+import com.allentom.diffusion.store.prompt.EmbeddingPrompt
+import com.allentom.diffusion.store.prompt.LoraPrompt
+import com.allentom.diffusion.store.prompt.LoraPromptEntity
 import com.allentom.diffusion.store.ModelEntity
 import com.allentom.diffusion.store.ModelStore
-import com.allentom.diffusion.store.Prompt
-import com.allentom.diffusion.store.PromptStore
-import com.allentom.diffusion.store.SavePrompt
+import com.allentom.diffusion.store.prompt.Prompt
+import com.allentom.diffusion.store.prompt.SavePrompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerParam
-import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerSlot
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetParam
-import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetSlot
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.XYZParam

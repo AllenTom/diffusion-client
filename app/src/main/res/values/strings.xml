@@ -274,4 +274,10 @@
     <string name="mod_hirstep">Hires Steps</string>
     <string name="mode">Mode</string>
     <string name="size">Size</string>
+    <string name="edit">Edit</string>
+    <string name="selected_styles">Selected %1$s styles</string>
+    <string name="styles">Styles</string>
+    <string name="style_deleted">Style deleted</string>
+    <string name="style_updated">Style updated</string>
+    <string name="style_added">Style added</string>
 </resources>

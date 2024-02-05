@@ -1,6 +1,6 @@
 package com.allentom.diffusion.api.entity
 
-import com.allentom.diffusion.store.LoraPrompt
+import com.allentom.diffusion.store.prompt.LoraPrompt
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable

@@ -6,10 +6,9 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.net.Uri
 import android.os.Environment
-import android.provider.OpenableColumns
 import android.util.Base64
 import androidx.compose.ui.graphics.asImageBitmap
-import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.store.prompt.Prompt
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream

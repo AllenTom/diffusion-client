@@ -1,7 +1,6 @@
 package com.allentom.diffusion.composables
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -10,7 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.RegionPromptParam
 
 @Composable

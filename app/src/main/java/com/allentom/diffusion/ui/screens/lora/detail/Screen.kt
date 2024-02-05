@@ -58,15 +58,13 @@ import com.allentom.diffusion.composables.ApplyLoraDialog
 import com.allentom.diffusion.composables.BottomActionSheet
 import com.allentom.diffusion.composables.CivitaiModelSelectDialog
 import com.allentom.diffusion.composables.DrawBar
-import com.allentom.diffusion.composables.MatchOptionDialog
 import com.allentom.diffusion.store.AppConfigStore
-import com.allentom.diffusion.store.Prompt
-import com.allentom.diffusion.store.PromptStore
+import com.allentom.diffusion.store.prompt.Prompt
+import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.ui.parts.CivitaiImageGrid
 import com.allentom.diffusion.ui.parts.CivitaiModelView
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageFilterPanel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
-import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

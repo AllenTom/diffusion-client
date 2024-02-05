@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -58,11 +57,10 @@ import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.MatchOptionDialog
 import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
-import com.allentom.diffusion.store.LoraPrompt
-import com.allentom.diffusion.store.PromptStore
+import com.allentom.diffusion.store.prompt.LoraPrompt
+import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.lora.detail.LoraDetailViewModel
-import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

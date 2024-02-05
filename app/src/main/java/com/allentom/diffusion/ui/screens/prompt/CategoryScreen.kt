@@ -33,9 +33,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
-import com.allentom.diffusion.composables.PromptLibraryImportDialog
-import com.allentom.diffusion.store.PromptStore
-import com.allentom.diffusion.store.SavePrompt
+import com.allentom.diffusion.store.prompt.PromptStore
+import com.allentom.diffusion.store.prompt.SavePrompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.allentom.diffusion.R
-import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 
 class PromptActionState {

@@ -13,7 +13,6 @@ import androidx.room.Update
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.AppDatabaseHelper
 import com.allentom.diffusion.store.ControlNetEntity
-import com.allentom.diffusion.store.Prompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetSlot
 

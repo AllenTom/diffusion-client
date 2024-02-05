@@ -7,7 +7,7 @@ import com.allentom.diffusion.api.civitai.entities.CivitaiImageItem
 import com.allentom.diffusion.api.civitai.entities.CivitaiModel
 import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.store.AppConfigStore
-import com.allentom.diffusion.store.LoraPromptWithRelation
+import com.allentom.diffusion.store.prompt.LoraPromptWithRelation
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageFilter
 import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
 

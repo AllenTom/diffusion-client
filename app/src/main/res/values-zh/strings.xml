@@ -275,4 +275,10 @@
     <string name="mod_hirstep">超分步数</string>
     <string name="mode">模式</string>
     <string name="size">尺寸</string>
+    <string name="edit">编辑</string>
+    <string name="selected_styles">选择了 %1$s 个样式</string>
+    <string name="styles">样式</string>
+    <string name="style_deleted">样式已删除</string>
+    <string name="style_updated">样式已更新</string>
+    <string name="style_added">样式已添加</string>
 </resources>

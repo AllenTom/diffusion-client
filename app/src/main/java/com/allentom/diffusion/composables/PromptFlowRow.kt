@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.allentom.diffusion.R
-import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.RegionPromptParam
 
 @Composable
@@ -70,40 +70,7 @@ fun PromptContainer(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         promptList.forEach {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer
-                    )
-                    .padding(vertical = 4.dp, horizontal = 8.dp)
-                    .clickable {
-                        onClickPrompt?.invoke(it)
-                    }
-            ) {
-                Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    if (it.piority != 0) {
-                        Text(
-                            text = it.piority.toString(),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    Column {
-                        Text(
-                            text = it.getTranslationText(),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
-                            fontSize = 12.sp
-                        )
-                        Text(
-                            text = it.text,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
+            SmallPrompt(prompt = it, onClickPrompt = onClickPrompt)
         }
     }
 

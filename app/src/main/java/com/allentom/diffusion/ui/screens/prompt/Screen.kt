@@ -1,6 +1,5 @@
 package com.allentom.diffusion.ui.screens.prompt
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,14 +32,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.composables.PromptLibraryImportDialog
-import com.allentom.diffusion.store.PromptStore
+import com.allentom.diffusion.store.prompt.PromptStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

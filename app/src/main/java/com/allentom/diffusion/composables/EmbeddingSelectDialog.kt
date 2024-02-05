@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.allentom.diffusion.R
 import com.allentom.diffusion.api.entity.Embedding
-import com.allentom.diffusion.store.EmbeddingPrompt
+import com.allentom.diffusion.store.prompt.EmbeddingPrompt
 import kotlin.math.min
 
 

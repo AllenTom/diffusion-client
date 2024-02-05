@@ -28,9 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
-import com.allentom.diffusion.store.LoraPrompt
-import com.allentom.diffusion.store.LoraPromptWithRelation
-import com.allentom.diffusion.store.Prompt
+import com.allentom.diffusion.store.prompt.LoraPrompt
+import com.allentom.diffusion.store.prompt.LoraPromptWithRelation
+import com.allentom.diffusion.store.prompt.Prompt
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +38,7 @@ fun ApplyLoraDialog(
     onDismiss: () -> Unit,
     title: String = stringResource(R.string.apply_lora),
     onApply: (lora: LoraPrompt) -> Unit,
-    lora:LoraPromptWithRelation,
+    lora: LoraPromptWithRelation,
 ) {
     var weight by remember {
         mutableStateOf(0.8f)

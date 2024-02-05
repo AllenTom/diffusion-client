@@ -31,4 +31,6 @@ sealed class Screens(val route: String) {
     object SettingsScreen : Screens("settings_screen")
 
     object ReactorScreen : Screens("reactor_screen")
+
+    object StylesScreen : Screens("styles_screen")
 }

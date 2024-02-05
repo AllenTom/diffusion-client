@@ -12,6 +12,7 @@ object ConstValues {
     lateinit var ReactorRestoreFaceOption: List<String>
     lateinit var AdetailerMaskMergeOptions: List<String>
     lateinit var HiresFixModeList: List<String>
+    lateinit var SearchTypeMapping: Map<String, String>
     fun initValues(context: Context) {
         Img2ImgResizeModeList = listOf(
             context.getString(R.string.just_resize),
@@ -61,6 +62,10 @@ object ConstValues {
         HiresFixModeList = listOf(
             context.getString(R.string.param_scale_by),
             context.getString(R.string.resize_and_fill),
+        )
+        SearchTypeMapping = mapOf(
+            "prompt" to context.getString(R.string.param_prompt),
+            "style" to context.getString(R.string.styles)
         )
 
     }

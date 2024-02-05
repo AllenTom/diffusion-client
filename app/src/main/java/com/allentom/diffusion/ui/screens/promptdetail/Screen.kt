@@ -30,8 +30,8 @@ import coil.compose.AsyncImage
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.store.history.HistoryWithRelation
 import com.allentom.diffusion.store.history.ImageHistory
-import com.allentom.diffusion.store.PromptStore
-import com.allentom.diffusion.store.SavePrompt
+import com.allentom.diffusion.store.prompt.PromptStore
+import com.allentom.diffusion.store.prompt.SavePrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

@@ -7,9 +7,8 @@ import androidx.room.Insert
 import androidx.room.Update
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.AppDatabaseHelper
-import com.allentom.diffusion.store.LoraPrompt
-import com.allentom.diffusion.store.Prompt
-import com.allentom.diffusion.store.PromptStore
+import com.allentom.diffusion.store.prompt.LoraPrompt
+import com.allentom.diffusion.store.prompt.PromptStore
 
 @Entity(primaryKeys = ["loraPromptId", "historyId"], tableName = "lora_prompt_history")
 data class LoraPromptHistoryCrossRef(
