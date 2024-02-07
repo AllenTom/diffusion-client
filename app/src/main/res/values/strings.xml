@@ -280,4 +280,10 @@
     <string name="style_deleted">Style deleted</string>
     <string name="style_updated">Style updated</string>
     <string name="style_added">Style added</string>
+    <string name="add_column">Add Column</string>
+    <string name="delete">Delete</string>
+    <string name="ratio">Ratio</string>
+    <string name="select_column">Select column</string>
+    <string name="select_row">Select row</string>
+    <string name="add_row">Add Row</string>
 </resources>

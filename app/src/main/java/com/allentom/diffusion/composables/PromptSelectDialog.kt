@@ -1,5 +1,7 @@
 package com.allentom.diffusion.composables
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +28,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -35,9 +39,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -56,11 +61,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
+import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.store.prompt.PromptStyle
 import com.allentom.diffusion.store.prompt.SavePrompt
 import com.allentom.diffusion.store.prompt.StyleStore
+import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.RegionPromptParam
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -664,118 +671,57 @@ fun PromptLibraryPanel(
 }
 
 data class Region(
-    val index: Int = -1,
+    var index: Int = -1,
     val ratio: Int = 1,
-    val color: Int = 1,
+    val color: Int = Util.randomColor(),
     var subRegions: List<Region> = emptyList(),
-    val layout: String = "Column"
+    val layout: String = "Column",
+    var id: String = layout + "_" + Util.randomString(6),
+    var parent: Region? = null
 )
 
-fun getRegionIndex(input: String): List<Region> {
-    var root = Region(-1, 1, 0)
-    var curRegionIndex = -1
-    var regions = input.split(";")
-    if (!input.contains(";")) {
-        regions = input.split(",")
-    }
-    try {
-        regions.forEach { regionText ->
-            if (regionText.isEmpty()) {
-                return@forEach
+fun parseRegionText(input: String): Region {
+    var rootRegion = Region(
+        subRegions = listOf(
+        )
+    )
+    val multipleColumn = input.contains(";")
+    val colParts = input.split(";")
+    colParts.forEach {
+        var colRegion = Region(
+            layout = "Column",
+            subRegions = emptyList()
+        )
+        val rowParts = it.split(",")
+        rowParts.forEachIndexed { idx, it ->
+            if (multipleColumn && idx == 0) {
+                colRegion = colRegion.copy(ratio = it.toIntOrNull() ?: 1)
+                if (rowParts.size == 1) {
+                    colRegion.subRegions += Region(
+                        layout = "Row",
+                        subRegions = emptyList(),
+                        ratio = it.toIntOrNull() ?: 1,
+                        parent = colRegion
+                    )
+                }
+                return@forEachIndexed
             }
-            val subRegion = regionText.split(",")
-            var region: Region? = null
-            if (subRegion.size == 1) {
-                curRegionIndex++
-                region = Region(curRegionIndex, subRegion[0].toInt(), 0)
-            } else {
-                region = Region(
-                    -1,
-                    subRegion[0].toInt(),
-                    0,
-                    subRegion.subList(1, subRegion.size).map { subRegionText ->
-                        curRegionIndex++
-                        Region(
-                            index = curRegionIndex,
-                            ratio = subRegionText.toInt(),
-                            color = 0,
-                            subRegions = emptyList()
-                        )
-                    })
-            }
-            root = root.copy(subRegions = root.subRegions?.plus(region) ?: listOf(region))
+            colRegion.subRegions += Region(
+                layout = "Row",
+                subRegions = emptyList(),
+                ratio = it.toIntOrNull() ?: 1,
+                parent = colRegion
+            )
         }
-        return root.subRegions ?: emptyList()
-
-    } catch (e: Exception) {
-        return emptyList()
+        rootRegion.subRegions += colRegion
     }
-
-    // example: 1,1,1;2,1,1
-//    var inputDividerRatio = input
-//    var curRegion = Region(
-//        subRegions = emptyList(),
-//    )
-//
-//    var root = Region(
-//        subRegions = listOf(curRegion),
-//        layout = "Row"
-//    )
-//
-//
-//    var cur = 0
-//    var regionIndex = -1
-//    var curDigit = ""
-//    while (cur < inputDividerRatio.length) {
-//        val curChar = inputDividerRatio[cur]
-//        if (curChar.isDigit()) {
-//            curDigit += curChar
-//        }
-//        if (curChar == ',') {
-//            regionIndex += 1
-//            val ratio = curDigit.takeIf { it.isNotEmpty() }?.toInt() ?: 1
-//            curDigit = ""
-//            val newRegion = Region(
-//                index = regionIndex,
-//                ratio = ratio,
-//            )
-//            curRegion.subRegions += newRegion
-//        }
-//        if (curChar == ';') {
-//            regionIndex += 1
-//            var ratioText = ""
-//            curDigit = ""
-//            while (true) {
-//                cur += 1
-//                if (cur >= inputDividerRatio.length) {
-//                    break
-//                }
-//                val nextChar = inputDividerRatio[cur]
-//                if (nextChar.isDigit()) {
-//                    ratioText += nextChar
-//                }
-//                if (nextChar == ',') {
-//                    break
-//                }
-//            }
-//            val newRegion = Region(
-//                index = regionIndex,
-//                ratio = ratioText.takeIf { it.isNotEmpty() }?.toInt() ?: 1,
-//            )
-//            root.subRegions += newRegion
-//            curRegion = newRegion
-//        }
-//        cur += 1
-//
-//    }
-//    return root.subRegions ?: emptyList()
-
+    return rootRegion
 }
 
-//fun main() {
-//    val result = getRegionIndex("1;1;1;1;")
-//    print(result)
-//}
+fun main() {
+    val result = parseRegionText("")
+    print(result)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -784,106 +730,438 @@ fun RegionalPrompterPanel(
     onValueChange: (RegionPromptParam) -> Unit = {},
     onUseCommonChange: (Boolean) -> Unit = {}
 ) {
-    var selectedMode by remember {
-        mutableStateOf("Columns")
+    var selectMode by remember {
+        mutableStateOf("column")
     }
     var inputRegionCount by remember {
         mutableStateOf(regionParam.regionCount.toString())
     }
-
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = stringResource(id = R.string.enable), modifier = Modifier.weight(1f))
-        Spacer(modifier = Modifier.width(8.dp))
-        Switch(checked = regionParam.enable, onCheckedChange = {
-            onValueChange(regionParam.copy(enable = it))
-        })
+    var regionTree by remember {
+        mutableStateOf(
+            Region()
+        )
     }
-    Spacer(modifier = Modifier.height(8.dp))
-    TextField(
-        modifier = Modifier
-            .fillMaxWidth(),
-        value = regionParam.dividerText, onValueChange = {
-            onValueChange(regionParam.copy(dividerText = it))
-        }, label = {
-            Text(text = stringResource(R.string.region_divider_ratio))
-        })
-    Spacer(modifier = Modifier.height(8.dp))
-    TextField(
-        modifier = Modifier
-            .fillMaxWidth(),
-        value = inputRegionCount,
-        onValueChange = { inputVal ->
-            inputRegionCount = inputVal
-            try {
-                onValueChange(regionParam.copy(regionCount = inputVal.toInt()))
-            } catch (e: Exception) {
+    var selectedRegionId by remember {
+        mutableStateOf(regionTree.subRegions.firstOrNull()?.id)
+    }
+    var regionRatioInput by remember {
+        mutableStateOf("")
+    }
+    var selectModeMap = mapOf(
+        "column" to stringResource(R.string.select_column),
+        "row" to stringResource(R.string.select_row)
+    )
+    var showRegionDropdown by remember {
+        mutableStateOf(false)
+    }
+    var aspectRatio = Util.calculateActualSize(
+        220,
+        220,
+        DrawViewModel.inputWidth.toInt(),
+        DrawViewModel.inputHeight.toInt()
+    )
 
+    fun getRegionText(): String {
+        return regionTree.subRegions.map { colRegion ->
+            if (colRegion.subRegions.size == 1) {
+                return@map colRegion.ratio.toString()
+            }
+            val colRatios = colRegion.subRegions.map {
+                it.ratio.toString()
+            }
+            if (regionTree.subRegions.size == 1) {
+                return@map colRatios.joinToString(separator = ",")
+            }
+            return@map colRegion.ratio.toString() + "," + colRatios.joinToString(separator = ",")
+        }.joinToString(separator = ";")
+    }
+
+    fun getRegionCount(countTree:Region = regionTree): Int {
+        return countTree.subRegions.flatMap { it.subRegions }.size
+    }
+
+    fun reIndexRegionTree(useCommon: Boolean = regionParam.useCommon) {
+        var curIndex = if (useCommon) 0 else -1
+        regionTree = regionTree.copy(
+            subRegions = regionTree.subRegions.map { colRegion ->
+                colRegion.copy(
+                    index = colRegion.index,
+                    subRegions = colRegion.subRegions.map {
+                        curIndex += 1
+                        it.copy(
+                            index = curIndex
+                        )
+                    }
+                )
+            }
+        )
+    }
+
+    fun onRegionTreeUpdate() {
+        val count = getRegionCount()
+        onValueChange(
+            regionParam.copy(
+                regionCount = count,
+            )
+        )
+        val text = getRegionText()
+        onValueChange(
+            regionParam.copy(
+                dividerText = text
+            )
+        )
+        // reindex
+        reIndexRegionTree()
+
+        inputRegionCount = count.toString()
+    }
+    LaunchedEffect(Unit) {
+        regionTree = parseRegionText(regionParam.dividerText)
+        onRegionTreeUpdate()
+    }
+
+    fun getRegionById(id: String): Region? {
+        return (regionTree.subRegions.flatMap { it.subRegions } + regionTree.subRegions).find { it.id == id }
+    }
+
+    val selectedRegion = selectedRegionId?.let {
+        getRegionById(it)
+    }
+
+    fun setSelectMode(mode: String) {
+        selectMode = mode
+        selectedRegion?.let {
+            if (mode == "column" && selectedRegion.layout == "Row") {
+                selectedRegionId = selectedRegion.parent?.id
+                regionRatioInput = selectedRegion.parent?.ratio.toString()
+            }
+            if (mode == "row" && selectedRegion.subRegions.isNotEmpty()) {
+                selectedRegionId = selectedRegion.subRegions.first().id
+                regionRatioInput = selectedRegion.subRegions.first().ratio.toString()
+            }
+        }
+    }
+
+    fun updateRegionTreeById(id: String, regionMod: (Region) -> Region) {
+        val targetRegion = getRegionById(id)
+        if (targetRegion != null) {
+            if (targetRegion.layout == "Column") {
+                regionTree = regionTree.copy(
+                    subRegions = regionTree.subRegions.map {
+                        if (it.id == id) {
+                            return@map regionMod(it)
+                        } else {
+                            return@map it
+                        }
+                    }
+                )
+            }
+            if (targetRegion.layout == "Row") {
+                regionTree = regionTree.copy(
+                    subRegions = regionTree.subRegions.map {
+                        if (it.layout == "Column") {
+                            return@map it.copy(
+                                subRegions = it.subRegions.map {
+                                    if (it.id == id) {
+                                        return@map regionMod(it)
+                                    } else {
+                                        return@map it
+                                    }
+                                }
+                            )
+                        } else {
+                            return@map it
+                        }
+                    }
+                )
+            }
+            onRegionTreeUpdate()
+        }
+    }
+
+    fun removeRegionById(id: String) {
+        val targetRegion = getRegionById(id)
+        if (targetRegion != null) {
+            if (targetRegion.layout == "Column") {
+                regionTree = regionTree.copy(
+                    subRegions = regionTree.subRegions.filter {
+                        it.id != id
+                    }
+                )
+            }
+            if (targetRegion.layout == "Row") {
+                regionTree = regionTree.copy(
+                    subRegions = regionTree.subRegions.map {
+                        if (it.layout == "Column") {
+                            return@map it.copy(
+                                subRegions = it.subRegions.filter {
+                                    it.id != id
+                                }
+                            )
+                        } else {
+                            return@map it
+                        }
+                    }
+                )
+            }
+            onRegionTreeUpdate()
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = stringResource(id = R.string.enable), modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
+            Switch(checked = regionParam.enable, onCheckedChange = {
+                onValueChange(regionParam.copy(enable = it))
+            })
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            selectModeMap.keys.forEach {
+                FilterChip(selected = selectMode == it, onClick = {
+                    setSelectMode(it)
+                }, label = { Text(text = selectModeMap[it]!!) })
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(aspectRatio.first.dp)
+                    .height(aspectRatio.second.dp)
+            ) {
+                regionTree.subRegions.forEachIndexed { idx, region ->
+                    Box(
+                        modifier = Modifier
+                            .weight(region.ratio.toFloat())
+                            .fillMaxWidth()
+                            .background(Color(region.color))
+                            .border(
+                                width = 2.dp,
+                                color = if (selectedRegionId == region.id) Color.Red else Color.Transparent
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (region.subRegions.isNotEmpty()) {
+                            Row {
+                                region.subRegions.forEach { subRegion ->
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .weight(subRegion.ratio.toFloat())
+                                            .background(Color(subRegion.color))
+                                            .border(
+                                                width = 2.dp,
+                                                color = if (selectedRegionId == subRegion.id) Color.Red else Color.Transparent
+                                            )
+                                            .clickable {
+                                                if (selectMode == "column" && subRegion.parent != null) {
+                                                    selectedRegionId = subRegion.parent!!.id
+                                                    regionRatioInput =
+                                                        subRegion.parent!!.ratio.toString()
+                                                } else {
+                                                    selectedRegionId = subRegion.id
+                                                    regionRatioInput = subRegion.ratio.toString()
+                                                }
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.background(Color(0x80000000))
+                                        ) {
+                                            Text(subRegion.index.toString(), color = Color.White)
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        Color.Black
+                                    )
+                                    .padding(4.dp)
+                            ) {
+                                Text("$idx", color = Color.White)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        selectedRegion?.let { region ->
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = stringResource(id = R.string.region,region.id))
+                    Spacer(modifier = Modifier.weight(1f))
+                    Box {
+                        IconButton(onClick = {
+                            showRegionDropdown = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = null,
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showRegionDropdown,
+                            onDismissRequest = {
+                                showRegionDropdown = false
+                            }
+                        ) {
+                            if (region.layout == "Column") {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.add_row)) },
+                                    onClick = {
+                                        updateRegionTreeById(region.id) {
+                                            it.copy(
+                                                subRegions = it.subRegions + Region(
+                                                    layout = "Row",
+                                                    parent = it
+                                                )
+                                            )
+                                        }
+                                        onRegionTreeUpdate()
+                                        showRegionDropdown = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.add_column)) },
+                                    onClick = {
+                                        val colRegion = Region(
+                                            subRegions = listOf(
+
+                                            )
+                                        )
+                                        val rowRegion = Region(
+                                            layout = "Row",
+                                            parent = colRegion
+                                        )
+                                        colRegion.subRegions += rowRegion
+                                        regionTree = regionTree.copy(
+                                            subRegions = regionTree.subRegions + colRegion
+                                        )
+                                        onRegionTreeUpdate()
+                                        showRegionDropdown = false
+                                    }
+                                )
+
+                            }
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.delete)) },
+                                onClick = {
+                                    if (region.layout == "Row" && region.parent?.subRegions?.size == 1) {
+                                        removeRegionById(region.parent!!.id)
+                                        return@DropdownMenuItem
+                                    } else {
+                                        removeRegionById(region.id)
+                                    }
+                                    showRegionDropdown = false
+                                }
+                            )
+                        }
+                    }
+                }
+                Slider(
+                    value = region.ratio.toFloat(),
+                    onValueChange = { newVal ->
+                        updateRegionTreeById(region.id) {
+                            it.copy(ratio = newVal.toInt())
+                        }
+                        regionRatioInput = newVal.toInt().toString()
+                    },
+                    valueRange = 1f..10f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = regionRatioInput,
+                    onValueChange = { newVal ->
+                        regionRatioInput = newVal
+                        newVal.toFloatOrNull()?.let { newVal ->
+                            updateRegionTreeById(region.id) {
+                                it.copy(ratio = newVal.toInt())
+                            }
+                        }
+                    },
+                    label = {
+                        Text(text = stringResource(R.string.ratio))
+                    },
+                )
             }
 
-        },
-        label = {
-            Text(text = stringResource(R.string.region_count))
-        },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = stringResource(R.string.region_usecommon), modifier = Modifier.weight(1f))
-        Spacer(modifier = Modifier.width(8.dp))
-        Switch(checked = regionParam.useCommon, onCheckedChange = {
-            onUseCommonChange(it)
-        })
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = regionParam.dividerText, onValueChange = {
+                regionTree = parseRegionText(it)
+                reIndexRegionTree()
+                val newRegionCount = getRegionCount(regionTree)
+                onValueChange(
+                    regionParam.copy(
+                        dividerText = it,
+                        regionCount = newRegionCount
+                    )
+                )
+                inputRegionCount = newRegionCount.toString()
+            }, label = {
+                Text(text = stringResource(R.string.region_divider_ratio))
+            }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = inputRegionCount,
+            onValueChange = { inputVal ->
+                inputRegionCount = inputVal
+                try {
+                    onValueChange(regionParam.copy(regionCount = inputVal.toInt()))
+                } catch (e: Exception) {
+
+                }
+
+            },
+            label = {
+                Text(text = stringResource(R.string.region_count))
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            enabled = false
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = stringResource(R.string.region_usecommon), modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
+            Switch(
+                checked = regionParam.useCommon,
+                onCheckedChange = {
+                    onUseCommonChange(it)
+                    reIndexRegionTree(it)
+                }
+            )
+        }
     }
-
-//    Column(
-//        modifier = Modifier
-//            .width(200.dp)
-//            .height(200.dp)
-//    ) {
-//        getRegionIndex(inputDividerRatio).forEach { region ->
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .weight(region.ratio.toFloat())
-//                    .background(Color(region.color)),
-//                contentAlignment = androidx.compose.ui.Alignment.Center
-//            ) {
-//                Box(
-//                    modifier = Modifier.background(Color(0x80000000))
-//                ) {
-//                    if (region.subRegions.isNotEmpty()) {
-//                        Row {
-//                            region.subRegions.forEach { subRegion ->
-//                                Box(
-//                                    modifier = Modifier
-//                                        .fillMaxHeight()
-//                                        .weight(subRegion.ratio.toFloat())
-//                                        .background(Color(subRegion.color ?: 0xFF000000.toInt())),
-//                                    contentAlignment = androidx.compose.ui.Alignment.Center
-//                                ) {
-//                                    Box(
-//                                        modifier = Modifier.background(Color(0x80000000))
-//                                    ) {
-//                                        Text(text = subRegion.index.toString(), color = Color.White)
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                    if (region.index != -1) {
-//                        Text(text = region.index.toString(), color = Color.White)
-//                    }
-//                }
-//
-//            }
-//        }
-//    }
-
 }
 
 @OptIn(ExperimentalLayoutApi::class)
