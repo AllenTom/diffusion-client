@@ -32,6 +32,7 @@ import com.allentom.diffusion.api.entity.Sampler
 import com.allentom.diffusion.api.entity.Upscale
 import com.allentom.diffusion.api.entity.Vae
 import com.allentom.diffusion.api.getApiClient
+import com.allentom.diffusion.composables.TemplateItem
 import com.allentom.diffusion.service.GenerateImageService
 import com.allentom.diffusion.service.Img2imgGenerateParam
 import com.allentom.diffusion.service.Text2ImageParam
@@ -268,6 +269,11 @@ data class ControlNetSlot(
     val inputImagePath: String? = null
 )
 
+data class TemplateParam(
+    val template: List<TemplateItem> = emptyList(),
+    val generateResult: List<Prompt> = emptyList()
+)
+
 data class XYZParam(
     val xAxis: GenModifier? = null,
     val yAxis: GenModifier? = null
@@ -412,6 +418,8 @@ object DrawViewModel {
     var adetailerParam by mutableStateOf<AdetailerParam>(AdetailerParam())
     var adetailerModelList by mutableStateOf<List<String>>(emptyList())
     var xyzParam by mutableStateOf<XYZParam>(XYZParam())
+    var templateParam by mutableStateOf<TemplateParam>(TemplateParam())
+    var negativeTemplateParam by mutableStateOf<TemplateParam>(TemplateParam())
 
     fun startGenerating(
         count: Int,
@@ -966,13 +974,27 @@ object DrawViewModel {
         }
     }
 
-    fun addInputPrompt(prompt: Prompt) {
-        inputPromptText.none { it.text == prompt.text }.let {
+    fun addInputPrompt(prompt: Prompt, regionIndex: Int? = 0) {
+        inputPromptText.none {
+            if (regionIndex != null) {
+                return@none it.text == prompt.text && it.regionIndex == regionIndex
+
+            } else {
+                return@none it.text == prompt.text
+            }
+        }.let {
             if (it) {
                 inputPromptText = inputPromptText + prompt
             }
         }
     }
+
+    fun replaceInputPrompt(promptList: List<Prompt>, regionIndex: Int = 0) {
+        var newPrompt = inputPromptText.filter { it.regionIndex != regionIndex }
+        newPrompt = newPrompt + promptList.map { it.copy(regionIndex = regionIndex) }
+        inputPromptText = newPrompt
+    }
+
 
     fun removeInputPrompt(text: String) {
         inputPromptText = inputPromptText.filter { it.text != text }
@@ -986,12 +1008,25 @@ object DrawViewModel {
         }
     }
 
-    fun addInputNegativePrompt(prompt: Prompt) {
-        inputNegativePromptText.none { it.text == prompt.text }.let {
+    fun addInputNegativePrompt(prompt: Prompt, regionIndex: Int? = 0) {
+        inputNegativePromptText.none {
+            if (regionIndex != null) {
+                return@none it.text == prompt.text && it.regionIndex == regionIndex
+
+            } else {
+                return@none it.text == prompt.text
+            }
+        }.let {
             if (it) {
                 inputNegativePromptText = inputNegativePromptText + prompt
             }
         }
+    }
+
+    fun replaceInputNegativePrompt(promptList: List<Prompt>, regionIndex: Int = 0) {
+        var newPrompt = inputNegativePromptText.filter { it.regionIndex != regionIndex }
+        newPrompt = newPrompt + promptList.map { it.copy(regionIndex = regionIndex) }
+        inputNegativePromptText = newPrompt
     }
 
     fun removeInputNegativePrompt(text: String) {

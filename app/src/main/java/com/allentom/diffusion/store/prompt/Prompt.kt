@@ -1,6 +1,7 @@
 package com.allentom.diffusion.store.prompt
 
 import android.content.Context
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.Insert
@@ -11,6 +12,7 @@ import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.civitai.entities.CivitaiModelVersion
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import com.allentom.diffusion.api.getApiClient
+import com.allentom.diffusion.composables.TemplateItem
 import com.allentom.diffusion.store.AppDatabaseHelper
 import com.allentom.diffusion.store.history.HistoryWithRelation
 import com.charleskorn.kaml.Yaml
@@ -28,8 +30,15 @@ data class Prompt(
     var promptId: Long? = null,
     var translation: String? = null,
     var regionIndex: Int = 0,
+    var category: String = "default",
+    var templateSlot: String? = null,
     var randomId: String = Util.randomString(8),
-    ) : Serializable {
+    var slotOrder: Int = 0,
+    var categoryOrder: Int = 0,
+    var promptOrder: Int = 0,
+    var generateLock: Boolean = false,
+    var generateItem :TemplateItem? = null
+) : Serializable {
     fun getPromptText(): String {
         if (piority == 0) {
             return text
@@ -40,6 +49,7 @@ data class Prompt(
         }
         return curText
     }
+
     fun getTranslationText(): String {
         if (translation == null) {
             return text
@@ -58,6 +68,13 @@ data class SavePrompt(
     var time: Long,
     var count: Int,
     var category: String = "default",
+    var templateSlot: String? = null,
+    @ColumnInfo(defaultValue = "0")
+    var categoryOrder: Int = 0,
+    @ColumnInfo(defaultValue = "0")
+    var slotOrder: Int = 0,
+    @ColumnInfo(defaultValue = "0")
+    var promptOrder : Int = 0
 ) : Serializable {
     companion object {
         fun fromPrompt(prompt: Prompt): SavePrompt {
@@ -77,11 +94,16 @@ data class SavePrompt(
             piority = 0,
             promptId = promptId,
             translation = nameCn,
+            category = category,
+            templateSlot = templateSlot,
+            categoryOrder = categoryOrder,
+            slotOrder = slotOrder,
+            promptOrder = promptOrder
         )
     }
 
     fun getTranslationText(): String {
-        if (nameCn.isBlank() ||nameCn == text) {
+        if (nameCn.isBlank() || nameCn == text) {
             return text
         }
         return nameCn
@@ -124,6 +146,17 @@ interface PromptDao {
 
     @Query("SELECT * FROM prompt WHERE category = :category")
     fun getPromptByCategory(category: String): List<SavePrompt>
+
+    @Query("SELECT distinct templateSlot FROM prompt")
+    fun getTemplateSlotDistinct(): List<String?>
+
+    @Query("SELECT * FROM prompt WHERE templateSlot = :slot")
+    fun getPromptByTemplateSlot(slot: String): List<SavePrompt>
+
+    @Query("SELECT * FROM prompt WHERE templateSlot = :slot and category = :category")
+    fun getPromptByTemplateSlotAndCategory(slot: String, category: String): List<SavePrompt>
+
+
 }
 
 object PromptStore {
@@ -201,6 +234,18 @@ object PromptStore {
         return AppDatabaseHelper.getDatabase(context).promptDao().getAllCategory()
     }
 
+    fun getAllTemplateSlot(context: Context): List<String> {
+        return AppDatabaseHelper.getDatabase(context).promptDao().getTemplateSlotDistinct().filterNotNull()
+    }
+
+    fun getPromptByTemplateSlot(context: Context, slot: String): List<SavePrompt> {
+        return AppDatabaseHelper.getDatabase(context).promptDao().getPromptByTemplateSlot(slot)
+    }
+
+    fun getPromptByTemplateSlotAndCategory(context: Context, slot: String, category: String): List<SavePrompt> {
+        return AppDatabaseHelper.getDatabase(context).promptDao().getPromptByTemplateSlotAndCategory(slot, category)
+    }
+
     fun getPromptByCategory(context: Context, category: String): List<SavePrompt> {
         return AppDatabaseHelper.getDatabase(context).promptDao().getPromptByCategory(category)
     }
@@ -239,7 +284,8 @@ object PromptStore {
             prompt
         }
     }
-    fun newPromptByName(context: Context,newPrompt: SavePrompt) {
+
+    fun newPromptByName(context: Context, newPrompt: SavePrompt) {
         val db = AppDatabaseHelper.getDatabase(context)
         val prompt = db.promptDao().getPrompt(newPrompt.text)
         if (prompt == null) {
@@ -250,6 +296,7 @@ object PromptStore {
                 nameCn = newPrompt.nameCn,
                 category = newPrompt.category,
                 text = newPrompt.text,
+                templateSlot = newPrompt.templateSlot
             )
             db.promptDao().update(promptToSave)
         }

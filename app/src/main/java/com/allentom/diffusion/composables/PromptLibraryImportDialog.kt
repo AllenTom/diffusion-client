@@ -40,7 +40,8 @@ import kotlinx.coroutines.launch
 data class ScanResult(
     val category: String,
     val name: String,
-    val translation: String
+    val translation: String,
+    val template_slot: String? = null
 )
 
 data class ImportProgress(
@@ -88,7 +89,8 @@ fun PromptLibraryImportDialog(
                             nameCn = scanResult.translation,
                             category = scanResult.category,
                             count = 0,
-                            time = System.currentTimeMillis()
+                            time = System.currentTimeMillis(),
+                            templateSlot = scanResult.template_slot
                         )
                     )
                 }
@@ -115,13 +117,22 @@ fun PromptLibraryImportDialog(
                         packageContent.items.forEach { catContent ->
                             val catName = catContent.yamlMap.get<YamlScalar>("name")?.content
                                 ?: return@forEach
+                            val template_slot =
+                                catContent.yamlMap.get<YamlScalar>("template_slot")?.content
                             val itemContent =
                                 catContent.yamlMap.get<YamlMap>("content") ?: return@forEach
                             itemContent.entries.forEach { ent ->
                                 val promptName = ent.key.yamlScalar.content
                                 val nameCn = ent.value.yamlMap.get<YamlScalar>("name")?.content
                                 if (nameCn != null) {
-                                    resultList.add(ScanResult(catName, promptName, nameCn))
+                                    resultList.add(
+                                        ScanResult(
+                                            catName,
+                                            promptName,
+                                            nameCn,
+                                            template_slot = template_slot
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -192,11 +203,13 @@ fun PromptLibraryImportDialog(
                         Text(
                             text = progress.currentScanResult.name,
                         )
-                        Text(text = stringResource(
-                            R.string.importing,
-                            progress.current.toString(),
-                            progress.total.toString()
-                        ))
+                        Text(
+                            text = stringResource(
+                                R.string.importing,
+                                progress.current.toString(),
+                                progress.total.toString()
+                            )
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
                         LinearProgressIndicator(
                             progress = progress.current.toFloat() / (if (progress.total == 0) 1 else progress.total),

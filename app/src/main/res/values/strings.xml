@@ -286,4 +286,13 @@
     <string name="select_column">Select column</string>
     <string name="select_row">Select row</string>
     <string name="add_row">Add Row</string>
+    <string name="replace">Replace</string>
+    <string name="add">Add</string>
+    <string name="send">Send</string>
+    <string name="template">Template</string>
+    <string name="history">History</string>
+    <string name="roll">Roll</string>
+    <string name="template_slot">slot</string>
+    <string name="template_category">category</string>
+    <string name="template_prompt">Roll</string>
 </resources>

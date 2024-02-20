@@ -29,7 +29,6 @@ import com.allentom.diffusion.ui.screens.home.tabs.draw.RegionPromptParam
 fun PromptFlowRow(
     promptList: List<Prompt>,
     onClickPrompt: ((Prompt) -> Unit)? = {},
-    useTranslate: Boolean = false,
     regionPromptParam: RegionPromptParam? = null
 ) {
     if (regionPromptParam != null && regionPromptParam.enable) {
@@ -44,7 +43,6 @@ fun PromptFlowRow(
                 PromptContainer(
                     promptList = promptList.filter { it.regionIndex == i },
                     onClickPrompt = onClickPrompt,
-                    useTranslate = useTranslate
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -53,7 +51,6 @@ fun PromptFlowRow(
         PromptContainer(
             promptList = promptList,
             onClickPrompt = onClickPrompt,
-            useTranslate = useTranslate
         )
     }
 }
@@ -62,15 +59,23 @@ fun PromptFlowRow(
 @Composable
 fun PromptContainer(
     promptList: List<Prompt>,
+    onlyTranslate: Boolean = false,
+    closeable: Boolean = false,
+    onClosed: ((Prompt) -> Unit)? = {},
     onClickPrompt: ((Prompt) -> Unit)? = {},
-    useTranslate: Boolean = false,
 ) {
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         promptList.forEach {
-            SmallPrompt(prompt = it, onClickPrompt = onClickPrompt)
+            SmallPrompt(
+                prompt = it,
+                onClickPrompt = onClickPrompt,
+                onlyTranslate = onlyTranslate,
+                closeable = closeable,
+                onClosed = onClosed
+            )
         }
     }
 

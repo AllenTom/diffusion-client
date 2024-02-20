@@ -287,4 +287,13 @@
     <string name="select_column">选择行</string>
     <string name="select_row">选择列</string>
     <string name="add_row">创建列</string>
+    <string name="replace">替换</string>
+    <string name="add">追加</string>
+    <string name="send">发送</string>
+    <string name="template">模板</string>
+    <string name="history">历史</string>
+    <string name="roll">抽卡</string>
+    <string name="template_slot">大类</string>
+    <string name="template_category">分类</string>
+    <string name="template_prompt">提示词</string>
 </resources>

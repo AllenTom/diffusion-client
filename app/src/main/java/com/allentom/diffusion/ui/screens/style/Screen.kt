@@ -2,7 +2,6 @@ package com.allentom.diffusion.ui.screens.style
 
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -52,10 +50,7 @@ import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.composables.PromptContainer
 import com.allentom.diffusion.composables.StyleEditDialog
 import com.allentom.diffusion.store.prompt.PromptStyle
-import com.allentom.diffusion.store.prompt.SavePrompt
-import com.allentom.diffusion.store.prompt.StyleEntity
 import com.allentom.diffusion.store.prompt.StyleStore
-import com.allentom.diffusion.store.prompt.StyleWithPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

@@ -27,6 +27,10 @@ import com.allentom.diffusion.store.history.PromptExtraDao
 import com.allentom.diffusion.store.history.PromptExtraEntity
 import com.allentom.diffusion.store.history.PromptHistoryCrossRef
 import com.allentom.diffusion.store.history.PromptHistoryDao
+import com.allentom.diffusion.store.history.TemplateDao
+import com.allentom.diffusion.store.history.TemplateEntity
+import com.allentom.diffusion.store.history.TemplateItemDao
+import com.allentom.diffusion.store.history.TemplateItemEntity
 import com.allentom.diffusion.store.history.XYZDao
 import com.allentom.diffusion.store.history.XYZHistoryEntity
 import com.allentom.diffusion.store.prompt.EmbeddingDao
@@ -64,7 +68,9 @@ import com.allentom.diffusion.store.prompt.StylePromptDao
         XYZHistoryEntity::class,
         StyleEntity::class,
         StylePromptCrossRef::class,
-    ], version = 15, exportSchema = true, autoMigrations = [
+        TemplateEntity::class,
+        TemplateItemEntity::class
+    ], version = 19, exportSchema = true, autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
@@ -79,6 +85,10 @@ import com.allentom.diffusion.store.prompt.StylePromptDao
         AutoMigration(from = 12, to = 13),
         AutoMigration(from = 13, to = 14),
         AutoMigration(from = 14, to = 15),
+        AutoMigration(from = 15, to = 16),
+        AutoMigration(from = 16, to = 17),
+        AutoMigration(from = 17, to = 18),
+        AutoMigration(from = 18, to = 19),
     ]
 )
 
@@ -104,6 +114,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun xyzDao(): XYZDao
     abstract fun styleDao(): StyleDao
     abstract fun stylePromptDao(): StylePromptDao
+
+    abstract fun templateDao(): TemplateDao
+
+    abstract fun templateItemDao(): TemplateItemDao
 
 }
 
