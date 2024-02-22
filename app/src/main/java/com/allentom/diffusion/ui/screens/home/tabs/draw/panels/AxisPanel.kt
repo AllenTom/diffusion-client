@@ -26,7 +26,7 @@ fun AxisPanel() {
             is IntListModifier -> {
                 TextAreaOptionItem(
                     label = mod.getDisplayLabel(context),
-                    value = mod.getDisplayLabel(context),
+                    value = mod.getStringValue(),
                     onValueChange = {
                         try {
                             mod.parseRawValue(it)

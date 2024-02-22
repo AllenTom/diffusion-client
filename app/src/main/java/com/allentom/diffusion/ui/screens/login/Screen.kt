@@ -59,7 +59,6 @@ fun LoginScreen(navController: NavController) {
             "http://$url"
         }
     }
-
     suspend fun onGoToUrl(url: String) {
         isLoading = true
         val apiUrl = completeUrl(url)
@@ -175,7 +174,6 @@ fun LoginScreen(navController: NavController) {
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
-
         }
 
     }

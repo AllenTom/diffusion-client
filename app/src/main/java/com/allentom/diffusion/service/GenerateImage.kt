@@ -273,7 +273,7 @@ suspend fun img2Image(
             image_cfg_scale = cfgScale,
             denoising_strength = denoisingStrength ?: 0.75f,
             scale_by = scaleBy ?: 1f,
-            mask = mask,
+            mask = mask?.takeIf { it.isNotBlank() },
             inpainting_mask_invert = inpaintingMaskInvert,
             mask_blur = maskBlur,
             inpainting_fill = inpaintingFill,

@@ -463,28 +463,11 @@ object Util {
         }
         return "data:image/$mimeType;base64,$base64String"
     }
+    fun formatFloatByBaseFloat(value: Float, baseFloat: Float): Float {
+        val raw = baseFloat.toString()
+        val decimal = raw.substringAfter(".").length
+        return String.format("%.${decimal}f", (value / baseFloat).toInt() * baseFloat).toFloat()
+    }
 
-//    fun getRealFileNameFromUri(context: Context, uri: Uri): String? {
-//        var result: String? = null
-//        if (uri.scheme == "content") {
-//            val cursor = context.contentResolver.query(uri, null, null, null, null)
-//            try {
-//                if (cursor != null && cursor.moveToFirst()) {
-//                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-//                    result = cursor.getString()
-//                }
-//            } finally {
-//                cursor?.close()
-//            }
-//        }
-//        if (result == null) {
-//            result = uri.path
-//            val cut = result?.lastIndexOf('/')
-//            if (cut != -1) {
-//                result = result?.substring(cut + 1)
-//            }
-//        }
-//        return result
-//    }
 
 }

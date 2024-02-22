@@ -74,6 +74,9 @@ data class ControlNetHistoryWithRelation(
 fun SaveHistory.saveControlNet(context: Context) {
     val database = AppDatabaseHelper.getDatabase(context)
     controlNetParam?.let { controlNetParam ->
+        if (controlNetParam.slots.all { !it.enabled }) {
+            return@let
+        }
         controlNetParam.slots.forEach { slot ->
             val md5 = Util.getMd5FromImageBase64(slot.inputImage!!)
             val db = AppDatabaseHelper.getDatabase(context)

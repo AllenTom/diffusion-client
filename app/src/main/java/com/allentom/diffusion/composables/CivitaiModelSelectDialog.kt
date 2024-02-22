@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
+import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.entity.Lora
 import com.allentom.diffusion.store.prompt.LoraPrompt
 import com.allentom.diffusion.store.prompt.PromptStore
@@ -184,7 +185,7 @@ fun CivitaiModelSelectDialog(
                                                             selectedLoraList.toMutableList()
                                                                 .map {
                                                                     if (it == lora) {
-                                                                        return@map lora.copy(weight = newVal)
+                                                                        return@map lora.copy(weight = Util.formatFloatByBaseFloat(newVal,0.01f))
                                                                     } else {
                                                                         it
                                                                     }
