@@ -1,23 +1,23 @@
 # Diffusion
 [English](README.md) | [简体中文](#)
 
-支持 Android 的功能丰富Stable-diffusion-webui 客户端
+支持 Android 的功能丰富[Stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 客户端
 
 ## 功能
-- 文生图
-- 图生图
-- 局部重绘
-- control net
-- lora
+- 文生图 [wiki](https://github.com/AllenTom/diffusion-client/wiki/QuickStart-%E2%80%90-zh_cn)
+- 图生图 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E5%9B%BE%E7%94%9F%E5%9B%BE)
+- 局部重绘 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E5%9B%BE%E7%94%9F%E5%9B%BE#%E9%87%8D%E7%BB%98inpaint)
+- control net [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E6%8F%92%E4%BB%B6-%E2%80%90-ControlNet)
+- lora [wiki](https://github.com/AllenTom/diffusion-client/wiki/Lora-%E7%AE%A1%E7%90%86)
 - 生成历史记录管理
-- 模型管理
+- 模型管理 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E6%A8%A1%E5%9E%8B%E7%AE%A1%E7%90%86)
 - 图片反推
-- 超分
+- 超分 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E6%8F%92%E4%BB%B6-%E2%80%90-%E8%B6%85%E5%88%86)
 - sdxl 支持
-- reactor (换脸插件)
-- 区域提示词插件
-- Adetailer 细节修复插件
-- 从 civitai 下载元信息
+- reactor (换脸插件) [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E6%8F%92%E4%BB%B6-%E2%80%90-Reactor)
+- 区域提示词插件 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E6%8F%92%E4%BB%B6-%E2%80%90-%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%88%86%E5%8C%BA)
+- Adetailer 细节修复插件 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E6%8F%92%E4%BB%B6-%E2%80%90-Adetailer)
+- 从 civitai 下载元信息 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E6%A8%A1%E5%9E%8B%E7%AE%A1%E7%90%86#%E8%87%AA%E5%8A%A8%E5%92%8C-civitai-%E6%A8%A1%E5%9E%8B%E5%8C%B9%E9%85%8D)
 ## 预览
 <p float="left">
   <img src="./assets/preview_draw.png" width="100" />

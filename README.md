@@ -2,7 +2,7 @@
 [English](#) | [简体中文](./README_zh_cn.md)
 
 
-a powerful stable-diffusion-webui client for android
+a powerful [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) client for android
 
 ## Feature
 - text to image [wiki](https://github.com/AllenTom/diffusion-client/wiki/QuickStart)
