@@ -5,20 +5,20 @@
 a powerful stable-diffusion-webui client for android
 
 ## Feature
-- text to image
-- image to image
-- inpaint image
+- text to image [wiki](https://github.com/AllenTom/diffusion-client/wiki/QuickStart)
+- image to image [wiki](https://github.com/AllenTom/diffusion-client/wiki/Image-to-image)
+- inpaint image [wiki](https://github.com/AllenTom/diffusion-client/wiki/Image-to-image#inpaint)
 - control net [wiki](https://github.com/AllenTom/diffusion-client/wiki/Extension-%E2%80%90-ControlNet)
-- lora
+- lora [wiki](https://github.com/AllenTom/diffusion-client/wiki/Lora-management)
 - history management
-- model management
+- model management [wiki](https://github.com/AllenTom/diffusion-client/wiki/Model-management)
 - control net management [wiki](https://github.com/AllenTom/diffusion-client/wiki/Extension-%E2%80%90-ControlNet)
 - tag from image
 - extra image [wiki](https://github.com/AllenTom/diffusion-client/wiki/Extension-%E2%80%90-Hires-fix)
 - sdxl support
 - reactor (for face swap) [wiki](https://github.com/AllenTom/diffusion-client/wiki/Extension-%E2%80%90-Reactor)
-- regional prompter
-- link model to civitai model
+- regional prompter [wiki](https://github.com/AllenTom/diffusion-client/wiki/Extension-%E2%80%90-Regional-prompter)
+- link model to civitai model [wiki](https://github.com/AllenTom/diffusion-client/wiki/Model-management#automatically-matches-civitai-models)
 - adetailer [wiki](https://github.com/AllenTom/diffusion-client/wiki/Extension-%E2%80%90-Adetailer)
 ## Preview
 <p float="left">
