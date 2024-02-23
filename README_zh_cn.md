@@ -27,6 +27,8 @@
   <img src="./assets/preview_tools.jpg" width="100" /> 
 </p>
 
+## wiki
+[wiki](https://github.com/AllenTom/diffusion-client/wiki/Home:zhcn) 记录了功能的使用方式，敬请查阅
 ## 下载
 可以从 [release page](https://github.com/AllenTom/diffusion-client/releases)下载
 
