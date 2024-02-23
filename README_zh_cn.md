@@ -28,7 +28,7 @@
 </p>
 
 ## wiki
-[wiki](https://github.com/AllenTom/diffusion-client/wiki/Home:zhcn) 记录了功能的使用方式，敬请查阅
+[wiki](https://github.com/AllenTom/diffusion-client/wiki/%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C) 记录了功能的使用方式，敬请查阅
 ## 下载
 可以从 [release page](https://github.com/AllenTom/diffusion-client/releases)下载
 
