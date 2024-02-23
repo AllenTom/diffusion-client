@@ -95,7 +95,7 @@ fun PromptSelectDialog(
     promptList: List<Prompt>,
     title: String,
     onDismiss: () -> Unit,
-    onValueChange: (List<Prompt>, RegionPromptParam?,TemplateParam?) -> Unit,
+    onValueChange: (List<Prompt>, RegionPromptParam?, TemplateParam?) -> Unit,
     regionParam: RegionPromptParam? = null,
     templateParam: TemplateParam? = null
 ) {
@@ -144,7 +144,7 @@ fun PromptSelectDialog(
             .fillMaxSize(),
         confirmButton = {
             Button(onClick = {
-                onValueChange(selectedPromptList, inputRegionParam,inputTemplateParam)
+                onValueChange(selectedPromptList, inputRegionParam, inputTemplateParam)
             }) {
                 Text(stringResource(R.string.confirm))
             }
@@ -237,17 +237,19 @@ fun PromptSelectDialog(
                                     inputRegionParam = newVal
                                 },
                                 onUseCommonChange = { newVal ->
-                                    regionParam?.let { regionParam ->
-                                        val totalRegion = regionParam.getTotalRegionCount()
-                                        selectedPromptList = selectedPromptList.map { prompt ->
-                                            if (prompt.regionIndex >= totalRegion - 1) {
-                                                return@map prompt.copy(regionIndex = 0)
-                                            } else {
-                                                return@map prompt
-                                            }
-                                        }
+                                    regionParam?.let {
                                         inputRegionParam =
                                             inputRegionParam?.copy(useCommon = newVal)
+                                        inputRegionParam?.let {
+                                            val totalRegion = it.getTotalRegionCount()
+                                            selectedPromptList = selectedPromptList.map { prompt ->
+                                                if (prompt.regionIndex >= totalRegion - 1) {
+                                                    return@map prompt.copy(regionIndex = 0)
+                                                } else {
+                                                    return@map prompt
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             )
@@ -256,7 +258,7 @@ fun PromptSelectDialog(
                     }
                     if (selectIndex == 3) {
                         TemplatePrompt(
-                            regionParam = regionParam,
+                            regionParam = inputRegionParam,
                             prompts = selectedPromptList,
                             onUpdated = {
                                 selectedPromptList = it
@@ -936,14 +938,10 @@ fun RegionalPrompterPanel(
 
     fun onRegionTreeUpdate() {
         val count = getRegionCount()
-        onValueChange(
-            regionParam.copy(
-                regionCount = count,
-            )
-        )
         val text = getRegionText()
         onValueChange(
             regionParam.copy(
+                regionCount = count,
                 dividerText = text
             )
         )
@@ -1386,6 +1384,7 @@ fun TemplatePrompt(
             )
         )
     }
+
     val usePromptList = templateParam.generateResult
     fun updateUsePromptList(newList: List<Prompt>) {
         onUpdateTemplate(
