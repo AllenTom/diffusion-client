@@ -20,11 +20,11 @@
 - 从 civitai 下载元信息
 ## 预览
 <p float="left">
-  <img src="./assets/preview_draw.jpg" width="100" />
-  <img src="./assets/preview_history.jpg" width="100" /> 
-  <img src="./assets/preview_model.jpg" width="100" /> 
-  <img src="./assets/preview_params.jpg" width="100" /> 
-  <img src="./assets/preview_tools.jpg" width="100" /> 
+  <img src="./assets/preview_draw.png" width="100" />
+  <img src="./assets/preview_history.png" width="100" /> 
+  <img src="./assets/preview_model.png" width="100" /> 
+  <img src="./assets/preview_params.png" width="100" /> 
+  <img src="./assets/preview_tools.png" width="100" /> 
 </p>
 
 ## wiki

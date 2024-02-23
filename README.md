@@ -22,11 +22,11 @@ a powerful stable-diffusion-webui client for android
 - adetailer [wiki](https://github.com/AllenTom/diffusion-client/wiki/Extension-%E2%80%90-Adetailer)
 ## Preview
 <p float="left">
-  <img src="./assets/preview_draw.jpg" width="100" />
-  <img src="./assets/preview_history.jpg" width="100" /> 
-  <img src="./assets/preview_model.jpg" width="100" /> 
-  <img src="./assets/preview_params.jpg" width="100" /> 
-  <img src="./assets/preview_tools.jpg" width="100" /> 
+  <img src="./assets/preview_draw.png" width="100" />
+  <img src="./assets/preview_history.png" width="100" /> 
+  <img src="./assets/preview_model.png" width="100" /> 
+  <img src="./assets/preview_params.png" width="100" /> 
+  <img src="./assets/preview_tools.png" width="100" /> 
 </p>
 
 ## TODO
