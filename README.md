@@ -34,6 +34,11 @@ a powerful [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diff
 - adapt video generate plugin
 - add more X/Y/Z Axis
 
+## Requirement
+Service base on [stable diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+
+Please start the sdw service before using it. The guide are [here](https://github.com/AllenTom/diffusion-client/wiki/QuickStart#set-up-stable-diffusion-web-ui)
+
 ## Wiki
 How to use the application is written in the [wiki](https://github.com/AllenTom/diffusion-client/wiki)
 
