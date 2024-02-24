@@ -71,7 +71,7 @@ fun HistoryView(
     }
 
     if (isImage2ImageInputPreviewOpen) {
-        currentHistory.img2imgParam?.let {
+        currentHistory.savedImg2ImgParam?.let {
             ImageUriPreviewDialog(
                 imageUri = it.path,
                 onDismissRequest = {
@@ -82,8 +82,8 @@ fun HistoryView(
     }
 
     LaunchedEffect(Unit) {
-        val sourceImagePath = currentHistory.img2imgParam?.path
-        val sourceMaskPath = currentHistory.img2imgParam?.maskPath
+        val sourceImagePath = currentHistory.savedImg2ImgParam?.path
+        val sourceMaskPath = currentHistory.savedImg2ImgParam?.maskPath
 
         if (sourceImagePath != null && sourceMaskPath != null) {
             scope.launch(Dispatchers.IO) {
@@ -300,7 +300,7 @@ fun HistoryView(
 
             }
         }
-        currentHistory.img2imgParam?.let { img2imgParam ->
+        currentHistory.savedImg2ImgParam?.let { img2imgParam ->
             Spacer(modifier = Modifier.height(16.dp))
             Divider()
             Spacer(modifier = Modifier.height(16.dp))

@@ -127,7 +127,9 @@ fun DrawBar(
             ActionItem(
                 text = stringResource(id = R.string.assign_to_prompt),
                 onAction = {
-                    DrawViewModel.inputPromptText = sendOptionContextPrompts
+                    DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                        promptText = sendOptionContextPrompts
+                    )
                     Toast.makeText(
                         context,
                         context.getString(R.string.assign_to_prompt_success),
@@ -151,7 +153,9 @@ fun DrawBar(
             ActionItem(
                 text = stringResource(R.string.assign_negative_prompt),
                 onAction = {
-                    DrawViewModel.inputNegativePromptText = sendOptionContextPrompts
+                    DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                        negativePromptText = sendOptionContextPrompts
+                    )
                     Toast.makeText(
                         context,
                         context.getString(R.string.assign_to_negative_prompt_success),

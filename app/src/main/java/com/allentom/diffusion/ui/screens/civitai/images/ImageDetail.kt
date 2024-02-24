@@ -82,10 +82,11 @@ fun CivitaiImageDetailScreen(id: Long) {
                                 it.text == selectedText
                             }
                         }.filterNotNull()
-                        DrawViewModel.inputPromptText =
-                            DrawViewModel.inputPromptText.filter { usedPrompt ->
+                        DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                            promptText = DrawViewModel.baseParam.promptText.filter { usedPrompt ->
                                 selectedPrompt.find { it.text == usedPrompt.text } == null
                             } + selectedPrompt
+                        )
                         Toast.makeText(
                             context,
                             context.getString(R.string.append_to_prompt), Toast.LENGTH_SHORT
@@ -97,10 +98,11 @@ fun CivitaiImageDetailScreen(id: Long) {
                                 it.text == selectedText
                             }
                         }.filterNotNull()
-                        DrawViewModel.inputNegativePromptText =
-                            DrawViewModel.inputNegativePromptText.filter { usedPrompt ->
+                        DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                            negativePromptText = DrawViewModel.baseParam.negativePromptText.filter { usedPrompt ->
                                 selectedPrompt.find { it.text == usedPrompt.text } == null
                             } + selectedPrompt
+                        )
                         Toast.makeText(
                             context,
                             context.getString(R.string.append_to_negative_prompt_success),
@@ -119,7 +121,7 @@ fun CivitaiImageDetailScreen(id: Long) {
                                 it.text == selectedText
                             }
                         }.filterNotNull()
-                        DrawViewModel.inputPromptText = selectedPrompt
+                        DrawViewModel.baseParam = DrawViewModel.baseParam.copy(promptText = selectedPrompt)
                         Toast.makeText(
                             context,
                             context.getString(R.string.assign_to_prompt_success),
@@ -132,7 +134,7 @@ fun CivitaiImageDetailScreen(id: Long) {
                                 it.text == selectedText
                             }
                         }.filterNotNull()
-                        DrawViewModel.inputNegativePromptText = selectedPrompt
+                        DrawViewModel.baseParam = DrawViewModel.baseParam.copy(negativePromptText = selectedPrompt)
                         Toast.makeText(
                             context,
                             context.getString(R.string.assign_to_negative_prompt_success),

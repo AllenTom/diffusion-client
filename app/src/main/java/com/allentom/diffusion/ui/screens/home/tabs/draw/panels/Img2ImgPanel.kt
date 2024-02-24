@@ -33,73 +33,84 @@ fun Img2ImgPanel() {
         }
         ImageBase64PickupOptionItem(
             label = stringResource(R.string.img2img_source_image),
-            value = DrawViewModel.inputImg2ImgImgBase64,
+            value = DrawViewModel.img2ImgParam.imgBase64,
             onValueChange = { _, it, filePath, width, height ->
-                DrawViewModel.inputImg2ImgImgBase64 = it
-                DrawViewModel.inputImg2ImgWidth = width.toFloat()
-                DrawViewModel.inputImg2ImgHeight = height.toFloat()
-                DrawViewModel.inputImg2ImgImgFilename = filePath
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                    imgBase64 = it,
+                    imgFilename = filePath,
+                    width = width,
+                    height = height
+                )
             }
         )
-        if (DrawViewModel.inputImg2ImgImgBase64 != null) {
+        if (DrawViewModel.img2ImgParam.imgBase64 != null) {
             SwitchOptionItem(
                 label = stringResource(id = R.string.inpaint_dialog_title),
-                value = DrawViewModel.inputImg2ImgInpaint
+                value = DrawViewModel.img2ImgParam.inpaint
             ) {
-                DrawViewModel.inputImg2ImgInpaint = it
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(inpaint = it)
             }
         }
-        if (DrawViewModel.inputImg2ImgImgBase64 != null && DrawViewModel.inputImg2ImgInpaint) {
+        if (DrawViewModel.img2ImgParam.imgBase64 != null && DrawViewModel.img2ImgParam.inpaint) {
             MaskDrawOptionItem(
                 label = stringResource(R.string.inpaint_mask),
                 value = DrawViewModel.inputImg2ImgMaskPreview,
-                backgroundImageBase64 = DrawViewModel.inputImg2ImgImgBase64
+                backgroundImageBase64 = DrawViewModel.img2ImgParam.imgBase64
             ) {
-                DrawViewModel.inputImg2ImgMask = it
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                    mask = it,
+                )
                 DrawViewModel.inputImg2ImgMaskPreview = Util.combineBase64Images(
-                    DrawViewModel.inputImg2ImgImgBase64!!,
+                    DrawViewModel.img2ImgParam.imgBase64!!,
                     it
                 )
             }
             SliderOptionItem(label = stringResource(id = R.string.mask_blur),
-                value = DrawViewModel.inputImg2ImgMaskBlur,
+                value = DrawViewModel.img2ImgParam.maskBlur,
                 valueRange = 0f..64f,
                 useInt = true,
                 onValueChangeInt = {
-                    DrawViewModel.inputImg2ImgMaskBlur = it.toFloat()
+                    DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                        maskBlur = it.toFloat()
+                    )
                 }
 
             )
             TextPickUpItem(
                 label = stringResource(id = R.string.mask_mode),
-                value = ConstValues.MaskInvertOptions[DrawViewModel.inputImg2ImgInpaintingMaskInvert],
+                value = ConstValues.MaskInvertOptions[DrawViewModel.img2ImgParam.inpaintingMaskInvert],
                 options = ConstValues.MaskInvertOptions
             ) {
-                DrawViewModel.inputImg2ImgInpaintingMaskInvert =
-                    ConstValues.MaskInvertOptions.indexOf(it)
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                    inpaintingMaskInvert = ConstValues.MaskInvertOptions.indexOf(it)
+                )
             }
             TextPickUpItem(
                 label = stringResource(id = R.string.masked_content),
-                value = ConstValues.InpaintingFillOptions[DrawViewModel.inputImg2ImgInpaintingFill],
+                value = ConstValues.InpaintingFillOptions[DrawViewModel.img2ImgParam.inpaintingFill],
                 options = ConstValues.InpaintingFillOptions
             ) {
-                DrawViewModel.inputImg2ImgInpaintingFill =
-                    ConstValues.InpaintingFillOptions.indexOf(it)
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                    inpaintingFill = ConstValues.InpaintingFillOptions.indexOf(it)
+                )
             }
             TextPickUpItem(
                 label = stringResource(id = R.string.inpaint_area),
-                value = ConstValues.InpaintingFullResOptions[DrawViewModel.inputImg2ImgInpaintingFullRes],
+                value = ConstValues.InpaintingFullResOptions[DrawViewModel.img2ImgParam.inpaintingFullRes],
                 options = ConstValues.InpaintingFullResOptions
             ) {
-                DrawViewModel.inputImg2ImgInpaintingFullRes =
-                    ConstValues.InpaintingFullResOptions.indexOf(it)
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                    inpaintingFullRes = ConstValues.InpaintingFullResOptions.indexOf(it)
+                )
             }
             SliderOptionItem(label = stringResource(id = R.string.only_masked_padding_pixels),
-                value = DrawViewModel.inputImg2ImgInpaintingFullResPadding.toFloat(),
+                value = DrawViewModel.img2ImgParam.inpaintingFullResPadding.toFloat(),
                 valueRange = 0f..256f,
                 useInt = true,
                 onValueChangeInt = {
-                    DrawViewModel.inputImg2ImgInpaintingFullResPadding = it
+                    DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                        inpaintingFullResPadding = it
+                    )
                 }
             )
 
@@ -107,45 +118,46 @@ fun Img2ImgPanel() {
 
 
         SliderOptionItem(label = stringResource(R.string.param_denoising_strength),
-            value = DrawViewModel.inputImg2ImgDenoisingStrength, valueRange = 0f..1f,
+            value = DrawViewModel.img2ImgParam.denoisingStrength, valueRange = 0f..1f,
             baseFloat = 0.01f,
             onValueChangeFloat = {
-                DrawViewModel.inputImg2ImgDenoisingStrength = it
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(denoisingStrength = it)
             })
         SliderOptionItem(label = stringResource(R.string.param_cfg_scale),
-            value = DrawViewModel.inputImg2ImgCfgScale, valueRange = 1f..30f,
+            value = DrawViewModel.img2ImgParam.cfgScale, valueRange = 1f..30f,
             useInt = true,
             baseFloat = 0.5f,
             onValueChangeInt = {
-                DrawViewModel.inputImg2ImgCfgScale = it.toFloat()
+                DrawViewModel.img2ImgParam =
+                    DrawViewModel.img2ImgParam.copy(cfgScale = it.toFloat())
             })
         TextPickUpItem(
             label = stringResource(R.string.param_resize_mode),
-            value = ConstValues.Img2ImgResizeModeList[DrawViewModel.inputImg2ImgResizeMode],
+            value = ConstValues.Img2ImgResizeModeList[DrawViewModel.img2ImgParam.resizeMode],
             options = ConstValues.Img2ImgResizeModeList
         )
         SliderOptionItem(label = stringResource(id = R.string.param_scale_by),
-            value = DrawViewModel.inputImg2ImgScaleBy,
+            value = DrawViewModel.img2ImgParam.scaleBy,
             valueRange = 0.05f..4f,
             baseFloat = 0.05f,
             onValueChangeFloat = {
-                DrawViewModel.inputImg2ImgScaleBy = it
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(scaleBy = it)
             })
         SliderOptionItem(label = stringResource(R.string.param_width),
-            value = DrawViewModel.inputImg2ImgWidth,
+            value = DrawViewModel.img2ImgParam.width.toFloat(),
             valueRange = 64f..2048f,
             steps = (2048 - 64) / 8,
             useInt = true,
             onValueChangeInt = {
-                DrawViewModel.inputImg2ImgWidth = it.toFloat()
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(width = it)
             })
         SliderOptionItem(label = stringResource(R.string.param_height),
-            value = DrawViewModel.inputImg2ImgHeight,
+            value = DrawViewModel.img2ImgParam.height.toFloat(),
             valueRange = 64f..2048f,
             steps = (2048 - 64) / 8,
             useInt = true,
             onValueChangeInt = {
-                DrawViewModel.inputImg2ImgHeight = it.toFloat()
+                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(height = it)
             })
     }
 }

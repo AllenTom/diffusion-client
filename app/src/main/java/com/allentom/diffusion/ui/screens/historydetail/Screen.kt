@@ -330,15 +330,21 @@ fun FirstScreen(
                         onClick = {
                             isActionMenuShow = false
                             scope.launch {
-                                DrawViewModel.inputImg2ImgImgBase64 =
-                                    Util.readImageWithPathToBase64(it.path)
                                 val width =
-                                    currentHistory.img2imgParam?.width ?: currentHistory.width
-                                DrawViewModel.inputImg2ImgWidth = width.toFloat()
+                                    currentHistory.savedImg2ImgParam?.width ?: currentHistory.width
                                 val height =
-                                    currentHistory.img2imgParam?.height ?: currentHistory.height
-                                DrawViewModel.inputImg2ImgHeight = height.toFloat()
-                                DrawViewModel.inputSeed = it.seed
+                                    currentHistory.savedImg2ImgParam?.height
+                                        ?: currentHistory.height
+
+                                DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                                    imgBase64 = Util.readImageWithPathToBase64(it.path),
+                                    imgFilename = it.path,
+                                    width = width,
+                                    height = height
+                                )
+                                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                                    seed = it.seed
+                                )
                                 Toast.makeText(
                                     context,
                                     context.getString(R.string.image_sent_to_image_to_image),

@@ -222,9 +222,11 @@ fun LoraDetailScreen(
         }, onApply = { lora ->
             isAddLoraDialogShow = false
             val exist =
-                DrawViewModel.inputLoraList.find { it.name == LoraDetailViewModel.loraModel?.loraPrompt?.name }
+                DrawViewModel.baseParam.loraPrompt.find { it.name == LoraDetailViewModel.loraModel?.loraPrompt?.name }
             if (exist == null) {
-                DrawViewModel.inputLoraList += lora
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                    loraPrompt = DrawViewModel.baseParam.loraPrompt + lora
+                )
                 Toast.makeText(
                     context,
                     context.getString(R.string.added), Toast.LENGTH_SHORT
@@ -264,11 +266,13 @@ fun LoraDetailScreen(
             ActionItem(
                 text = stringResource(id = R.string.add_to_prompt),
                 onAction = {
-                    DrawViewModel.inputPromptText = DrawViewModel.inputPromptText.filter { exist ->
-                        selectedTriggerTextList.none { it == exist.text }
-                    } + selectedTriggerTextList.map { text ->
-                        Prompt(text, 0)
-                    }
+                    DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                        promptText = DrawViewModel.baseParam.promptText.filter { exist ->
+                            selectedTriggerTextList.none { it == exist.text }
+                        } + selectedTriggerTextList.map { text ->
+                            Prompt(text, 0)
+                        }
+                    )
                     Toast.makeText(
                         context,
                         context.getString(
@@ -282,9 +286,11 @@ fun LoraDetailScreen(
             ActionItem(
                 text = stringResource(id = R.string.assign_to_prompt),
                 onAction = {
-                    DrawViewModel.inputPromptText = selectedTriggerTextList.map { text ->
-                        Prompt(text, 0)
-                    }
+                    DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                        promptText = selectedTriggerTextList.map { text ->
+                            Prompt(text, 0)
+                        }
+                    )
                     Toast.makeText(
                         context,
                         context.getString(

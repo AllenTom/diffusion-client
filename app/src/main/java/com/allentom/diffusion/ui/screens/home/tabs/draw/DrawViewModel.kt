@@ -44,7 +44,7 @@ import com.allentom.diffusion.store.prompt.EmbeddingPrompt
 import com.allentom.diffusion.store.history.HistoryStore
 import com.allentom.diffusion.store.history.ImageHistory
 import com.allentom.diffusion.store.history.ImageHistoryEntity
-import com.allentom.diffusion.store.history.Img2imgParam
+import com.allentom.diffusion.store.history.SavedImg2imgParam
 import com.allentom.diffusion.store.prompt.LoraPrompt
 import com.allentom.diffusion.store.ModelStore
 import com.allentom.diffusion.store.prompt.Prompt
@@ -323,27 +323,51 @@ data class DisplayAxis(
     val xAxisValues: List<String> = emptyList(),
     val yAxisName: String? = null,
     val yAxisValues: List<String> = emptyList()
-) {
+)
 
-}
+data class BaseParam(
+    val promptText: List<Prompt> = "1girl,serafuku,classroom".split(",").map { Prompt(it, 0) },
+    val negativePromptText: List<Prompt> = "nsfw".split(",").map { Prompt(it, 0) },
+    val embeddingModels: Map<String, Embedding> = emptyMap(),
+    val width: Int = 300,
+    val height: Int = 512,
+    val steps: Int = 20,
+    val niter: Int = 1,
+    val samplerName: String = "DDIM",
+    val cfgScale: Float = 7f,
+    val seed: Int = -1,
+    val useVae: String? = null,
+    val enableRefiner: Boolean = false,
+    val refinerModel: String? = null,
+    val refinerSwitchAt: Float = 0.8f,
+    val baseModelName: String? = null,
+    val loraPrompt: List<LoraPrompt> = emptyList(),
+    val embeddingPrompt: List<EmbeddingPrompt> = emptyList(),
+)
 
+data class Img2ImgParam(
+    val imgBase64: String? = null,
+    val resizeMode: Int = 0,
+    val scaleBy: Float = 1f,
+    val width: Int = 512,
+    val height: Int = 512,
+    val cfgScale: Float = 7f,
+    val mask: String? = null,
+    var inpaint: Boolean = false,
+    val maskBlur: Float = 4f,
+    val inpaintingMaskInvert: Int = 0,
+    val inpaintingFill: Int = 0,
+    val inpaintingFullRes: Int = 0,
+    val inpaintingFullResPadding: Int = 0,
+    val denoisingStrength: Float = 0.4f,
+    val imgFilename: String? = null,
+)
 
 object DrawViewModel {
     var genScope: CoroutineScope? = null
-    var inputPromptText by mutableStateOf(
-        "1girl,serafuku,classroom".split(",").map { Prompt(it, 0) })
-    var inputNegativePromptText by mutableStateOf(
-        "nsfw".split(",").map { Prompt(it, 0) })
+    var baseParam by mutableStateOf<BaseParam>(BaseParam())
     var regionPromptParam by mutableStateOf<RegionPromptParam>(RegionPromptParam())
-    var embeddingList by mutableStateOf<List<EmbeddingPrompt>>(emptyList())
     var embeddingModels by mutableStateOf(emptyMap<String, Embedding>())
-    var inputWidth by mutableFloatStateOf(300f)
-    var inputHeight by mutableFloatStateOf(512f)
-    var inputSteps by mutableFloatStateOf(20f)
-    var inputNiter by mutableFloatStateOf(1f)
-    var inputSamplerName by mutableStateOf("DDIM")
-    var inputCfgScale by mutableFloatStateOf(7f)
-    var inputSeed by mutableIntStateOf(-1)
     var samplerList by mutableStateOf(emptyList<Sampler>())
     var progress by mutableStateOf<Progress?>(null)
     var models by mutableStateOf<List<Model>>(emptyList())
@@ -370,44 +394,20 @@ object DrawViewModel {
             hrUpscaler = "None",
         )
     )
-
-    //    var inputEnableHiresFix by mutableStateOf(false)
-//    var inputHrScale by mutableFloatStateOf(2f)
-//    var inputHrSteps by mutableFloatStateOf(0f)
-//    var inputHrDenoisingStrength by mutableFloatStateOf(0.7f)
-//    var inputUpscaler by mutableStateOf("None")
     var upscalers by mutableStateOf<List<Upscale>>(emptyList())
 
     //lora
     var loraList by mutableStateOf<List<Lora>>(emptyList())
-    var inputLoraList by mutableStateOf<List<LoraPrompt>>(emptyList())
+//    var inputLoraList by mutableStateOf<List<LoraPrompt>>(emptyList())
 
     var inputControlNetParams by mutableStateOf(ControlNetParam())
     var controlNetModelList by mutableStateOf<List<String>>(emptyList())
 
     var enableControlNetFeat by mutableStateOf(false)
-    var inputImg2ImgImgBase64 by mutableStateOf<String?>(null)
-    var inputImg2ImgImgFilename by mutableStateOf<String?>(null)
     var generateMode by mutableStateOf("text2img")
-    var inputImg2ImgDenoisingStrength by mutableFloatStateOf(0.7f)
-    var inputImg2ImgResizeMode by mutableIntStateOf(0)
-    var inputImg2ImgScaleBy by mutableFloatStateOf(1f)
-    var inputImg2ImgWidth by mutableFloatStateOf(512f)
-    var inputImg2ImgHeight by mutableFloatStateOf(512f)
-    var inputImg2ImgCfgScale by mutableFloatStateOf(7f)
-    var inputImg2ImgMask by mutableStateOf<String?>(null)
+
+    var img2ImgParam by mutableStateOf<Img2ImgParam>(Img2ImgParam())
     var inputImg2ImgMaskPreview by mutableStateOf<String?>(null)
-    var inputImg2ImgInpaint by mutableStateOf(false)
-    var inputImg2ImgMaskBlur by mutableFloatStateOf(4f)
-    var inputImg2ImgInpaintingMaskInvert by mutableStateOf(0)
-    var inputImg2ImgInpaintingFill by mutableStateOf(0)
-    var inputImg2ImgInpaintingFullRes by mutableStateOf(0)
-
-    var enableRefiner by mutableStateOf(false)
-    var refinerModel by mutableStateOf<String?>(null)
-    var refinerSwitchAt by mutableStateOf(0.8f)
-
-    var inputImg2ImgInpaintingFullResPadding by mutableStateOf(32)
 
     var reactorParam by mutableStateOf<ReactorParam>(ReactorParam())
     var reactorUpscalerList by mutableStateOf<List<String>>(emptyList())
@@ -463,7 +463,7 @@ object DrawViewModel {
         if (regionPromptParam.regionCount > 0 && regionPromptParam.enable) {
             return getPositiveWithRegion()
         }
-        return inputPromptText.joinToString(",") { it.getPromptText() }
+        return baseParam.promptText.joinToString(",") { it.getPromptText() }
     }
 
     fun getPositiveWithRegion(): String {
@@ -471,7 +471,7 @@ object DrawViewModel {
         val maxRegion = regionPromptParam.getTotalRegionCount()
         for (i in 0 until maxRegion) {
             val regionText =
-                inputPromptText.filter { it.regionIndex == i }.map { it.getPromptText() }
+                baseParam.promptText.filter { it.regionIndex == i }.map { it.getPromptText() }
                     .joinToString(",")
             promptTextList.add(regionText)
         }
@@ -479,80 +479,78 @@ object DrawViewModel {
     }
 
     fun getNegativePrompt(): String {
-        return (inputNegativePromptText.map { it.getPromptText() } + embeddingList.map { it.getPromptText() }).joinToString(
+        return (baseParam.negativePromptText.map { it.getPromptText() } + baseParam.embeddingPrompt.map { it.getPromptText() }).joinToString(
             ","
         )
     }
 
     fun getLoraPrompt(): String {
-        return inputLoraList.joinToString(",") { it.getPromptText().joinToString(",") }
+        return baseParam.loraPrompt.joinToString(",") { it.getPromptText().joinToString(",") }
     }
 
     fun updateRegionCount(count: Int) {
         regionPromptParam = regionPromptParam.copy(regionCount = count)
-        inputPromptText = inputPromptText.map {
-            if (it.regionIndex >= count) {
-                it.copy(regionIndex = 0)
-            } else {
-                it
+        baseParam = baseParam.copy(
+            promptText = baseParam.promptText.map {
+                if (it.regionIndex >= count) {
+                    it.copy(regionIndex = 0)
+                } else {
+                    it
+                }
             }
-        }
+        )
     }
 
     fun applyHistory(context: Context, useHistory: SaveHistory) {
         val history = HistoryStore.getHistoryById(context, useHistory.id) ?: return
-        inputPromptText = history.prompt
-        inputNegativePromptText = history.negativePrompt
-        inputSteps = history.steps.toFloat()
-        inputSamplerName = history.samplerName
-        inputWidth = history.width.toFloat()
-        inputHeight = history.height.toFloat()
-        inputCfgScale = history.cfgScale
-        embeddingList = history.embeddingPrompt
+        baseParam = baseParam.copy(
+            promptText = history.prompt,
+            negativePromptText = history.negativePrompt,
+            embeddingPrompt = history.embeddingPrompt,
+            steps = history.steps,
+            width = history.width,
+            height = history.height,
+            samplerName = history.samplerName,
+            cfgScale = history.cfgScale,
+            enableRefiner = history.enableRefiner,
+            refinerModel = history.refinerModelName,
+            refinerSwitchAt = history.refinerSwitchAt ?: 0.8f,
+            loraPrompt = history.loraPrompt,
+        )
         regionPromptParam = RegionPromptParam(
             regionCount = history.regionCount ?: 1,
             dividerText = history.regionRatio ?: "1",
             useCommon = history.regionUseCommon ?: false,
             enable = history.regionEnable ?: false
         )
-        enableRefiner = history.enableRefiner
-        refinerModel = history.refinerModelName
-        refinerSwitchAt = history.refinerSwitchAt ?: 0.8f
 
 
         inputHiresFixParam = history.hrParam
 
 
-        history.img2imgParam?.let { img2imgParam: Img2imgParam ->
-            val inputImageBase64 = Util.readImageWithPathToBase64(img2imgParam.path)
-            inputImg2ImgWidth = img2imgParam.width.toFloat()
-            inputImg2ImgHeight = img2imgParam.height.toFloat()
-            inputImg2ImgCfgScale = img2imgParam.cfgScale
-            inputImg2ImgDenoisingStrength = img2imgParam.denoisingStrength
-            inputImg2ImgResizeMode = img2imgParam.resizeMode
-            inputImg2ImgScaleBy = img2imgParam.scaleBy
-            inputImg2ImgImgFilename = img2imgParam.path
-            inputImg2ImgImgBase64 = inputImageBase64
-            if (img2imgParam.inpaint == true) {
-                val maskBase64 = Util.readImageWithPathToBase64(img2imgParam.maskPath!!)
-                inputImg2ImgInpaint = true
-                inputImg2ImgMask = maskBase64
-                img2imgParam.maskBlur?.let {
-                    inputImg2ImgMaskBlur = it
-                }
-                img2imgParam.maskInvert?.let {
-                    inputImg2ImgInpaintingMaskInvert = it
-                }
-                img2imgParam.inpaintingFill?.let {
-                    inputImg2ImgInpaintingFill = it
-                }
-                img2imgParam.inpaintingFullRes?.let {
-                    inputImg2ImgInpaintingFullRes = it
-                }
-                img2imgParam.inpaintingFullResPadding?.let {
-                    inputImg2ImgInpaintingFullResPadding = it
-                }
-
+        history.savedImg2ImgParam?.let { savedImg2ImgParam: SavedImg2imgParam ->
+            val inputImageBase64 = Util.readImageWithPathToBase64(savedImg2ImgParam.path)
+            img2ImgParam = img2ImgParam.copy(
+                imgBase64 = inputImageBase64,
+                resizeMode = savedImg2ImgParam.resizeMode,
+                scaleBy = savedImg2ImgParam.scaleBy,
+                width = savedImg2ImgParam.width,
+                height = savedImg2ImgParam.height,
+                cfgScale = savedImg2ImgParam.cfgScale,
+                denoisingStrength = savedImg2ImgParam.denoisingStrength ?: 0.4f,
+                imgFilename = savedImg2ImgParam.path,
+            )
+            if (savedImg2ImgParam.inpaint == true) {
+                val maskBase64 = Util.readImageWithPathToBase64(savedImg2ImgParam.maskPath!!)
+                img2ImgParam = img2ImgParam.copy(
+                    inpaint = true,
+                    mask = maskBase64,
+                    maskBlur = savedImg2ImgParam.maskBlur ?: 4f,
+                    inpaintingMaskInvert = savedImg2ImgParam.maskInvert ?: 0,
+                    inpaintingFill = savedImg2ImgParam.inpaintingFill ?: 0,
+                    inpaintingFullRes = savedImg2ImgParam.inpaintingFullRes ?: 0,
+                    inpaintingFullResPadding = savedImg2ImgParam.inpaintingFullResPadding ?: 32
+                )
                 val previewBase64 = Util.combineBase64Images(
                     inputImageBase64,
                     maskBase64,
@@ -564,9 +562,6 @@ object DrawViewModel {
         history.controlNetParam?.let {
             inputControlNetParams = it
         }
-        // for lora
-        inputLoraList = history.loraPrompt
-
         history.reactorParam?.let {
             reactorParam = it
         }
@@ -672,14 +667,14 @@ object DrawViewModel {
                         if (xyzParam.enable) {
                             xyzParam.totalCount
                         } else {
-                            inputNiter.toInt()
+                            baseParam.niter.toInt()
                         }
                     } else {
                         1
                     }
                 }
                 if (refreshIndex == null) {
-                    var useSeed = inputSeed
+                    var useSeed = baseParam.seed
                     if (xyzParam.enable) {
                         useSeed = (0..100000000).random()
                     }
@@ -725,18 +720,18 @@ object DrawViewModel {
                                     getPositivePrompt()
                                 ).filter { it.isNotBlank() }.joinToString(","),
                                 negativePrompt = getNegativePrompt(),
-                                width = inputWidth.toInt(),
-                                height = inputHeight.toInt(),
-                                steps = inputSteps.toInt(),
-                                samplerName = inputSamplerName,
-                                nIter = inputNiter.toInt(),
-                                cfgScale = inputCfgScale,
+                                width = baseParam.width,
+                                height = baseParam.height,
+                                steps = baseParam.steps,
+                                samplerName = baseParam.samplerName,
+                                nIter = baseParam.niter,
+                                cfgScale = baseParam.cfgScale,
                                 seed = seed,
                                 hiresFixParam = inputHiresFixParam,
                                 controlNetParam = controlNetParam,
                                 regionPromptParam = regionPromptParam,
-                                refinerModel = if (enableRefiner) refinerModel else null,
-                                refinerSwitchAt = if (enableRefiner) refinerSwitchAt else null,
+                                refinerModel = if (baseParam.enableRefiner) baseParam.refinerModel else null,
+                                refinerSwitchAt = if (baseParam.enableRefiner) baseParam.refinerSwitchAt else null,
                                 reactorParam = reactorParam,
                                 adetailerParam = adetailerParam
                             )
@@ -782,22 +777,22 @@ object DrawViewModel {
                                     getLoraPrompt()
                                 ).joinToString(","),
                                 negativePrompt = getNegativePrompt(),
-                                width = inputImg2ImgWidth.toInt(),
-                                height = inputImg2ImgHeight.toInt(),
-                                steps = inputSteps.toInt(),
-                                samplerName = inputSamplerName,
-                                cfgScale = inputCfgScale,
+                                width = img2ImgParam.width,
+                                height = img2ImgParam.height,
+                                steps = baseParam.steps,
+                                samplerName = baseParam.samplerName,
+                                cfgScale = baseParam.cfgScale,
                                 seed = seed,
-                                imgBase64 = inputImg2ImgImgBase64,
-                                resizeMode = inputImg2ImgResizeMode,
-                                denoisingStrength = inputImg2ImgDenoisingStrength,
-                                scaleBy = inputImg2ImgScaleBy,
-                                mask = if (inputImg2ImgInpaint) inputImg2ImgMask ?: "" else "",
-                                inpaintingMaskInvert = inputImg2ImgInpaintingMaskInvert,
-                                maskBlur = inputImg2ImgMaskBlur,
-                                inpaintingFill = inputImg2ImgInpaintingFill,
-                                inpaintFullRes = inputImg2ImgInpaintingFullRes,
-                                inpaintFullResPadding = inputImg2ImgInpaintingFullResPadding,
+                                imgBase64 = img2ImgParam.imgBase64,
+                                resizeMode = img2ImgParam.resizeMode,
+                                denoisingStrength = img2ImgParam.denoisingStrength,
+                                scaleBy = img2ImgParam.scaleBy,
+                                mask = if (img2ImgParam.inpaint) img2ImgParam.mask ?: "" else "",
+                                inpaintingMaskInvert = img2ImgParam.inpaintingMaskInvert,
+                                maskBlur = img2ImgParam.maskBlur,
+                                inpaintingFill = img2ImgParam.inpaintingFill,
+                                inpaintFullRes = img2ImgParam.inpaintingFullRes,
+                                inpaintFullResPadding = img2ImgParam.inpaintingFullResPadding,
                                 adetailerParam = adetailerParam,
                                 regionPromptParam = regionPromptParam,
                                 reactorParam = reactorParam
@@ -843,78 +838,78 @@ object DrawViewModel {
                     withContext(Dispatchers.IO) {
                         PromptStore.updatePrompt(
                             context,
-                            inputPromptText.map { it.text },
+                            baseParam.promptText.map { it.text },
                         )
                         PromptStore.updatePrompt(
                             context,
-                            inputNegativePromptText.map { it.text },
+                            baseParam.negativePromptText.map { it.text },
                         )
                     }
 
                 }
-                var img2ImgParam: Img2imgParam? = null
+                var savedImg2ImgParam: SavedImg2imgParam? = null
                 if (generateMode == "img2img") {
-                    val saveFilename = inputImg2ImgImgFilename ?: "${UUID.randomUUID()}.png"
-                    inputImg2ImgImgBase64?.let { inputImageBase64 ->
+                    val saveFilename = img2ImgParam.imgFilename ?: "${UUID.randomUUID()}.png"
+                    img2ImgParam.imgBase64?.let { inputImageBase64 ->
                         val savePath = Util.saveImg2ImgFile(
                             context,
                             inputImageBase64,
                             saveFilename
                         )
-                        img2ImgParam = Img2imgParam(
-                            denoisingStrength = inputImg2ImgDenoisingStrength,
-                            resizeMode = inputImg2ImgResizeMode,
-                            scaleBy = inputImg2ImgScaleBy,
-                            width = inputImg2ImgWidth.toInt(),
-                            height = inputImg2ImgHeight.toInt(),
-                            cfgScale = inputImg2ImgCfgScale,
+                        savedImg2ImgParam = SavedImg2imgParam(
+                            denoisingStrength = img2ImgParam.denoisingStrength,
+                            resizeMode = img2ImgParam.resizeMode,
+                            scaleBy = img2ImgParam.scaleBy,
+                            width = img2ImgParam.width,
+                            height = img2ImgParam.height,
+                            cfgScale = img2ImgParam.cfgScale,
                             path = savePath,
                             historyId = 0
                         )
-                        if (inputImg2ImgInpaint) {
+                        if (img2ImgParam.inpaint) {
                             val maskFilename = "${UUID.randomUUID()}.png"
                             val maskPath = Util.saveImg2ImgMaskFile(
                                 context,
-                                inputImg2ImgMask ?: "",
+                                img2ImgParam.mask ?: "",
                                 maskFilename
                             )
-                            img2ImgParam = img2ImgParam?.copy(
+                            savedImg2ImgParam = savedImg2ImgParam?.copy(
                                 maskPath = maskPath,
                                 inpaint = true,
-                                maskBlur = inputImg2ImgMaskBlur,
-                                maskInvert = inputImg2ImgInpaintingMaskInvert,
-                                inpaintingFill = inputImg2ImgInpaintingFill,
-                                inpaintingFullRes = inputImg2ImgInpaintingFullRes,
-                                inpaintingFullResPadding = inputImg2ImgInpaintingFullResPadding
+                                maskBlur = img2ImgParam.maskBlur,
+                                maskInvert = img2ImgParam.inpaintingMaskInvert,
+                                inpaintingFill = img2ImgParam.inpaintingFill,
+                                inpaintingFullRes = img2ImgParam.inpaintingFullRes,
+                                inpaintingFullResPadding = img2ImgParam.inpaintingFullResPadding
                             )
                         }
                     }
                 }
                 val saveHistory = SaveHistory(
-                    prompt = inputPromptText,
-                    negativePrompt = inputNegativePromptText,
-                    steps = inputSteps.toInt(),
-                    samplerName = inputSamplerName,
+                    prompt = baseParam.promptText,
+                    negativePrompt = baseParam.negativePromptText,
+                    steps = baseParam.steps,
+                    samplerName = baseParam.samplerName,
                     sdModelCheckpoint = useModelName ?: "",
-                    width = inputWidth.toInt(),
-                    height = inputHeight.toInt(),
+                    width = baseParam.width,
+                    height = baseParam.height,
                     batchSize = 1,
                     time = System.currentTimeMillis(),
                     imagePaths = saveImagePaths,
-                    cfgScale = inputCfgScale,
-                    loraPrompt = inputLoraList,
-                    embeddingPrompt = embeddingList,
+                    cfgScale = baseParam.cfgScale,
+                    loraPrompt = baseParam.loraPrompt,
+                    embeddingPrompt = baseParam.embeddingPrompt,
                     hrParam = inputHiresFixParam,
-                    img2imgParam = img2ImgParam,
+                    savedImg2ImgParam = savedImg2ImgParam,
                     controlNetParam = controlNetParam,
                     regionRatio = regionPromptParam.dividerText,
                     regionCount = regionPromptParam.regionCount,
                     regionUseCommon = regionPromptParam.useCommon,
                     regionEnable = regionPromptParam.enable,
                     vaeName = useVae,
-                    enableRefiner = enableRefiner,
-                    refinerModelName = refinerModel,
-                    refinerSwitchAt = refinerSwitchAt,
+                    enableRefiner = baseParam.enableRefiner,
+                    refinerModelName = baseParam.refinerModel,
+                    refinerSwitchAt = baseParam.refinerSwitchAt,
                     reactorParam = reactorParam,
                     adetailerParam = adetailerParam,
                     xyzParam = xyzParam
@@ -967,15 +962,18 @@ object DrawViewModel {
     }
 
     fun addInputPrompt(text: String) {
-        inputPromptText.none { it.text == text }.let {
+        baseParam.promptText.none { it.text == text }.let {
             if (it) {
-                inputPromptText = inputPromptText + Prompt(text, 0)
+                baseParam = baseParam.copy(
+                    promptText = baseParam.promptText + Prompt(text, 0)
+                )
             }
         }
     }
 
     fun addInputPrompt(prompt: Prompt, regionIndex: Int? = 0) {
-        inputPromptText.none {
+
+        baseParam.promptText.none {
             if (regionIndex != null) {
                 return@none it.text == prompt.text && it.regionIndex == regionIndex
 
@@ -984,32 +982,40 @@ object DrawViewModel {
             }
         }.let {
             if (it) {
-                inputPromptText = inputPromptText + prompt
+                baseParam = baseParam.copy(
+                    promptText = baseParam.promptText + prompt
+                )
             }
         }
     }
 
     fun replaceInputPrompt(promptList: List<Prompt>, regionIndex: Int = 0) {
-        var newPrompt = inputPromptText.filter { it.regionIndex != regionIndex }
+        var newPrompt = baseParam.promptText.filter { it.regionIndex != regionIndex }
         newPrompt = newPrompt + promptList.map { it.copy(regionIndex = regionIndex) }
-        inputPromptText = newPrompt
+        baseParam = baseParam.copy(
+            promptText = newPrompt
+        )
     }
 
 
     fun removeInputPrompt(text: String) {
-        inputPromptText = inputPromptText.filter { it.text != text }
+        baseParam = baseParam.copy(
+            promptText = baseParam.promptText.filter { it.text != text }
+        )
     }
 
     fun addInputNegativePrompt(text: String) {
-        inputNegativePromptText.none { it.text == text }.let {
+        baseParam.negativePromptText.none { it.text == text }.let {
             if (it) {
-                inputNegativePromptText = inputNegativePromptText + Prompt(text, 0)
+                baseParam = baseParam.copy(
+                    negativePromptText = baseParam.negativePromptText + Prompt(text, 0)
+                )
             }
         }
     }
 
     fun addInputNegativePrompt(prompt: Prompt, regionIndex: Int? = 0) {
-        inputNegativePromptText.none {
+        baseParam.negativePromptText.none {
             if (regionIndex != null) {
                 return@none it.text == prompt.text && it.regionIndex == regionIndex
 
@@ -1018,19 +1024,25 @@ object DrawViewModel {
             }
         }.let {
             if (it) {
-                inputNegativePromptText = inputNegativePromptText + prompt
+                baseParam = baseParam.copy(
+                    negativePromptText = baseParam.negativePromptText + prompt
+                )
             }
         }
     }
 
     fun replaceInputNegativePrompt(promptList: List<Prompt>, regionIndex: Int = 0) {
-        var newPrompt = inputNegativePromptText.filter { it.regionIndex != regionIndex }
+        var newPrompt = baseParam.negativePromptText.filter { it.regionIndex != regionIndex }
         newPrompt = newPrompt + promptList.map { it.copy(regionIndex = regionIndex) }
-        inputNegativePromptText = newPrompt
+        baseParam = baseParam.copy(
+            negativePromptText = newPrompt
+        )
     }
 
     fun removeInputNegativePrompt(text: String) {
-        inputNegativePromptText = inputNegativePromptText.filter { it.text != text }
+        baseParam = baseParam.copy(
+            negativePromptText = baseParam.negativePromptText.filter { it.text != text }
+        )
     }
 
     suspend fun loadLora(context: Context): List<Lora> {

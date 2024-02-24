@@ -265,12 +265,15 @@ fun GenProgressGrid(
                                 onClick = {
                                     isActionMenuShow = false
                                     scope.launch {
-                                        DrawViewModel.inputImg2ImgImgBase64 =
-                                            imgItem.getDisplayImageBase64()
-                                        DrawViewModel.inputImg2ImgWidth = DrawViewModel.inputWidth
-                                        DrawViewModel.inputImg2ImgHeight = DrawViewModel.inputHeight
-                                        imgItem.seed?.let {
-                                            DrawViewModel.inputSeed = it
+                                        DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
+                                            imgBase64 = imgItem.getDisplayImageBase64(),
+                                            width = DrawViewModel.baseParam.width,
+                                            height = DrawViewModel.baseParam.height
+                                        )
+                                        imgItem.seed.let {
+                                            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                                                seed = it
+                                            )
                                         }
                                         Toast.makeText(
                                             context,
@@ -361,7 +364,7 @@ fun GenProgressGrid(
 fun GenItem(index: Int) {
     Box(
         modifier = Modifier
-            .aspectRatio(DrawViewModel.inputWidth / DrawViewModel.inputHeight)
+            .aspectRatio(DrawViewModel.baseParam.width.toFloat() / DrawViewModel.baseParam.height.toFloat())
             .sizeIn(maxHeight = 90.dp, maxWidth = 90.dp)
             .border(
                 DrawViewModel.displayResultIndex.let { currentIndex ->

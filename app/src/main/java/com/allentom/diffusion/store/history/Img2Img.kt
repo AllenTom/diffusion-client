@@ -7,10 +7,13 @@ import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
+import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.AppDatabaseHelper
+import com.allentom.diffusion.ui.screens.home.tabs.draw.Img2ImgParam
 import java.io.Serializable
+import java.util.UUID
 
-data class Img2imgParam(
+data class SavedImg2imgParam(
     val denoisingStrength: Float,
     val resizeMode: Int,
     val scaleBy: Float,
@@ -26,7 +29,52 @@ data class Img2imgParam(
     val inpaintingFill: Int? = null,
     val inpaintingFullRes: Int? = null,
     val inpaintingFullResPadding: Int? = null,
-) : Serializable
+) : Serializable {
+    companion object {
+        fun fromImg2ImgParam(img2ImgParam: Img2ImgParam, savePath: String): SavedImg2imgParam {
+            return SavedImg2imgParam(
+                denoisingStrength = img2ImgParam.denoisingStrength,
+                resizeMode = img2ImgParam.resizeMode,
+                scaleBy = img2ImgParam.scaleBy,
+                width = img2ImgParam.width,
+                height = img2ImgParam.height,
+                cfgScale = img2ImgParam.cfgScale,
+                path = savePath,
+                historyId = 0
+            )
+        }
+        fun create(context:Context,img2ImgParam: Img2ImgParam): SavedImg2imgParam? {
+            var savedImg2ImgParam: SavedImg2imgParam? = null
+            val saveFilename = img2ImgParam.imgFilename ?: "${UUID.randomUUID()}.png"
+            img2ImgParam.imgBase64?.let { inputImageBase64 ->
+                val savePath = Util.saveImg2ImgFile(
+                    context,
+                    inputImageBase64,
+                    saveFilename
+                )
+                savedImg2ImgParam = fromImg2ImgParam(img2ImgParam, savePath)
+                if (img2ImgParam.inpaint && img2ImgParam.mask != null) {
+                    val maskFilename = "${UUID.randomUUID()}.png"
+                    val maskPath = Util.saveImg2ImgMaskFile(
+                        context,
+                        img2ImgParam.mask,
+                        maskFilename
+                    )
+                    savedImg2ImgParam = savedImg2ImgParam?.copy(
+                        maskPath = maskPath,
+                        inpaint = true,
+                        maskBlur = img2ImgParam.maskBlur,
+                        maskInvert = img2ImgParam.inpaintingMaskInvert,
+                        inpaintingFill = img2ImgParam.inpaintingFill,
+                        inpaintingFullRes = img2ImgParam.inpaintingFullRes,
+                        inpaintingFullResPadding = img2ImgParam.inpaintingFullResPadding
+                    )
+                }
+            }
+            return savedImg2ImgParam
+        }
+    }
+}
 
 @Entity(tableName = "img2img")
 data class Img2ImgEntity(
@@ -51,28 +99,28 @@ data class Img2ImgEntity(
 
     ) {
     companion object {
-        fun fromImg2imgParam(img2imgParam: Img2imgParam, historyId: Long): Img2ImgEntity {
+        fun fromImg2imgParam(savedImg2ImgParam: SavedImg2imgParam, historyId: Long): Img2ImgEntity {
             return Img2ImgEntity(
-                denoisingStrength = img2imgParam.denoisingStrength,
-                resizeMode = img2imgParam.resizeMode,
-                scaleBy = img2imgParam.scaleBy,
-                width = img2imgParam.width,
-                height = img2imgParam.height,
-                cfgScale = img2imgParam.cfgScale,
-                path = img2imgParam.path,
+                denoisingStrength = savedImg2ImgParam.denoisingStrength,
+                resizeMode = savedImg2ImgParam.resizeMode,
+                scaleBy = savedImg2ImgParam.scaleBy,
+                width = savedImg2ImgParam.width,
+                height = savedImg2ImgParam.height,
+                cfgScale = savedImg2ImgParam.cfgScale,
+                path = savedImg2ImgParam.path,
                 historyId = historyId,
-                maskPath = img2imgParam.maskPath,
-                inpaint = img2imgParam.inpaint,
-                maskBlur = img2imgParam.maskBlur,
-                maskInvert = img2imgParam.maskInvert,
-                inpaintingFill = img2imgParam.inpaintingFill,
-                inpaintingFullRes = img2imgParam.inpaintingFullRes,
+                maskPath = savedImg2ImgParam.maskPath,
+                inpaint = savedImg2ImgParam.inpaint,
+                maskBlur = savedImg2ImgParam.maskBlur,
+                maskInvert = savedImg2ImgParam.maskInvert,
+                inpaintingFill = savedImg2ImgParam.inpaintingFill,
+                inpaintingFullRes = savedImg2ImgParam.inpaintingFullRes,
             )
         }
     }
 
-    fun toImg2imgParam(): Img2imgParam {
-        return Img2imgParam(
+    fun toImg2imgParam(): SavedImg2imgParam {
+        return SavedImg2imgParam(
             denoisingStrength = denoisingStrength,
             resizeMode = resizeMode,
             scaleBy = scaleBy,
@@ -105,7 +153,7 @@ interface Img2ImgDao {
 
 fun SaveHistory.saveImg2Img(context: Context) {
     val database = AppDatabaseHelper.getDatabase(context)
-    img2imgParam?.let {
+    savedImg2ImgParam?.let {
         var ent = Img2ImgEntity(
             denoisingStrength = it.denoisingStrength,
             resizeMode = it.resizeMode,

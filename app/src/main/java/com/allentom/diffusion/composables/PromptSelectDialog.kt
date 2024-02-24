@@ -289,8 +289,8 @@ fun PromptEditPanel(
     var aspectRatio = Util.calculateActualSize(
         220,
         120,
-        DrawViewModel.inputWidth.toInt(),
-        DrawViewModel.inputHeight.toInt()
+        DrawViewModel.baseParam.width,
+        DrawViewModel.baseParam.height
     )
 
     fun updateListByPrompt(prompt: Prompt, update: (Prompt) -> Prompt) {
@@ -912,8 +912,8 @@ fun RegionalPrompterPanel(
     var aspectRatio = Util.calculateActualSize(
         220,
         220,
-        DrawViewModel.inputWidth.toInt(),
-        DrawViewModel.inputHeight.toInt()
+        DrawViewModel.baseParam.width,
+        DrawViewModel.baseParam.height
     )
 
     fun getRegionText(): String {

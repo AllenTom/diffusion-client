@@ -22,6 +22,7 @@ import com.allentom.diffusion.store.ModelStore
 import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.store.prompt.SavePrompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerParam
+import com.allentom.diffusion.ui.screens.home.tabs.draw.BaseParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
@@ -53,7 +54,7 @@ data class SaveHistory(
     val time: Long,
     val imagePaths: List<ImageHistory>,
     val hrParam: SaveHrParam,
-    val img2imgParam: Img2imgParam? = null,
+    val savedImg2ImgParam: SavedImg2imgParam? = null,
     var controlNetParam: ControlNetParam? = null,
     val model: ModelEntity? = null,
     val regionRatio: String? = "",
@@ -213,7 +214,7 @@ data class HistoryWithRelation(
             time = historyEntity.time,
             imagePaths = imagePaths.map { it.toImageHistory() },
             hrParam = toHiresFixParam(),
-            img2imgParam = img2imgParam?.toImg2imgParam(),
+            savedImg2ImgParam = img2imgParam?.toImg2imgParam(),
             controlNetParam = toControlNetParam(),
             model = modelEntity,
             regionCount = historyEntity.regionCount,

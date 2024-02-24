@@ -63,7 +63,7 @@ fun PromptCart() {
         LazyColumn {
             item {
                 when(selectedTabIndex){
-                    0 -> DrawViewModel.inputPromptText.forEach { prompt ->
+                    0 -> DrawViewModel.baseParam.promptText.forEach { prompt ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -81,7 +81,7 @@ fun PromptCart() {
                             }
                         }
                     }
-                    1 -> DrawViewModel.inputNegativePromptText.forEach { prompt ->
+                    1 -> DrawViewModel.baseParam.negativePromptText.forEach { prompt ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()

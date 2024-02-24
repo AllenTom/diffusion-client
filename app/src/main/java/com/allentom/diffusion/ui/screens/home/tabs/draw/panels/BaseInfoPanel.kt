@@ -32,11 +32,11 @@ fun BaseInfoPanel(
         }
         PromptSelectOptionItem(
             label = stringResource(id = R.string.param_prompt),
-            value = DrawViewModel.inputPromptText,
+            value = DrawViewModel.baseParam.promptText,
             regionPromptParam = DrawViewModel.regionPromptParam,
             templateParam = DrawViewModel.templateParam
         ) { prompts, region, template ->
-            DrawViewModel.inputPromptText = prompts
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(promptText = prompts)
             region?.let {
                 DrawViewModel.regionPromptParam = it
             }
@@ -47,10 +47,10 @@ fun BaseInfoPanel(
 
         PromptSelectOptionItem(
             label = stringResource(id = R.string.param_negative_prompt),
-            value = DrawViewModel.inputNegativePromptText,
+            value = DrawViewModel.baseParam.negativePromptText,
             templateParam = DrawViewModel.negativeTemplateParam
         ) { prompts, _, template ->
-            DrawViewModel.inputNegativePromptText = prompts
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(negativePromptText = prompts)
             template?.let {
                 DrawViewModel.negativeTemplateParam = it
             }
@@ -58,79 +58,90 @@ fun BaseInfoPanel(
         }
         LoraSelectOptionItem(
             label = stringResource(R.string.param_lora),
-            value = DrawViewModel.inputLoraList,
+            value = DrawViewModel.baseParam.loraPrompt,
             loraList = DrawViewModel.loraList
         ) {
-            DrawViewModel.inputLoraList = it
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(loraPrompt = it)
         }
         EmbeddingSelectOptionItem(
             label = stringResource(R.string.param_embedding),
-            value = DrawViewModel.embeddingList,
+            value = DrawViewModel.baseParam.embeddingPrompt,
             embeddingList = DrawViewModel.embeddingModels
         ) {
-            DrawViewModel.embeddingList = it
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(embeddingPrompt = it)
         }
         CanvasSizeItem(
-            width = DrawViewModel.inputWidth.toInt(),
-            height = DrawViewModel.inputHeight.toInt(),
+            width = DrawViewModel.baseParam.width,
+            height = DrawViewModel.baseParam.height,
             label = stringResource(
                 R.string.size
             )
         ) { width, height ->
-            DrawViewModel.inputWidth = width.toFloat()
-            DrawViewModel.inputHeight = height.toFloat()
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(width = width, height = height)
         }
         SliderOptionItem(
             label = stringResource(R.string.param_width),
-            value = DrawViewModel.inputWidth,
+            value = DrawViewModel.baseParam.width.toFloat(),
             valueRange = 64f..2048f,
             steps = (2048 - 64) / 8,
             useInt = true,
-            onValueChangeInt = { DrawViewModel.inputWidth = it.toFloat() }
+            onValueChangeInt = {
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(width = it)
+            }
         )
         SliderOptionItem(
             label = stringResource(R.string.param_height),
-            value = DrawViewModel.inputHeight,
+            value = DrawViewModel.baseParam.height.toFloat(),
             valueRange = 64f..2048f,
             steps = (2048 - 64) / 8,
             useInt = true,
-            onValueChangeInt = { DrawViewModel.inputHeight = it.toFloat() }
+            onValueChangeInt = {
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(height = it)
+            }
         )
         TextPickUpItem(
             label = stringResource(R.string.param_sampler),
-            value = DrawViewModel.inputSamplerName,
+            value = DrawViewModel.baseParam.samplerName,
             options = DrawViewModel.samplerList.map { it.name }) {
-            DrawViewModel.inputSamplerName = it
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(samplerName = it)
         }
         SliderOptionItem(
             label = stringResource(R.string.param_steps),
-            value = DrawViewModel.inputSteps,
+            value = DrawViewModel.baseParam.steps.toFloat(),
             valueRange = 1f..100f,
             steps = 100 - 1,
             useInt = true,
-            onValueChangeInt = { DrawViewModel.inputSteps = it.toFloat() }
+            onValueChangeInt = {
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(steps = it)
+            }
         )
         SliderOptionItem(
             label = stringResource(R.string.param_seed),
-            value = DrawViewModel.inputSeed.toFloat(),
+            value = DrawViewModel.baseParam.seed.toFloat(),
             valueRange = -1f..1.0E8f,
             useInt = true,
-            onValueChangeInt = { DrawViewModel.inputSeed = it }
+            onValueChangeInt = {
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(seed = it)
+            }
         )
         SliderOptionItem(
             label = stringResource(R.string.param_cfg_scale),
-            value = DrawViewModel.inputCfgScale,
+            value = DrawViewModel.baseParam.cfgScale,
             valueRange = 1f..30f,
             useInt = true,
-            onValueChangeInt = { DrawViewModel.inputCfgScale = it.toFloat() }
+            onValueChangeInt = {
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(cfgScale = it.toFloat())
+            }
         )
         SliderOptionItem(
             label = stringResource(R.string.param_iter),
-            value = DrawViewModel.inputNiter,
+            value = DrawViewModel.baseParam.niter.toFloat(),
             valueRange = 1f..20f,
             steps = 20,
             useInt = true,
-            onValueChangeInt = { DrawViewModel.inputNiter = it.toFloat() }
+            onValueChangeInt = {
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(niter = it)
+            }
         )
         TextPickUpItem(
             label = "Vae",
@@ -140,21 +151,23 @@ fun BaseInfoPanel(
         }
         SwitchOptionItem(
             label = stringResource(R.string.refiner),
-            value = DrawViewModel.enableRefiner
+            value = DrawViewModel.baseParam.enableRefiner
         ) {
-            DrawViewModel.enableRefiner = it
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(enableRefiner = it)
         }
-        if (DrawViewModel.enableRefiner) {
+        if (DrawViewModel.baseParam.enableRefiner) {
             TextPickUpItem(label = stringResource(id = R.string.refiner_model),
-                value = DrawViewModel.refinerModel,
+                value = DrawViewModel.baseParam.refinerModel,
                 options = DrawViewModel.models.map { it.title }) {
-                DrawViewModel.refinerModel = it
+                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(refinerModel = it)
             }
             SliderOptionItem(label = stringResource(id = R.string.refiner_switch_at),
-                value = DrawViewModel.refinerSwitchAt,
+                value = DrawViewModel.baseParam.refinerSwitchAt,
                 valueRange = 0f..1f,
                 baseFloat = 0.01f,
-                onValueChangeFloat = { DrawViewModel.refinerSwitchAt = it }
+                onValueChangeFloat = {
+                    DrawViewModel.baseParam = DrawViewModel.baseParam.copy(refinerSwitchAt = it)
+                }
             )
         }
 

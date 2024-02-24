@@ -36,9 +36,13 @@ fun PromptAction(
                 text = stringResource(id = R.string.send_to_prompt),
                 onAction = {
                     if (actionState.target == "prompt") {
-                        DrawViewModel.inputPromptText = actionState.contextPrompt
+                        DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                            promptText = actionState.contextPrompt
+                        )
                     } else {
-                        DrawViewModel.inputNegativePromptText = actionState.contextPrompt
+                        DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                            negativePromptText = actionState.contextPrompt
+                        )
                     }
                     actionState.isActionBottomSheetOpen = false
                 }

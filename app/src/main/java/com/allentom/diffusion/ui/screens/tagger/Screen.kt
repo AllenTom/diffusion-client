@@ -125,12 +125,14 @@ fun TaggerScreen() {
             ActionItem(
                 text = stringResource(R.string.add_to_prompt),
                 onAction = {
-                    DrawViewModel.inputPromptText =
-                        DrawViewModel.inputPromptText.filter {
+                    DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                        promptText = DrawViewModel.baseParam.promptText.filter {
                             it.text !in selectedCaption
                         } + selectedCaption.map { captionText ->
                             Prompt(captionText, 0)
                         }
+                    )
+
                     Toast.makeText(
                         context,
                         context.getString(R.string.added_to_prompt, selectedCaption.size.toString()),
@@ -141,10 +143,11 @@ fun TaggerScreen() {
             ActionItem(
                 text = stringResource(R.string.assign_to_prompt),
                 onAction = {
-                    DrawViewModel.inputPromptText =
-                        selectedCaption.map { captionText ->
+                    DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                        promptText = selectedCaption.map { captionText ->
                             Prompt(captionText, 0)
                         }
+                    )
                     Toast.makeText(
                         context,
                         context.getString(R.string.assigned_to_prompt, selectedCaption.size.toString()),
