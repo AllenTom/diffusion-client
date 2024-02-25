@@ -224,16 +224,6 @@ fun DrawBar(
                         Text(text = stringResource(id = R.string.tools_caption))
                     })
                     Spacer(modifier = Modifier.weight(1f))
-                    if (currentPanelIndex == 0 && DrawViewModel.isGenerating) {
-                        Button(
-                            onClick = {
-                                DrawViewModel.interruptGenerate()
-                            },
-                            enabled = DrawViewModel.isGenerating && !DrawViewModel.interruptFlag
-                        ) {
-                            Text(text = stringResource(id = R.string.btn_stop))
-                        }
-                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Divider()
@@ -307,7 +297,6 @@ fun DrawBar(
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
-
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -358,29 +347,24 @@ fun DrawBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Spacer(modifier = Modifier.width(16.dp))
-            if (!DrawViewModel.isGenerating) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(horizontal = 16.dp)
-                        .clickable(
-                            role = null,
-                        ) {
-                            if (!DrawViewModel.isGenerating) {
-                                isParamsModalShow = true
-                            }
-                        },
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (!DrawViewModel.isGenerating) {
-                        Text(
-                            text = stringResource(id = R.string.params)
-                        )
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .clickable(
+                        role = null,
+                    ) {
+                        if (!DrawViewModel.isGenerating) {
+                            isParamsModalShow = true
+                        }
                     }
-
-                }
+                    .padding(horizontal = 32.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = stringResource(id = R.string.params)
+                )
             }
+
             Spacer(modifier = Modifier.width(16.dp))
             if (DrawViewModel.isGenerating) {
                 Button(
@@ -388,19 +372,15 @@ fun DrawBar(
                     enabled = false,
                     modifier = Modifier
                         .weight(1f)
-
                 ) {
                     Text(
-                        text = stringResource(
-                            id = R.string.generate_btn_progress,
-                            DrawViewModel.currentGenIndex,
-                            DrawViewModel.totalGenCount
-                        )
+                        text = stringResource(id = R.string.add_to_queue)
                     )
-
                 }
             } else {
                 Button(
+                    modifier = Modifier
+                        .weight(1f),
                     onClick = {
                         if (!DrawViewModel.isGenerating) {
                             DrawViewModel.startGenerate(context)

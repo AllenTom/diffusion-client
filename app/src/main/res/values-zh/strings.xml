@@ -296,4 +296,10 @@
     <string name="template_slot">大类</string>
     <string name="template_category">分类</string>
     <string name="template_prompt">提示词</string>
+    <string name="queue">队列</string>
+    <string name="task">任务</string>
+    <string name="task_done">完成</string>
+    <string name="task_generating">生成中</string>
+    <string name="task_in_queue">队列中</string>
+    <string name="add_to_queue">添加至队列</string>
 </resources>

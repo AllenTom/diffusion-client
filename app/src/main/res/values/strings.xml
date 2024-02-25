@@ -295,4 +295,10 @@
     <string name="template_slot">slot</string>
     <string name="template_category">category</string>
     <string name="template_prompt">Roll</string>
+    <string name="queue">Queue</string>
+    <string name="task">Task</string>
+    <string name="task_done">done</string>
+    <string name="task_generating">generating</string>
+    <string name="task_in_queue">in queue</string>
+    <string name="add_to_queue">Add to queue</string>
 </resources>

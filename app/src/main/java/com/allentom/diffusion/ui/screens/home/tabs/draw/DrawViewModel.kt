@@ -55,6 +55,7 @@ import com.allentom.diffusion.store.history.SaveHrParam
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -332,7 +333,7 @@ data class BaseParam(
     val width: Int = 300,
     val height: Int = 512,
     val steps: Int = 20,
-    val niter: Int = 1,
+    val niter: Int = 3,
     val samplerName: String = "DDIM",
     val cfgScale: Float = 7f,
     val seed: Int = -1,
@@ -363,69 +364,37 @@ data class Img2ImgParam(
     val imgFilename: String? = null,
 )
 
-object DrawViewModel {
-    var genScope: CoroutineScope? = null
-    var baseParam by mutableStateOf<BaseParam>(BaseParam())
-    var regionPromptParam by mutableStateOf<RegionPromptParam>(RegionPromptParam())
-    var embeddingModels by mutableStateOf(emptyMap<String, Embedding>())
-    var samplerList by mutableStateOf(emptyList<Sampler>())
-    var progress by mutableStateOf<Progress?>(null)
-    var models by mutableStateOf<List<Model>>(emptyList())
-    var vaeList by mutableStateOf<List<Vae>>(emptyList())
-    var useVae by mutableStateOf<String?>(null)
-    var isGenerating by mutableStateOf(false)
-    var options by mutableStateOf<Option?>(null)
-    var useModelName by mutableStateOf<String?>(null)
-    var isSwitchingModel by mutableStateOf(false)
+class GenerateTask(
+    val context: Context,
+    var genScope: CoroutineScope? = null,
+    val baseParam: BaseParam,
+    val xyzParam: XYZParam = XYZParam(),
+    val controlNetParam: ControlNetParam? = null,
+    val generateMode: String = "text2img",
+    val hiresFixParam: SaveHrParam,
+    val regionPromptParam: RegionPromptParam = RegionPromptParam(),
+    val reactorParam: ReactorParam = ReactorParam(),
+    val adetailerParam: AdetailerParam = AdetailerParam(),
+    val img2ImgParam: Img2ImgParam = Img2ImgParam(),
+    val id: String = Util.randomString(8),
+    val createTime: Long = System.currentTimeMillis(),
+    var alreadyRunFlag: Boolean = false
+) {
     var currentGenIndex by mutableStateOf(0)
     var totalGenCount by mutableStateOf(0)
 
     var genItemList by mutableStateOf<List<GenImageItem>>(emptyList())
-    var genXYZ by mutableStateOf<DisplayAxis?>(null)
-
     var displayResultIndex by mutableStateOf(0)
-
-    // hires fix
-    var inputHiresFixParam by mutableStateOf<SaveHrParam>(
-        SaveHrParam(
-            enableScale = false,
-            hrScale = 2f,
-            hrDenosingStrength = 0.7f,
-            hrUpscaler = "None",
-        )
-    )
-    var upscalers by mutableStateOf<List<Upscale>>(emptyList())
-
-    //lora
-    var loraList by mutableStateOf<List<Lora>>(emptyList())
-//    var inputLoraList by mutableStateOf<List<LoraPrompt>>(emptyList())
-
-    var inputControlNetParams by mutableStateOf(ControlNetParam())
-    var controlNetModelList by mutableStateOf<List<String>>(emptyList())
-
-    var enableControlNetFeat by mutableStateOf(false)
-    var generateMode by mutableStateOf("text2img")
-
-    var img2ImgParam by mutableStateOf<Img2ImgParam>(Img2ImgParam())
-    var inputImg2ImgMaskPreview by mutableStateOf<String?>(null)
-
-    var reactorParam by mutableStateOf<ReactorParam>(ReactorParam())
-    var reactorUpscalerList by mutableStateOf<List<String>>(emptyList())
-    var reactorModelList by mutableStateOf<List<String>>(emptyList())
-
+    var isGenerating by mutableStateOf(false)
+    var interruptFlag by mutableStateOf(false)
+    var genXYZ by mutableStateOf<DisplayAxis?>(null)
     var currentHistory by mutableStateOf<SaveHistory?>(null)
 
-    var adetailerParam by mutableStateOf<AdetailerParam>(AdetailerParam())
-    var adetailerModelList by mutableStateOf<List<String>>(emptyList())
-    var xyzParam by mutableStateOf<XYZParam>(XYZParam())
-    var templateParam by mutableStateOf<TemplateParam>(TemplateParam())
-    var negativeTemplateParam by mutableStateOf<TemplateParam>(TemplateParam())
 
     fun startGenerating(
         count: Int,
         seed: Int = -1
     ) {
-        isGenerating = true
         totalGenCount = count
         currentGenIndex = 0
         displayResultIndex = 0
@@ -437,7 +406,7 @@ object DrawViewModel {
                 seed
             }
             val imageName = "diffusion_${i}_${imageSeed}.jpg"
-            genItemList = genItemList + GenImageItem(null, null, imageSeed, imageName, null)
+            genItemList += GenImageItem(null, null, imageSeed, imageName, null)
         }
         currentHistory = null
         if (xyzParam.enable) {
@@ -447,23 +416,23 @@ object DrawViewModel {
         }
     }
 
-    var interruptFlag by mutableStateOf(false)
-    val genImageListMutex = Mutex()
-    val gson = Gson()
-
-    suspend fun updateGenItemByIndex(index: Int, update: (item: GenImageItem) -> GenImageItem) {
-        genImageListMutex.withLock {
-            genItemList = genItemList.toMutableList().also {
-                it[index] = update(it[index])
-            }
+    fun updateGenItemByIndex(index: Int, update: (item: GenImageItem) -> GenImageItem) {
+        genItemList = genItemList.toMutableList().also {
+            it[index] = update(it[index])
         }
+
     }
 
-    fun getPositivePrompt(): String {
-        if (regionPromptParam.regionCount > 0 && regionPromptParam.enable) {
-            return getPositiveWithRegion()
+    fun getNegativePrompt(): String {
+        return (baseParam.negativePromptText.map { it.getPromptText() } + baseParam.embeddingPrompt.map { it.getPromptText() }).joinToString(
+            ","
+        )
+    }
+
+    fun getLoraPrompt(): String {
+        return baseParam.loraPrompt.joinToString(",") {
+            it.getPromptText().joinToString(",")
         }
-        return baseParam.promptText.joinToString(",") { it.getPromptText() }
     }
 
     fun getPositiveWithRegion(): String {
@@ -478,28 +447,373 @@ object DrawViewModel {
         return promptTextList.joinToString(" BREAK\n")
     }
 
-    fun getNegativePrompt(): String {
-        return (baseParam.negativePromptText.map { it.getPromptText() } + baseParam.embeddingPrompt.map { it.getPromptText() }).joinToString(
-            ","
-        )
+    fun getPositivePrompt(): String {
+        if (regionPromptParam.regionCount > 0 && regionPromptParam.enable) {
+            return getPositiveWithRegion()
+        }
+        return baseParam.promptText.joinToString(",") { it.getPromptText() }
     }
 
-    fun getLoraPrompt(): String {
-        return baseParam.loraPrompt.joinToString(",") { it.getPromptText().joinToString(",") }
+    fun interruptGenerate() {
+        genScope?.launch {
+            try {
+                getApiClient().interrupt()
+                interruptFlag = true
+                genItemList = genItemList.mapIndexed { index, item ->
+                    if (index >= currentGenIndex) {
+                        return@mapIndexed item.copy(
+                            isInterrupted = true
+                        )
+                    }
+                    item
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
-    fun updateRegionCount(count: Int) {
-        regionPromptParam = regionPromptParam.copy(regionCount = count)
-        baseParam = baseParam.copy(
-            promptText = baseParam.promptText.map {
-                if (it.regionIndex >= count) {
-                    it.copy(regionIndex = 0)
-                } else {
-                    it
+    fun initTask() {
+        val genTotalCount = if (xyzParam.enable) {
+            xyzParam.totalCount
+        } else {
+            baseParam.niter
+        }
+        var useSeed = baseParam.seed
+        if (xyzParam.enable) {
+            useSeed = (0..100000000).random()
+        }
+        startGenerating(genTotalCount, useSeed)
+    }
+
+    suspend fun generateImage() {
+        alreadyRunFlag = true
+        val builder = NotificationCompat.Builder(context, "gen_ch")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(context.getString(R.string.generating))
+            .setContentText(context.getString(R.string.generating))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setProgress(100, 0, false)
+            .setOngoing(true)
+        val notificationCompat = NotificationManagerCompat.from(context)
+        try {
+            isGenerating = true
+            val genTotalCount = totalGenCount
+
+            val saveImagePaths = emptyList<ImageHistory>().toMutableList()
+            for (genIndex in 0 until genTotalCount) {
+                currentGenIndex = genIndex
+                val seed = genItemList[currentGenIndex].seed
+                var resultImage: String? = null
+                with(builder) {
+                    setProgress(100, (currentGenIndex + 1) * 100 / genTotalCount, false)
+                    setContentText(
+                        context.getString(
+                            R.string.generate_btn_progress,
+                            currentGenIndex + 1,
+                            genTotalCount
+                        )
+                    )
+                    notificationCompat.apply {
+                        if (ActivityCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notify(1, builder.build())
+                        }
+                    }
+                }
+                if (generateMode == "text2img") {
+                    try {
+                        var param = Text2ImageParam(
+                            prompt = listOf(
+                                getLoraPrompt(),
+                                getPositivePrompt()
+                            ).filter { it.isNotBlank() }.joinToString(","),
+                            negativePrompt = getNegativePrompt(),
+                            width = baseParam.width,
+                            height = baseParam.height,
+                            steps = baseParam.steps,
+                            samplerName = baseParam.samplerName,
+                            nIter = baseParam.niter,
+                            cfgScale = baseParam.cfgScale,
+                            seed = seed,
+                            hiresFixParam = hiresFixParam,
+                            controlNetParam = controlNetParam,
+                            regionPromptParam = regionPromptParam,
+                            refinerModel = if (baseParam.enableRefiner) baseParam.refinerModel else null,
+                            refinerSwitchAt = if (baseParam.enableRefiner) baseParam.refinerSwitchAt else null,
+                            reactorParam = reactorParam,
+                            adetailerParam = adetailerParam
+                        )
+                        val xIndex = xyzParam.getXAxisIndex(currentGenIndex)
+                        val yIndex = xyzParam.getYAxisIndex(currentGenIndex)
+                        xIndex?.let {
+                            param =
+                                xyzParam.xAxis?.onText2ImageParamChange(param, xIndex) ?: param
+                        }
+                        yIndex?.let {
+                            param =
+                                xyzParam.yAxis?.onText2ImageParamChange(param, yIndex) ?: param
+                        }
+
+                        text2Image(param)?.let {
+                            resultImage = it
+                        }
+                    } catch (e: ApiException) {
+                        genItemList.getOrNull(currentGenIndex)?.let {
+                            updateGenItemByIndex(currentGenIndex) {
+                                it.copy(error = e.error)
+                            }
+                        }
+                    }
+                }
+                if (generateMode == "img2img") {
+                    try {
+                        val param = Img2imgGenerateParam(
+                            prompt = listOf(
+                                getPositivePrompt(),
+                                getLoraPrompt()
+                            ).joinToString(","),
+                            negativePrompt = getNegativePrompt(),
+                            width = baseParam.width,
+                            height = baseParam.height,
+                            steps = baseParam.steps,
+                            samplerName = baseParam.samplerName,
+                            cfgScale = baseParam.cfgScale,
+                            seed = seed,
+                            imgBase64 = img2ImgParam.imgBase64,
+                            resizeMode = img2ImgParam.resizeMode,
+                            denoisingStrength = img2ImgParam.denoisingStrength,
+                            scaleBy = img2ImgParam.scaleBy,
+                            mask = if (img2ImgParam.inpaint) img2ImgParam.mask
+                                ?: "" else "",
+                            inpaintingMaskInvert = img2ImgParam.inpaintingMaskInvert,
+                            maskBlur = img2ImgParam.maskBlur,
+                            inpaintingFill = img2ImgParam.inpaintingFill,
+                            inpaintFullRes = img2ImgParam.inpaintingFullRes,
+                            inpaintFullResPadding = img2ImgParam.inpaintingFullResPadding,
+                            adetailerParam = adetailerParam,
+                            regionPromptParam = regionPromptParam,
+                            reactorParam = reactorParam
+                        )
+                        img2Image(param)?.let {
+                            resultImage = it
+                        }
+                    } catch (e: ApiException) {
+                        genItemList.getOrNull(currentGenIndex)?.let {
+                            updateGenItemByIndex(currentGenIndex) {
+                                it.copy(error = e.error)
+                            }
+                        }
+                    }
+                }
+                if (resultImage == null) {
+                    continue
+                }
+
+                if (interruptFlag) {
+                    interruptFlag = false
+                    break
+                }
+                updateGenItemByIndex(currentGenIndex) {
+                    it.copy(imageBase64 = resultImage)
+                }
+                val imagePath = Util.saveImageBase64ToAppData(
+                    context,
+                    resultImage!!,
+                    genItemList[currentGenIndex].imageName
+                )
+                saveImagePaths += ImageHistory(
+                    path = imagePath,
+                    seed = seed,
+                    name = genItemList[currentGenIndex].imageName,
+                    favourite = false,
+                    historyId = 0
+                )
+
+                withContext(Dispatchers.IO) {
+                    PromptStore.updatePrompt(
+                        context,
+                        baseParam.promptText.map { it.text },
+                    )
+                    PromptStore.updatePrompt(
+                        context,
+                        baseParam.negativePromptText.map { it.text },
+                    )
+                }
+
+            }
+            val savedImg2ImgParam: SavedImg2imgParam? = SavedImg2imgParam.create(
+                context,
+                img2ImgParam
+            )
+
+            val saveHistory = SaveHistory(
+                prompt = baseParam.promptText,
+                negativePrompt = baseParam.negativePromptText,
+                steps = baseParam.steps,
+                samplerName = baseParam.samplerName,
+                sdModelCheckpoint = baseParam.baseModelName ?: "",
+                width = baseParam.width,
+                height = baseParam.height,
+                batchSize = 1,
+                time = System.currentTimeMillis(),
+                imagePaths = saveImagePaths,
+                cfgScale = baseParam.cfgScale,
+                loraPrompt = baseParam.loraPrompt,
+                embeddingPrompt = baseParam.embeddingPrompt,
+                hrParam = hiresFixParam,
+                savedImg2ImgParam = savedImg2ImgParam,
+                controlNetParam = controlNetParam,
+                regionRatio = regionPromptParam.dividerText,
+                regionCount = regionPromptParam.regionCount,
+                regionUseCommon = regionPromptParam.useCommon,
+                regionEnable = regionPromptParam.enable,
+                vaeName = baseParam.useVae,
+                enableRefiner = baseParam.enableRefiner,
+                refinerModelName = baseParam.refinerModel,
+                refinerSwitchAt = baseParam.refinerSwitchAt,
+                reactorParam = reactorParam,
+                adetailerParam = adetailerParam,
+                xyzParam = xyzParam
+            )
+            genScope?.launch(Dispatchers.IO) {
+                HistoryStore.saveHistoryToDatabase(context, saveHistory)
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            isGenerating = false
+            builder.setProgress(0, 0, false)
+            builder.setContentTitle(context.getString(R.string.generated))
+            builder.setContentText(context.getString(R.string.generated))
+            builder.setOngoing(false)
+            notificationCompat.apply {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    notify(1, builder.build())
                 }
             }
-        )
+        }
+
     }
+}
+
+data class TaskRunner(
+    var queue: MutableList<GenerateTask> = mutableListOf(),
+    var currentIndex: Int = 0
+) {
+    fun startTask(context: Context) {
+        val act = context as Activity
+        val intent = Intent(context, GenerateImageService::class.java)
+        intent.putExtra("refreshIndex", -1)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            act.startService(intent)
+        }
+    }
+
+
+    val isGenerating: Boolean
+        get() {
+            return queue.any { it.isGenerating }
+        }
+
+    fun updateCurrentTask(update: (task: GenerateTask) -> GenerateTask) {
+        queue[currentIndex] = update(queue[currentIndex])
+    }
+
+    fun updateTaskById(id: String, update: (task: GenerateTask) -> GenerateTask) {
+        queue.find { it.id == id }?.let {
+            val index = queue.indexOf(it)
+            queue[index] = update(queue[index])
+        }
+    }
+
+    val currentTask: GenerateTask?
+        get() {
+            return queue.getOrNull(currentIndex)
+        }
+    val unRunTask: List<GenerateTask>
+        get() {
+            return queue.filter { !it.alreadyRunFlag }
+        }
+
+    fun getNextUnRunTask(): GenerateTask? {
+        return unRunTask.firstOrNull()
+    }
+
+    fun hasUnRunTask(): Boolean {
+        return unRunTask.isNotEmpty()
+    }
+
+    fun cancelTaskById(id: String) {
+        queue = queue.filter { it.id != id }.toMutableList()
+    }
+}
+
+
+object DrawViewModel {
+    var baseParam by mutableStateOf<BaseParam>(BaseParam())
+    var regionPromptParam by mutableStateOf<RegionPromptParam>(RegionPromptParam())
+    var embeddingModels by mutableStateOf(emptyMap<String, Embedding>())
+    var samplerList by mutableStateOf(emptyList<Sampler>())
+    var progress by mutableStateOf<Progress?>(null)
+    var models by mutableStateOf<List<Model>>(emptyList())
+    var vaeList by mutableStateOf<List<Vae>>(emptyList())
+    var useVae by mutableStateOf<String?>(null)
+    val isGenerating: Boolean
+        get() {
+            return runningTask?.isGenerating ?: false
+        }
+    var options by mutableStateOf<Option?>(null)
+    var useModelName by mutableStateOf<String?>(null)
+    var isSwitchingModel by mutableStateOf(false)
+    var genXYZ by mutableStateOf<DisplayAxis?>(null)
+
+    // hires fix
+    var inputHiresFixParam by mutableStateOf<SaveHrParam>(
+        SaveHrParam(
+            enableScale = false,
+            hrScale = 2f,
+            hrDenosingStrength = 0.7f,
+            hrUpscaler = "None",
+        )
+    )
+    var upscalers by mutableStateOf<List<Upscale>>(emptyList())
+
+    //lora
+    var loraList by mutableStateOf<List<Lora>>(emptyList())
+
+    var inputControlNetParams by mutableStateOf(ControlNetParam())
+    var controlNetModelList by mutableStateOf<List<String>>(emptyList())
+
+    var enableControlNetFeat by mutableStateOf(false)
+    var generateMode by mutableStateOf("text2img")
+
+    var img2ImgParam by mutableStateOf(Img2ImgParam())
+    var inputImg2ImgMaskPreview by mutableStateOf<String?>(null)
+
+    var reactorParam by mutableStateOf(ReactorParam())
+    var reactorUpscalerList by mutableStateOf<List<String>>(emptyList())
+    var reactorModelList by mutableStateOf<List<String>>(emptyList())
+
+
+    var adetailerParam by mutableStateOf(AdetailerParam())
+    var adetailerModelList by mutableStateOf<List<String>>(emptyList())
+    var xyzParam by mutableStateOf(XYZParam())
+    var templateParam by mutableStateOf(TemplateParam())
+    var negativeTemplateParam by mutableStateOf(TemplateParam())
+
+    val gson = Gson()
+    var currentGenTaskId by mutableStateOf<String?>(null)
+    var pinRunningTask by mutableStateOf(true)
+
 
     fun applyHistory(context: Context, useHistory: SaveHistory) {
         val history = HistoryStore.getHistoryById(context, useHistory.id) ?: return
@@ -621,323 +935,38 @@ object DrawViewModel {
 
     }
 
-    fun startGenerate(context: Context, refreshIndex: Int? = null) {
-        val act = context as Activity
-
-        val intent = Intent(context, GenerateImageService::class.java)
-        intent.putExtra("refreshIndex", refreshIndex)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            act.startService(intent)
-        }
+    fun startGenerate(context: Context) {
+        runTask(context)
     }
 
-    fun interruptGenerate() {
-        genScope?.launch {
-            try {
-                getApiClient().interrupt()
-                interruptFlag = true
-                genItemList = genItemList.mapIndexed { index, item ->
-                    if (index >= currentGenIndex) {
-                        return@mapIndexed item.copy(
-                            isInterrupted = true
-                        )
-                    }
-                    item
-
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    var runningTask by mutableStateOf<TaskRunner?>(null)
+    fun runTask(context: Context) {
+        val task = GenerateTask(
+            context = context,
+            baseParam = baseParam,
+            xyzParam = xyzParam,
+            controlNetParam = inputControlNetParams,
+            generateMode = generateMode,
+            hiresFixParam = inputHiresFixParam,
+            regionPromptParam = regionPromptParam,
+            reactorParam = reactorParam,
+            adetailerParam = adetailerParam,
+            img2ImgParam = img2ImgParam
+        )
+        if (runningTask == null) {
+            runningTask = TaskRunner()
         }
-    }
-
-    fun generateImage(context: Context, refreshIndex: Int? = null) {
-        genScope?.launch {
-            val builder = NotificationCompat.Builder(context, "gen_ch")
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle(context.getString(R.string.generating))
-                .setContentText(context.getString(R.string.generating))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setProgress(100, 0, false)
-                .setOngoing(true)
-            val notificationCompat = NotificationManagerCompat.from(context)
-            try {
-                val genTotalCount = refreshIndex.let {
-                    if (it == null) {
-                        if (xyzParam.enable) {
-                            xyzParam.totalCount
-                        } else {
-                            baseParam.niter.toInt()
-                        }
-                    } else {
-                        1
-                    }
-                }
-                if (refreshIndex == null) {
-                    var useSeed = baseParam.seed
-                    if (xyzParam.enable) {
-                        useSeed = (0..100000000).random()
-                    }
-                    startGenerating(genTotalCount, useSeed)
-                }
-                val saveImagePaths = emptyList<ImageHistory>().toMutableList()
-                var controlNetParam: ControlNetParam? = null
-                if (enableControlNetFeat) {
-                    controlNetParam = inputControlNetParams
-                }
-                for (genIndex in 0 until genTotalCount) {
-                    if (refreshIndex != null) {
-                        currentGenIndex = refreshIndex
-                    } else {
-                        currentGenIndex = genIndex
-                    }
-                    val seed = genItemList[currentGenIndex].seed
-                    var resultImage: String? = null
-                    with(builder) {
-                        setProgress(100, (currentGenIndex + 1) * 100 / genTotalCount, false)
-                        setContentText(
-                            context.getString(
-                                R.string.generate_btn_progress,
-                                currentGenIndex + 1,
-                                genTotalCount
-                            )
-                        )
-                        notificationCompat.apply {
-                            if (ActivityCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.POST_NOTIFICATIONS
-                                ) == PackageManager.PERMISSION_GRANTED
-                            ) {
-                                notify(1, builder.build())
-                            }
-                        }
-                    }
-                    if (generateMode == "text2img") {
-                        try {
-                            var param = Text2ImageParam(
-                                prompt = listOf(
-                                    getLoraPrompt(),
-                                    getPositivePrompt()
-                                ).filter { it.isNotBlank() }.joinToString(","),
-                                negativePrompt = getNegativePrompt(),
-                                width = baseParam.width,
-                                height = baseParam.height,
-                                steps = baseParam.steps,
-                                samplerName = baseParam.samplerName,
-                                nIter = baseParam.niter,
-                                cfgScale = baseParam.cfgScale,
-                                seed = seed,
-                                hiresFixParam = inputHiresFixParam,
-                                controlNetParam = controlNetParam,
-                                regionPromptParam = regionPromptParam,
-                                refinerModel = if (baseParam.enableRefiner) baseParam.refinerModel else null,
-                                refinerSwitchAt = if (baseParam.enableRefiner) baseParam.refinerSwitchAt else null,
-                                reactorParam = reactorParam,
-                                adetailerParam = adetailerParam
-                            )
-                            // x = 4 y = 2
-                            // index = 4
-                            // xIndex = 4 % 4 = 0
-                            // yIndex = 4 / 4 = 1
-                            val xIndex = xyzParam.getXAxisIndex(currentGenIndex)
-                            val yIndex = xyzParam.getYAxisIndex(currentGenIndex)
-                            xIndex?.let {
-//                                Log.d(
-//                                    "xIndex",
-//                                    "xIndex: $xIndex $currentGenIndex % ${xAxis!!.getGenCount()}"
-//                                )
-                                param =
-                                    xyzParam.xAxis?.onText2ImageParamChange(param, xIndex) ?: param
-                            }
-                            yIndex?.let {
-//                                Log.d(
-//                                    "yIndex",
-//                                    "yIndex: $yIndex $currentGenIndex / ${xAxis!!.getGenCount()}"
-//                                )
-                                param =
-                                    xyzParam.yAxis?.onText2ImageParamChange(param, yIndex) ?: param
-                            }
-
-                            text2Image(param)?.let {
-                                resultImage = it
-                            }
-                        } catch (e: ApiException) {
-                            genItemList.getOrNull(currentGenIndex)?.let {
-                                updateGenItemByIndex(currentGenIndex) {
-                                    it.copy(error = e.error)
-                                }
-                            }
-                        }
-                    }
-                    if (generateMode == "img2img") {
-                        try {
-                            val param = Img2imgGenerateParam(
-                                prompt = listOf(
-                                    getPositivePrompt(),
-                                    getLoraPrompt()
-                                ).joinToString(","),
-                                negativePrompt = getNegativePrompt(),
-                                width = img2ImgParam.width,
-                                height = img2ImgParam.height,
-                                steps = baseParam.steps,
-                                samplerName = baseParam.samplerName,
-                                cfgScale = baseParam.cfgScale,
-                                seed = seed,
-                                imgBase64 = img2ImgParam.imgBase64,
-                                resizeMode = img2ImgParam.resizeMode,
-                                denoisingStrength = img2ImgParam.denoisingStrength,
-                                scaleBy = img2ImgParam.scaleBy,
-                                mask = if (img2ImgParam.inpaint) img2ImgParam.mask ?: "" else "",
-                                inpaintingMaskInvert = img2ImgParam.inpaintingMaskInvert,
-                                maskBlur = img2ImgParam.maskBlur,
-                                inpaintingFill = img2ImgParam.inpaintingFill,
-                                inpaintFullRes = img2ImgParam.inpaintingFullRes,
-                                inpaintFullResPadding = img2ImgParam.inpaintingFullResPadding,
-                                adetailerParam = adetailerParam,
-                                regionPromptParam = regionPromptParam,
-                                reactorParam = reactorParam
-                            )
-                            img2Image(param)?.let {
-                                resultImage = it
-                            }
-                        } catch (e: ApiException) {
-                            genItemList.getOrNull(currentGenIndex)?.let {
-                                updateGenItemByIndex(currentGenIndex) {
-                                    it.copy(error = e.error)
-                                }
-                            }
-                        }
-                    }
-                    if (resultImage == null) {
-                        continue
-                    }
-
-                    if (interruptFlag) {
-                        interruptFlag = false
-                        break
-                    }
-                    updateGenItemByIndex(currentGenIndex) {
-                        it.copy(imageBase64 = resultImage)
-                    }
-                    val imagePath = Util.saveImageBase64ToAppData(
-                        context,
-                        resultImage!!,
-                        genItemList[currentGenIndex].imageName
-                    )
-                    if (refreshIndex != null) {
-                        continue
-                    }
-                    saveImagePaths += ImageHistory(
-                        path = imagePath,
-                        seed = seed,
-                        name = genItemList[currentGenIndex].imageName,
-                        favourite = false,
-                        historyId = 0
-                    )
-
-                    withContext(Dispatchers.IO) {
-                        PromptStore.updatePrompt(
-                            context,
-                            baseParam.promptText.map { it.text },
-                        )
-                        PromptStore.updatePrompt(
-                            context,
-                            baseParam.negativePromptText.map { it.text },
-                        )
-                    }
-
-                }
-                var savedImg2ImgParam: SavedImg2imgParam? = null
-                if (generateMode == "img2img") {
-                    val saveFilename = img2ImgParam.imgFilename ?: "${UUID.randomUUID()}.png"
-                    img2ImgParam.imgBase64?.let { inputImageBase64 ->
-                        val savePath = Util.saveImg2ImgFile(
-                            context,
-                            inputImageBase64,
-                            saveFilename
-                        )
-                        savedImg2ImgParam = SavedImg2imgParam(
-                            denoisingStrength = img2ImgParam.denoisingStrength,
-                            resizeMode = img2ImgParam.resizeMode,
-                            scaleBy = img2ImgParam.scaleBy,
-                            width = img2ImgParam.width,
-                            height = img2ImgParam.height,
-                            cfgScale = img2ImgParam.cfgScale,
-                            path = savePath,
-                            historyId = 0
-                        )
-                        if (img2ImgParam.inpaint) {
-                            val maskFilename = "${UUID.randomUUID()}.png"
-                            val maskPath = Util.saveImg2ImgMaskFile(
-                                context,
-                                img2ImgParam.mask ?: "",
-                                maskFilename
-                            )
-                            savedImg2ImgParam = savedImg2ImgParam?.copy(
-                                maskPath = maskPath,
-                                inpaint = true,
-                                maskBlur = img2ImgParam.maskBlur,
-                                maskInvert = img2ImgParam.inpaintingMaskInvert,
-                                inpaintingFill = img2ImgParam.inpaintingFill,
-                                inpaintingFullRes = img2ImgParam.inpaintingFullRes,
-                                inpaintingFullResPadding = img2ImgParam.inpaintingFullResPadding
-                            )
-                        }
-                    }
-                }
-                val saveHistory = SaveHistory(
-                    prompt = baseParam.promptText,
-                    negativePrompt = baseParam.negativePromptText,
-                    steps = baseParam.steps,
-                    samplerName = baseParam.samplerName,
-                    sdModelCheckpoint = useModelName ?: "",
-                    width = baseParam.width,
-                    height = baseParam.height,
-                    batchSize = 1,
-                    time = System.currentTimeMillis(),
-                    imagePaths = saveImagePaths,
-                    cfgScale = baseParam.cfgScale,
-                    loraPrompt = baseParam.loraPrompt,
-                    embeddingPrompt = baseParam.embeddingPrompt,
-                    hrParam = inputHiresFixParam,
-                    savedImg2ImgParam = savedImg2ImgParam,
-                    controlNetParam = controlNetParam,
-                    regionRatio = regionPromptParam.dividerText,
-                    regionCount = regionPromptParam.regionCount,
-                    regionUseCommon = regionPromptParam.useCommon,
-                    regionEnable = regionPromptParam.enable,
-                    vaeName = useVae,
-                    enableRefiner = baseParam.enableRefiner,
-                    refinerModelName = baseParam.refinerModel,
-                    refinerSwitchAt = baseParam.refinerSwitchAt,
-                    reactorParam = reactorParam,
-                    adetailerParam = adetailerParam,
-                    xyzParam = xyzParam
-                )
-                genScope?.launch(Dispatchers.IO) {
-                    HistoryStore.saveHistoryToDatabase(context, saveHistory)
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                isGenerating = false
-                builder.setProgress(0, 0, false)
-                builder.setContentTitle(context.getString(R.string.generated))
-                builder.setContentText(context.getString(R.string.generated))
-                builder.setOngoing(false)
-                notificationCompat.apply {
-                    if (ActivityCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.POST_NOTIFICATIONS
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        notify(1, builder.build())
-                    }
-                }
-            }
+        runningTask = runningTask!!.copy(
+            queue = (runningTask!!.queue + task.apply {
+                initTask()
+            }).toMutableList()
+        )
+//        runningTask = TaskRunner().apply {
+//            queue.add(task)
+//        }
+        if (!runningTask!!.isGenerating) {
+            runningTask!!.startTask(context)
         }
-
     }
 
     fun favouriteImage(context: Context, imgItem: GenImageItem) {

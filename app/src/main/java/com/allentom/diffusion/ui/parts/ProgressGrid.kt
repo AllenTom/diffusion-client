@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Warning
@@ -31,9 +32,15 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +55,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.allentom.diffusion.R
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
 import com.allentom.diffusion.extension.thenIf
@@ -61,6 +70,7 @@ import kotlinx.coroutines.withContext
 import kotlin.math.max
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenProgressGrid(
     modifier: Modifier
@@ -69,8 +79,18 @@ fun GenProgressGrid(
     var isImagePreviewerOpen by remember { mutableStateOf(false) }
     var isActionMenuShow by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    if (isImagePreviewerOpen && DrawViewModel.displayResultIndex < DrawViewModel.genItemList.size) {
-        val displayItem = DrawViewModel.genItemList[DrawViewModel.displayResultIndex]
+    val displayTask = DrawViewModel.runningTask?.queue?.find {
+        it.id == DrawViewModel.currentGenTaskId
+    }
+    val genItemList = displayTask?.genItemList ?: emptyList()
+    val displayResultIndex = displayTask?.displayResultIndex ?: 0
+    val pinIcon = ImageVector.vectorResource(id = R.drawable.ic_pin_fill)
+    val unPinIcon = ImageVector.vectorResource(id = R.drawable.ic_pin)
+    val stopIcon = ImageVector.vectorResource(id = R.drawable.ic_stop_fill)
+
+    var isQueueModalOpen by remember { mutableStateOf(false) }
+    if (isImagePreviewerOpen && displayResultIndex < genItemList.size) {
+        val displayItem = genItemList[displayResultIndex]
         displayItem.getDisplayImageBase64()?.let {
             ImageBase64PreviewDialog(
                 imageBase64 = it,
@@ -91,6 +111,94 @@ fun GenProgressGrid(
             context.getString(R.string.saved_to_device_gallery), Toast.LENGTH_SHORT
         ).show()
     }
+    if (isQueueModalOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { isQueueModalOpen = false },
+            sheetState = rememberModalBottomSheetState(
+                skipPartiallyExpanded = true
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text(text = stringResource(R.string.queue), fontSize = 18.sp, fontWeight = FontWeight.W400)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(DrawViewModel.runningTask?.queue?.size ?: 0) { idx ->
+                                val task =
+                                    DrawViewModel.runningTask?.queue?.sortedBy { -it.createTime }
+                                        ?.get(idx)
+                                task?.let {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(bottom = 8.dp, top = 8.dp)
+                                            .fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(modifier = Modifier.weight(1f)) {
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .clickable {
+                                                            DrawViewModel.currentGenTaskId = task.id
+                                                            isQueueModalOpen = false
+                                                        }
+                                                ) {
+                                                    Row {
+                                                        Text(text = stringResource(R.string.task))
+                                                        Spacer(modifier = Modifier.width(4.dp))
+                                                        if (task.alreadyRunFlag && !task.isGenerating) {
+                                                            Text(text = stringResource(R.string.task_done))
+                                                        }
+                                                        if (task.isGenerating) {
+                                                            Text(text = stringResource(R.string.task_generating))
+                                                        }
+                                                        if (!task.alreadyRunFlag) {
+                                                            Text(text = stringResource(R.string.task_in_queue))
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Text(text = it.id, fontSize = 12.sp)
+                                                }
+                                            }
+                                            if (it.isGenerating) {
+                                                IconButton(onClick = {
+                                                    it.interruptGenerate()
+                                                }) {
+                                                    Icon(
+                                                        imageVector = stopIcon,
+                                                        contentDescription = "Stop"
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
     Column(
         modifier = modifier
     ) {
@@ -100,10 +208,52 @@ fun GenProgressGrid(
                 .height(300.dp)
 
         ) {
-            if (DrawViewModel.genItemList.isNotEmpty()) {
+            if (genItemList.isNotEmpty()) {
                 val imgItem =
-                    DrawViewModel.genItemList[DrawViewModel.displayResultIndex]
+                    genItemList[displayResultIndex]
                 Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                isQueueModalOpen = true
+                            }) {
+                            if (displayTask != null) {
+                                Text(text = "${stringResource(id = R.string.task)} ${displayTask.id.subSequence(0, 6)}")
+                            } else {
+                                Text(text = stringResource(id = R.string.queue))
+                            }
+                        }
+                        if (displayTask?.isGenerating == true) {
+                            IconButton(onClick = {
+                                displayTask.interruptGenerate()
+                            }) {
+
+                                Icon(imageVector = stopIcon, contentDescription = "Stop")
+                            }
+                        }
+
+                        IconButton(onClick = {
+                            if (!DrawViewModel.pinRunningTask) {
+                                DrawViewModel.runningTask?.queue?.find { it.isGenerating }?.let {
+                                    DrawViewModel.currentGenTaskId = it.id
+                                }
+                            }
+                            DrawViewModel.pinRunningTask = !DrawViewModel.pinRunningTask
+
+                        }) {
+                            if (DrawViewModel.pinRunningTask) {
+                                Icon(pinIcon, contentDescription = "Pin")
+                            } else {
+                                Icon(unPinIcon, contentDescription = "UnPin")
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -188,27 +338,27 @@ fun GenProgressGrid(
                 }
             }
         }
-        if (DrawViewModel.genItemList.isNotEmpty()) {
-            if (!DrawViewModel.isGenerating) {
-                val imgItem =
-                    DrawViewModel.genItemList[DrawViewModel.displayResultIndex]
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            MaterialTheme.colorScheme.primaryContainer
-                        )
-                        .padding(vertical = 8.dp, horizontal = 16.dp)
-                ) {
-                    Text(
-                        text = imgItem.seed.toString(),
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+        // preview
+        if (genItemList.isNotEmpty() && displayResultIndex != null) {
+            val imgItem =
+                genItemList[displayResultIndex]
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer
                     )
-
-                    Box() {
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+            ) {
+                Text(
+                    text = imgItem.seed.toString(),
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                if (displayTask?.isGenerating == false && displayTask.alreadyRunFlag) {
+                    Box {
                         Icon(
                             Icons.Rounded.MoreVert,
                             contentDescription = null,
@@ -238,24 +388,6 @@ fun GenProgressGrid(
                             DropdownMenuItem(
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = Icons.Default.Refresh,
-                                        contentDescription = null
-                                    )
-                                },
-                                text = { Text(stringResource(R.string.regenerate)) },
-                                onClick = {
-                                    isActionMenuShow = false
-                                    scope.launch {
-                                        DrawViewModel.startGenerate(
-                                            context,
-                                            refreshIndex = DrawViewModel.displayResultIndex
-                                        )
-                                    }
-                                }
-                            )
-                            DropdownMenuItem(
-                                leadingIcon = {
-                                    Icon(
                                         imageVector = Icons.Default.Send,
                                         contentDescription = null
                                     )
@@ -265,21 +397,26 @@ fun GenProgressGrid(
                                 onClick = {
                                     isActionMenuShow = false
                                     scope.launch {
-                                        DrawViewModel.img2ImgParam = DrawViewModel.img2ImgParam.copy(
-                                            imgBase64 = imgItem.getDisplayImageBase64(),
-                                            width = DrawViewModel.baseParam.width,
-                                            height = DrawViewModel.baseParam.height
-                                        )
-                                        imgItem.seed.let {
-                                            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
-                                                seed = it
-                                            )
+                                        displayTask.let {
+                                            DrawViewModel.img2ImgParam =
+                                                DrawViewModel.img2ImgParam.copy(
+                                                    imgBase64 = imgItem.getDisplayImageBase64(),
+                                                    width = it.baseParam.width,
+                                                    height = it.baseParam.height
+                                                )
+                                            imgItem.seed.let {
+                                                DrawViewModel.baseParam =
+                                                    DrawViewModel.baseParam.copy(
+                                                        seed = it
+                                                    )
+                                            }
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.image_sent_to_image_to_image),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.image_sent_to_image_to_image),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+
                                     }
                                 }
                             )
@@ -288,14 +425,17 @@ fun GenProgressGrid(
                 }
 
             }
+
+
         }
         Spacer(modifier = Modifier.height(16.dp))
+        // gen list
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            if (DrawViewModel.genItemList.isNotEmpty()) {
+            if (genItemList.isNotEmpty()) {
                 val displayXYZ = DrawViewModel.genXYZ
                 if (displayXYZ == null) {
                     LazyVerticalGrid(
@@ -305,8 +445,19 @@ fun GenProgressGrid(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        items(DrawViewModel.genItemList.size) {
-                            GenItem(index = it)
+                        items(genItemList.size) { idx ->
+                            GenItem(
+                                imageItem = genItemList[idx],
+                                isSelected = idx == displayResultIndex,
+                                onClick = {
+                                    displayTask?.let {
+                                        DrawViewModel.runningTask?.updateTaskById(it.id) {
+                                            it.displayResultIndex = idx
+                                            it
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
                 } else {
@@ -331,23 +482,21 @@ fun GenProgressGrid(
                                             modifier = Modifier.width(120.dp)
                                         ) {
                                             GenItem(
-                                                currentIndex
+                                                genItemList[currentIndex],
+                                                isSelected = currentIndex == displayResultIndex,
+                                                onClick = {
+                                                    displayTask?.let {
+                                                        DrawViewModel.runningTask?.updateTaskById(it.id) {
+                                                            it.displayResultIndex = currentIndex
+                                                            it
+                                                        }
+                                                    }
+                                                }
                                             )
                                         }
                                         Spacer(modifier = Modifier.width(8.dp))
                                     }
                                 }
-//                                LazyVerticalGrid(
-//                                    columns = GridCells.Fixed(3),
-//                                    modifier = Modifier
-//                                        .fillMaxWidth(),
-//                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-//                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-//                                ) {
-//                                    items(xyzParam.xAxis!!.getGenCount()) {
-//                                        GenItem(index = it * i)
-//                                    }
-//                                }
                             }
                         }
 
@@ -361,29 +510,27 @@ fun GenProgressGrid(
 }
 
 @Composable
-fun GenItem(index: Int) {
+fun GenItem(
+    imageItem: GenImageItem,
+    isSelected: Boolean = false,
+    onClick: () -> Unit
+) {
+
     Box(
         modifier = Modifier
             .aspectRatio(DrawViewModel.baseParam.width.toFloat() / DrawViewModel.baseParam.height.toFloat())
             .sizeIn(maxHeight = 90.dp, maxWidth = 90.dp)
             .border(
-                DrawViewModel.displayResultIndex.let { currentIndex ->
-                    if (currentIndex == index) 4.dp else 0.dp
-                },
-                DrawViewModel.displayResultIndex.let { currentIndex ->
-                    if (currentIndex == index) MaterialTheme.colorScheme.secondary
-                    else Color.Transparent
-                },
+                if (isSelected) 4.dp else 0.dp,
+                if (isSelected) MaterialTheme.colorScheme.secondary
+                else Color.Transparent,
                 RoundedCornerShape(8.dp)
             )
             .clickable {
-
-                DrawViewModel.displayResultIndex = index
-
+                onClick()
             }
             .clip(RoundedCornerShape(8.dp))
     ) {
-        val imageItem = DrawViewModel.genItemList[index]
         if (imageItem.error != null) {
             Box(
                 modifier = Modifier

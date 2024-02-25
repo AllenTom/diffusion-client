@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -29,8 +30,9 @@ class GenerateImageService : Service() {
         }
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val context = this
-        DrawViewModel.genScope = serviceScope
+        DrawViewModel.runningTask?.queue?.forEach {
+            it.genScope = serviceScope
+        }
         val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationCompat.Builder(this, "GenerateImageServiceChannel")
                 .setContentTitle("Generate Image Service")
@@ -47,15 +49,18 @@ class GenerateImageService : Service() {
         notificationManager.notify(1, notification)
 
         serviceScope.launch(Dispatchers.IO) {
-            val refreshIndex = intent?.getIntExtra("refreshIndex", -1)?.let {
-                if (it == -1) {
-                    null
-                } else {
-                    it
+                while (true) {
+                    val runner = DrawViewModel.runningTask ?: break
+                    val nextTask = runner.getNextUnRunTask() ?: break
+                    val unRunIndex = runner.queue.indexOf(nextTask)
+                    runner.currentIndex = unRunIndex
+                    if (DrawViewModel.currentGenTaskId == null || DrawViewModel.pinRunningTask) {
+                        DrawViewModel.currentGenTaskId = nextTask.id
+                    }
+                    nextTask.genScope = serviceScope
+                    nextTask.generateImage()
                 }
-            }
 
-            DrawViewModel.generateImage(context, refreshIndex = refreshIndex)
             stopSelf()
         }
 

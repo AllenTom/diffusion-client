@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
@@ -82,8 +83,9 @@ fun DrawScreen() {
     val scope = rememberCoroutineScope()
 
     val context = LocalContext.current
-
-    val imageViewerState = rememberPreviewerState(pageCount = { DrawViewModel.genItemList.size })
+    val genItemList = DrawViewModel.runningTask?.currentTask?.genItemList ?: emptyList()
+    val displayResultIndex = DrawViewModel.runningTask?.currentTask?.displayResultIndex ?: 0
+    val imageViewerState = rememberPreviewerState(pageCount = { genItemList.size })
     var isImagePreviewerOpen by remember {
         mutableStateOf(false)
     }
@@ -99,8 +101,8 @@ fun DrawScreen() {
         )
     }
 
-    if (isImagePreviewerOpen && DrawViewModel.displayResultIndex < DrawViewModel.genItemList.size) {
-        val displayItem = DrawViewModel.genItemList[DrawViewModel.displayResultIndex]
+    if (isImagePreviewerOpen && displayResultIndex < genItemList.size) {
+        val displayItem = genItemList[displayResultIndex]
         displayItem.getDisplayImageBase64()?.let {
             ImageBase64PreviewDialog(
                 imageBase64 = it,
@@ -153,7 +155,7 @@ fun DrawScreen() {
                             .fillMaxWidth()
                     ) {
                         Row {
-                            if (!DrawViewModel.isGenerating && !isWideDisplay) {
+                            if (!isWideDisplay) {
                                 Button(
                                     onClick = {
                                         isParamDisplayed = true
@@ -162,33 +164,19 @@ fun DrawScreen() {
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                             }
-                            if (DrawViewModel.isGenerating) {
-                                Button(
-                                    onClick = {
-                                        DrawViewModel.interruptGenerate()
-                                    },
-                                    enabled = DrawViewModel.isGenerating && !DrawViewModel.interruptFlag
-                                ) {
-                                    Text(text = stringResource(id = R.string.btn_stop))
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
+
                             Button(
                                 modifier = Modifier.weight(1f),
-                                enabled = !DrawViewModel.isGenerating,
                                 onClick = {
                                     DrawViewModel.startGenerate(context = context)
                                 }) {
                                 Icon(
-                                    DrawViewModel.isGenerating.let { if (it) Icons.Filled.Share else Icons.Filled.Create },
+                                    DrawViewModel.isGenerating.let { if (it) Icons.Filled.Add else Icons.Filled.Create },
                                     contentDescription = "Generate"
                                 )
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(text = DrawViewModel.isGenerating.let {
-                                    if (it) stringResource(
-                                        id = R.string.generate_btn_progress,
-                                        DrawViewModel.currentGenIndex + 1,
-                                        DrawViewModel.totalGenCount
-                                    ) else stringResource(
+                                    if (it) stringResource(R.string.add_to_queue) else stringResource(
                                         id = R.string.draw_generate
                                     )
                                 })
@@ -199,7 +187,7 @@ fun DrawScreen() {
                 ImagePreviewer(
                     state = imageViewerState,
                     imageLoader = { index ->
-                        val imgItem = DrawViewModel.genItemList[index]
+                        val imgItem = genItemList[index]
                         val imageBase64 = imgItem.getDisplayImageBase64()
                         val decodedString = Base64.decode(imageBase64, Base64.DEFAULT)
                         val decodedByte =

@@ -106,7 +106,6 @@ class MainActivity : ComponentActivity() {
 fun DiffusionApp() {
     val navController = rememberNavController()
     val backStackEntry = navController.currentBackStackEntryAsState()
-    val scope = rememberCoroutineScope()
     if (DrawViewModel.isGenerating) {
         LaunchedEffect(Unit) {
             while (true) {
@@ -116,23 +115,24 @@ fun DiffusionApp() {
                 DrawViewModel.progress = getApiClient().getProgress().body()
                 val progress = DrawViewModel.progress
                 if (progress !== null) {
-                    DrawViewModel.updateGenItemByIndex(DrawViewModel.currentGenIndex) {
-                        it.copy(progress = progress)
+                    DrawViewModel.runningTask?.run {
+                        updateCurrentTask {
+                            it.updateGenItemByIndex(it.currentGenIndex) {
+                                it.copy(progress = progress)
+                            }
+                            it
+                        }
                     }
                 }
                 delay(500)
             }
         }
     }
-//    LaunchedEffect(Unit) {
-//        DrawViewModel.genScope = scope
-//
-//    }
     NavHost(
         navController = navController,
         startDestination = Screens.Login.route,
 
-    ) {
+        ) {
         composable(Screens.Login.route) {
             LoginScreen(navController = navController)
         }
