@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +74,7 @@ fun GalleryView(navController: NavController) {
     val columns = screenWidthDp / 120 // Adjust this value to change the width of each column
     var selectedImageItemIds by remember { mutableStateOf(listOf<String>()) }
     val downloadIcon = ImageVector.vectorResource(id = R.drawable.ic_download)
+    val unFavoriteIcon = ImageVector.vectorResource(id = R.drawable.ic_unfavo)
     fun saveAllSelectImageToDeviceImage() {
         selectedImageItemIds.forEach { selectedName ->
             galleryItems.find { it.name == selectedName }?.let { imageHistory: ImageHistory ->
@@ -83,6 +86,19 @@ fun GalleryView(navController: NavController) {
         HomeViewModel.gallerySelectMode = false
         selectedImageItemIds = listOf()
         Toast.makeText(context, context.getString(R.string.saved_to_device_gallery), Toast.LENGTH_SHORT).show()
+    }
+    fun unFavouriteAllSelectImage() {
+        scope.launch(Dispatchers.IO) {
+            selectedImageItemIds.forEach { selectedName ->
+                galleryItems.find { it.name == selectedName }?.let { imageHistory: ImageHistory ->
+                    HistoryStore.updateImageHistory(context, imageHistory.copy(favourite = false))
+                }
+            }
+            galleryItems = HistoryStore.getFavoriteImageHistory(context)
+            HomeViewModel.gallerySelectMode = false
+            selectedImageItemIds = listOf()
+        }
+
     }
     Column {
         LazyVerticalGrid(
@@ -156,7 +172,6 @@ fun GalleryView(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-
                     .background(
                         MaterialTheme.colorScheme.primaryContainer
                     )
@@ -178,6 +193,20 @@ fun GalleryView(navController: NavController) {
                         Icon(downloadIcon, contentDescription = "Download")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = {
+                        unFavouriteAllSelectImage()
+                    }) {
+                        Icon(unFavoriteIcon, contentDescription = "Unfavourite")
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxHeight()  //fill the max height
+                            .width(1.dp),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     IconButton(onClick = {
                         HomeViewModel.gallerySelectMode = false
                         selectedImageItemIds = listOf()

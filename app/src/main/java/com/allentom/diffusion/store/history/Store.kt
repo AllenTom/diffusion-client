@@ -29,7 +29,7 @@ import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.XYZParam
 import java.io.Serializable
 
-class ImageHistory(
+data class ImageHistory(
     val imageHistoryId: Long = 0,
     val path: String,
     val name: String,
@@ -118,6 +118,9 @@ interface ImageHistoryDao {
 
     @Query("SELECT * FROM image_history WHERE favourite = 1 ORDER BY imageHistoryId DESC")
     fun getFavouriteImageHistory(): List<ImageHistoryEntity>
+
+    @Update
+    fun updateImageHistory(imageHistoryEntity: ImageHistoryEntity)
 
 }
 
@@ -415,6 +418,13 @@ object HistoryStore {
     fun getImageHistoryWithName(context: Context, name: String): ImageHistory? {
         val database = AppDatabaseHelper.getDatabase(context)
         return database.imageHistoryDao().getImageHistoryWithName(name)?.toImageHistory()
+    }
+
+    fun updateImageHistory(context: Context, imageHistory: ImageHistory) {
+        val database = AppDatabaseHelper.getDatabase(context)
+        database.imageHistoryDao().updateImageHistory(
+            ImageHistoryEntity.fromImageHistory(imageHistory, imageHistory.historyId)
+        )
     }
 
     fun getHistoryById(context: Context, id: Long): SaveHistory? {
