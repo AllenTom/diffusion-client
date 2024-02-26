@@ -305,4 +305,5 @@
     <string name="applied_seed_value">Applied seed value</string>
     <string name="use_this_seed">Use this seed</string>
     <string name="random">Random</string>
+    <string name="selected_items">Selected %1$s items</string>
 </resources>

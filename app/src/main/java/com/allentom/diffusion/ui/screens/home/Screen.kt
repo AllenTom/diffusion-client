@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Divider
@@ -94,6 +95,17 @@ fun HomePage(navController: NavController) {
                                 },
                                 contentDescription = "Menu",
                             )
+                        }
+                        if (!HomeViewModel.gallerySelectMode) {
+                            IconButton(
+                                onClick = {
+                                    HomeViewModel.gallerySelectMode = !HomeViewModel.gallerySelectMode
+                                }
+                            ) {
+                                Icon(Icons.Default.Check,
+                                    contentDescription = "Select",
+                                )
+                            }
                         }
                     }
                 }

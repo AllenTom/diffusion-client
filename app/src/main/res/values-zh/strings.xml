@@ -306,4 +306,5 @@
     <string name="applied_seed_value">已应用种子值</string>
     <string name="use_this_seed">使用当前种子</string>
     <string name="random">随机</string>
+    <string name="selected_items">已选 %1$s 项</string>
 </resources>
