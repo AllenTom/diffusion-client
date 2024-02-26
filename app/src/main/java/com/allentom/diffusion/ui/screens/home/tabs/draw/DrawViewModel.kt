@@ -159,7 +159,7 @@ suspend fun fetchAdetailerModelFromApi(): List<String> {
 data class GenImageItem(
     val imageBase64: String?,
     val progress: Progress?,
-    val seed: Int,
+    val seed: Long,
     val imageName: String,
     val error: ApiError?,
     val isInterrupted: Boolean = false
@@ -336,7 +336,7 @@ data class BaseParam(
     val niter: Int = 1,
     val samplerName: String = "DDIM",
     val cfgScale: Float = 7f,
-    val seed: Int = -1,
+    val seed: Long = -1,
     val useVae: String? = null,
     val enableRefiner: Boolean = false,
     val refinerModel: String? = null,
@@ -393,15 +393,15 @@ class GenerateTask(
 
     fun startGenerating(
         count: Int,
-        seed: Int = -1
+        seed: Long = -1
     ) {
         totalGenCount = count
         currentGenIndex = 0
         displayResultIndex = 0
         genItemList = emptyList()
         for (i in 0 until count) {
-            val imageSeed = if (seed == -1) {
-                (0..100000000).random()
+            val imageSeed = if (seed == -1L) {
+                (0..100000000).random().toLong()
             } else {
                 seed
             }
@@ -481,7 +481,7 @@ class GenerateTask(
         }
         var useSeed = baseParam.seed
         if (xyzParam.enable) {
-            useSeed = (0..100000000).random()
+            useSeed = (0..100000000).random().toLong()
         }
         startGenerating(genTotalCount, useSeed)
     }

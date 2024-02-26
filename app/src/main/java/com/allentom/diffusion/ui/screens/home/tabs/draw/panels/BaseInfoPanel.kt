@@ -11,6 +11,7 @@ import com.allentom.diffusion.composables.CanvasSizeItem
 import com.allentom.diffusion.composables.EmbeddingSelectOptionItem
 import com.allentom.diffusion.composables.LoraSelectOptionItem
 import com.allentom.diffusion.composables.PromptSelectOptionItem
+import com.allentom.diffusion.composables.SeedOptionItem
 import com.allentom.diffusion.composables.SliderOptionItem
 import com.allentom.diffusion.composables.SwitchOptionItem
 import com.allentom.diffusion.composables.TextPickUpItem
@@ -115,15 +116,21 @@ fun BaseInfoPanel(
                 DrawViewModel.baseParam = DrawViewModel.baseParam.copy(steps = it)
             }
         )
-        SliderOptionItem(
+        SeedOptionItem(
             label = stringResource(R.string.param_seed),
-            value = DrawViewModel.baseParam.seed.toFloat(),
-            valueRange = -1f..1.0E8f,
-            useInt = true,
-            onValueChangeInt = {
-                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(seed = it)
-            }
-        )
+            value = DrawViewModel.baseParam.seed
+        ) {
+            DrawViewModel.baseParam = DrawViewModel.baseParam.copy(seed = it)
+        }
+//        SliderOptionItem(
+//            label = stringResource(R.string.param_seed),
+//            value = DrawViewModel.baseParam.seed.toFloat(),
+//            valueRange = -1f..1.0E8f,
+//            useInt = true,
+//            onValueChangeInt = {
+//                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(seed = it)
+//            }
+//        )
         SliderOptionItem(
             label = stringResource(R.string.param_cfg_scale),
             value = DrawViewModel.baseParam.cfgScale,

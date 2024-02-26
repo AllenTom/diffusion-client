@@ -33,7 +33,7 @@ class ImageHistory(
     val imageHistoryId: Long = 0,
     val path: String,
     val name: String,
-    val seed: Int,
+    val seed: Long,
     val favourite: Boolean = false,
     val historyId: Long
 ) : Serializable
@@ -77,7 +77,7 @@ data class ImageHistoryEntity(
     val name: String,
     val path: String,
     val favourite: Boolean,
-    val seed: Int,
+    val seed: Long,
     val historyId: Long,
 ) {
     companion object {

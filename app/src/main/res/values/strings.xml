@@ -304,4 +304,5 @@
     <string name="save_to_device_gallery">Save to device gallery</string>
     <string name="applied_seed_value">Applied seed value</string>
     <string name="use_this_seed">Use this seed</string>
+    <string name="random">Random</string>
 </resources>

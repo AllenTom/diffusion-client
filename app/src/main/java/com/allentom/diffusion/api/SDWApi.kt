@@ -465,7 +465,7 @@ data class Txt2ImgRequest(
     @SerializedName("cfg_scale")
     val cfgScale: Int = 7,
     @SerializedName("seed")
-    val seed: Int = -1,
+    val seed: Long = -1,
     @SerializedName("enable_hr")
     val enableHr: Boolean = false,
     @SerializedName("denoising_strength")
@@ -504,7 +504,7 @@ data class Img2ImgRequest(
     val sampler_name: String = "dimm",
     val n_iter: Int = 1,
     val cfg_scale: Int = 7,
-    val seed: Int = -1,
+    val seed: Long = -1,
     val alwayson_scripts: AlwaysonScripts? = AlwaysonScripts(null),
     val init_images: List<String> = listOf(),
     val resize_mode: Int = 0,

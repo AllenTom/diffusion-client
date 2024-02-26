@@ -305,4 +305,5 @@
     <string name="save_to_device_gallery">保存至设备相册</string>
     <string name="applied_seed_value">已应用种子值</string>
     <string name="use_this_seed">使用当前种子</string>
+    <string name="random">随机</string>
 </resources>
