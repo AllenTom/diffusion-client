@@ -301,4 +301,5 @@
     <string name="task_generating">generating</string>
     <string name="task_in_queue">in queue</string>
     <string name="add_to_queue">Add to queue</string>
+    <string name="save_to_device_gallery">Save to device gallery</string>
 </resources>

@@ -24,8 +24,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.rounded.MoreVert
@@ -35,7 +33,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -59,8 +56,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.allentom.diffusion.R
+import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
-import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.GenImageItem
@@ -87,6 +84,7 @@ fun GenProgressGrid(
     val pinIcon = ImageVector.vectorResource(id = R.drawable.ic_pin_fill)
     val unPinIcon = ImageVector.vectorResource(id = R.drawable.ic_pin)
     val stopIcon = ImageVector.vectorResource(id = R.drawable.ic_stop_fill)
+    val downloadIcon = ImageVector.vectorResource(id = R.drawable.ic_download)
 
     var isQueueModalOpen by remember { mutableStateOf(false) }
     if (isImagePreviewerOpen && displayResultIndex < genItemList.size) {
@@ -100,7 +98,7 @@ fun GenProgressGrid(
                 })
         }
     }
-    fun saveImageToDeviceGallery(imageItem: GenImageItem) {
+    fun favouriteImage(imageItem: GenImageItem) {
         scope.launch {
             withContext(Dispatchers.IO) {
                 DrawViewModel.favouriteImage(context, imageItem)
@@ -108,8 +106,21 @@ fun GenProgressGrid(
         }
         Toast.makeText(
             context,
-            context.getString(R.string.saved_to_device_gallery), Toast.LENGTH_SHORT
+            context.getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT
         ).show()
+    }
+    fun saveToDeviceGallery(imageItem: GenImageItem){
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                Util.saveImageBase64ToGallery(imageItem.getDisplayImageBase64()!!,imageItem.imageName)
+            }
+            Toast.makeText(
+                context,
+                context.getString(R.string.saved_to_device_gallery), Toast.LENGTH_SHORT
+            ).show()
+        }
+
+
     }
     if (isQueueModalOpen) {
         ModalBottomSheet(
@@ -126,7 +137,11 @@ fun GenProgressGrid(
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(text = stringResource(R.string.queue), fontSize = 18.sp, fontWeight = FontWeight.W400)
+                    Text(
+                        text = stringResource(R.string.queue),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.W400
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
@@ -223,7 +238,14 @@ fun GenProgressGrid(
                                 isQueueModalOpen = true
                             }) {
                             if (displayTask != null) {
-                                Text(text = "${stringResource(id = R.string.task)} ${displayTask.id.subSequence(0, 6)}")
+                                Text(
+                                    text = "${stringResource(id = R.string.task)} ${
+                                        displayTask.id.subSequence(
+                                            0,
+                                            6
+                                        )
+                                    }"
+                                )
                             } else {
                                 Text(text = stringResource(id = R.string.queue))
                             }
@@ -382,7 +404,7 @@ fun GenProgressGrid(
                                 text = { Text(stringResource(R.string.add_to_gallery)) },
                                 onClick = {
                                     isActionMenuShow = false
-                                    saveImageToDeviceGallery(imgItem)
+                                    favouriteImage(imgItem)
                                 }
                             )
                             DropdownMenuItem(
@@ -418,6 +440,19 @@ fun GenProgressGrid(
                                         }
 
                                     }
+                                }
+                            )
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = downloadIcon,
+                                        contentDescription = null
+                                    )
+                                },
+                                text = { Text(stringResource(R.string.save_to_device_gallery)) },
+                                onClick = {
+                                    isActionMenuShow = false
+                                    saveToDeviceGallery(imgItem)
                                 }
                             )
                         }
