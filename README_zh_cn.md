@@ -27,6 +27,20 @@
   <img src="./assets/preview_tools.png" width="100" /> 
 </p>
 
+## 设备
+
+如果你很幸运和开发者都是折叠设备使用者的话，应用内一些界面针对设备做了一些界面优化。
+
+<p float="left">
+  <img src="./assets/foldable_draw_preview.png" width="150" />
+  <img src="./assets/foldable_extra_image.png" width="150" /> 
+  <img src="./assets/foldable_image_history_preview.png" width="150" /> 
+  <img src="./assets/foldable_prompt.png" width="150" /> 
+</p>
+
+## 需求
+应用基于 [stable diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)，要使用应用，请先启动服务。[详见文档](https://github.com/AllenTom/diffusion-client/wiki/QuickStart-%E2%80%90-zh_cn#%E5%90%AF%E5%8A%A8-stable-diffusion-web-ui-%E6%9C%8D%E5%8A%A1)
+
 ## wiki
 [wiki](https://github.com/AllenTom/diffusion-client/wiki/%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C) 记录了功能的使用方式，敬请查阅
 ## 下载

@@ -29,13 +29,24 @@ a powerful [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diff
   <img src="./assets/preview_tools.png" width="100" /> 
 </p>
 
+## Device
+
+If you are a foldable device user like the developer, some interfaces in the app have been optimized for the device.
+
+<p float="left">
+  <img src="./assets/foldable_draw_preview.png" width="150" />
+  <img src="./assets/foldable_extra_image.png" width="150" /> 
+  <img src="./assets/foldable_image_history_preview.png" width="150" /> 
+  <img src="./assets/foldable_prompt.png" width="150" /> 
+</p>
+
 ## TODO
 - complete app document
 - adapt video generate plugin
 - add more X/Y/Z Axis
 
 ## Requirement
-Service base on [stable diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+Service base on [stable diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 Please start the sdw service before using it. The guide are [here](https://github.com/AllenTom/diffusion-client/wiki/QuickStart#set-up-stable-diffusion-web-ui)
 
