@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -189,38 +190,7 @@ fun ImageDetail(id: String, navController: NavController) {
                             },
                             text = { Text(stringResource(id = R.string.upscale)) }
                         )
-                        DropdownMenuItem(text = {
-                            Text(stringResource(id = R.string.saved_to_gallery))
-                        }, onClick = {
-                            expanded = false
-                            galleryItem?.let {
-                                Util.copyImageFileToGallery(context, it.path, it.name)
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.image_saved_to_gallery),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        })
-                        DropdownMenuItem(
-                            onClick = {
-                                expanded = false
-                                genHistory?.let {
-                                    scope.launch(Dispatchers.IO) {
-                                        DrawViewModel.applyHistory(context,it)
-                                        scope.launch(Dispatchers.Main) {
-                                            Toast.makeText(
-                                                context,
-                                                context.getString(R.string.params_applied),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                    }
-
-                                }
-                            },
-                            text = { Text(stringResource(R.string.apply_params)) }
-                        )
+                        Divider()
                         DropdownMenuItem(
                             onClick = {
                                 expanded = false
@@ -235,6 +205,40 @@ fun ImageDetail(id: String, navController: NavController) {
                             },
                             text = { Text(stringResource(R.string.send_to_reactor)) }
                         )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                expanded = false
+                                genHistory?.let {
+                                    scope.launch(Dispatchers.IO) {
+                                        DrawViewModel.applyHistory(context, it)
+                                        scope.launch(Dispatchers.Main) {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.params_applied),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+
+                                }
+                            },
+                            text = { Text(stringResource(R.string.apply_params)) }
+                        )
+                        Divider()
+                        DropdownMenuItem(text = {
+                            Text(stringResource(id = R.string.save_to_device_gallery))
+                        }, onClick = {
+                            expanded = false
+                            galleryItem?.let {
+                                it.saveToDeviceGallery(context = context)
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.image_saved_to_gallery),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        })
                     }
                 }
             )
@@ -278,7 +282,7 @@ fun ImageDetail(id: String, navController: NavController) {
                                 Box(
                                     modifier = Modifier.padding(horizontal = 16.dp)
                                 ) {
-                                    HistoryView(currentHistory = genHis,navController)
+                                    HistoryView(currentHistory = genHis, navController)
                                 }
                                 Spacer(modifier = Modifier.height(64.dp))
                             }

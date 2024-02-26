@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -97,7 +98,6 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
         }
         refresh()
     }
-
 
 
     if (isHistoryActionOpen) {
@@ -227,9 +227,6 @@ fun FirstScreen(
     var isImagePreviewOpen by remember {
         mutableStateOf(false)
     }
-    var isImageActionSheetOpen by remember {
-        mutableStateOf(false)
-    }
     var isActionMenuShow by remember {
         mutableStateOf(false)
     }
@@ -255,6 +252,20 @@ fun FirstScreen(
             ).show()
         }
     }
+    fun saveImageToDeviceGallery(imageHistory: ImageHistory) {
+        scope.launch(Dispatchers.IO) {
+            imageHistory.saveToDeviceGallery(context)
+            scope.launch(
+                Dispatchers.Main
+            ) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .padding(16.dp)
@@ -305,19 +316,7 @@ fun FirstScreen(
                     expanded = isActionMenuShow,
                     onDismissRequest = { isActionMenuShow = false }
                 ) {
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_photo_album),
-                                contentDescription = null
-                            )
-                        },
-                        text = { Text(stringResource(R.string.add_to_gallery)) },
-                        onClick = {
-                            isActionMenuShow = false
-                            favouriteImage(it)
-                        }
-                    )
+
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(
@@ -372,6 +371,56 @@ fun FirstScreen(
                                 Util.readImageWithPathToBase64(it.path)
                                 navController.navigate(Screens.ReactorScreen.route)
                             }
+                        }
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = null
+                            )
+
+                        },
+                        text = { Text(stringResource(id = R.string.use_this_seed)) },
+                        onClick = {
+                            isActionMenuShow = false
+                            scope.launch {
+                                DrawViewModel.baseParam = DrawViewModel.baseParam.copy(
+                                    seed = it.seed
+                                )
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.applied_seed_value),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    )
+                    Divider()
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_photo_album),
+                                contentDescription = null
+                            )
+                        },
+                        text = { Text(stringResource(R.string.add_to_gallery)) },
+                        onClick = {
+                            isActionMenuShow = false
+                            favouriteImage(it)
+                        }
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_download),
+                                contentDescription = null
+                            )
+                        },
+                        text = { Text(stringResource(R.string.save_to_device_gallery)) },
+                        onClick = {
+                            isActionMenuShow = false
+                            saveImageToDeviceGallery(it)
                         }
                     )
                 }

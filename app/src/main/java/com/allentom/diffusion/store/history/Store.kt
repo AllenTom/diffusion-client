@@ -13,16 +13,15 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.AppDatabaseHelper
+import com.allentom.diffusion.store.ModelEntity
+import com.allentom.diffusion.store.ModelStore
 import com.allentom.diffusion.store.prompt.EmbeddingEntity
 import com.allentom.diffusion.store.prompt.EmbeddingPrompt
 import com.allentom.diffusion.store.prompt.LoraPrompt
 import com.allentom.diffusion.store.prompt.LoraPromptEntity
-import com.allentom.diffusion.store.ModelEntity
-import com.allentom.diffusion.store.ModelStore
 import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.store.prompt.SavePrompt
 import com.allentom.diffusion.ui.screens.home.tabs.draw.AdetailerParam
-import com.allentom.diffusion.ui.screens.home.tabs.draw.BaseParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ControlNetParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
@@ -36,7 +35,14 @@ data class ImageHistory(
     val seed: Long,
     val favourite: Boolean = false,
     val historyId: Long
-) : Serializable
+) : Serializable {
+    fun saveToDeviceGallery(context: Context) {
+        Util.copyImageFileToGallery(
+            context, path,
+            "${Util.randomString(4)}_${name}"
+        )
+    }
+}
 
 data class SaveHistory(
     val id: Long = 0,
