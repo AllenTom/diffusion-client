@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -109,10 +110,14 @@ fun GenProgressGrid(
             context.getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT
         ).show()
     }
-    fun saveToDeviceGallery(imageItem: GenImageItem){
+
+    fun saveToDeviceGallery(imageItem: GenImageItem) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                Util.saveImageBase64ToGallery(imageItem.getDisplayImageBase64()!!,imageItem.imageName)
+                Util.saveImageBase64ToGallery(
+                    imageItem.getDisplayImageBase64()!!,
+                    imageItem.imageName
+                )
             }
             Toast.makeText(
                 context,
@@ -397,19 +402,6 @@ fun GenProgressGrid(
                             DropdownMenuItem(
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_photo_album),
-                                        contentDescription = null
-                                    )
-                                },
-                                text = { Text(stringResource(R.string.add_to_gallery)) },
-                                onClick = {
-                                    isActionMenuShow = false
-                                    favouriteImage(imgItem)
-                                }
-                            )
-                            DropdownMenuItem(
-                                leadingIcon = {
-                                    Icon(
                                         imageVector = Icons.Default.Send,
                                         contentDescription = null
                                     )
@@ -445,6 +437,49 @@ fun GenProgressGrid(
                             DropdownMenuItem(
                                 leadingIcon = {
                                     Icon(
+                                        imageVector = Icons.Default.Send,
+                                        contentDescription = null
+                                    )
+
+                                },
+                                text = { Text(stringResource(R.string.use_this_seed)) },
+                                onClick = {
+                                    isActionMenuShow = false
+                                    scope.launch {
+                                        displayTask.let {
+                                            imgItem.seed.let {
+                                                DrawViewModel.baseParam =
+                                                    DrawViewModel.baseParam.copy(
+                                                        seed = it
+                                                    )
+                                            }
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.applied_seed_value),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+
+                                    }
+                                }
+                            )
+                            Divider()
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_photo_album),
+                                        contentDescription = null
+                                    )
+                                },
+                                text = { Text(stringResource(R.string.add_to_gallery)) },
+                                onClick = {
+                                    isActionMenuShow = false
+                                    favouriteImage(imgItem)
+                                }
+                            )
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
                                         imageVector = downloadIcon,
                                         contentDescription = null
                                     )
@@ -455,6 +490,7 @@ fun GenProgressGrid(
                                     saveToDeviceGallery(imgItem)
                                 }
                             )
+
                         }
                     }
                 }

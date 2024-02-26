@@ -302,4 +302,6 @@
     <string name="task_in_queue">in queue</string>
     <string name="add_to_queue">Add to queue</string>
     <string name="save_to_device_gallery">Save to device gallery</string>
+    <string name="applied_seed_value">Applied seed value</string>
+    <string name="use_this_seed">Use this seed</string>
 </resources>
