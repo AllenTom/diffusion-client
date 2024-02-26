@@ -299,7 +299,6 @@ fun TaggerScreen() {
                                     Text(stringResource(R.string.select_image))
                                 }
                             }
-
                         }
                     }
                 }

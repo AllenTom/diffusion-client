@@ -67,6 +67,13 @@ fun TabTools(navController: NavController) {
             headlineContent = { Text(text = stringResource(id = R.string.reactor)) },
             leadingContent = { Icon(swapIcon, contentDescription = "Reactor") }
         )
+        ListItem(
+            modifier = Modifier.clickable {
+                navController.navigate(Screens.Tagger.route)
+            },
+            headlineContent = { Text(text = stringResource(id = R.string.tools_caption)) },
+            leadingContent = { Icon(swapIcon, contentDescription = "Caption") }
+        )
         Divider()
         ListItem(
             modifier = Modifier.clickable {
