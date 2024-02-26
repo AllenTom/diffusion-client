@@ -333,7 +333,7 @@ data class BaseParam(
     val width: Int = 300,
     val height: Int = 512,
     val steps: Int = 20,
-    val niter: Int = 3,
+    val niter: Int = 1,
     val samplerName: String = "DDIM",
     val cfgScale: Float = 7f,
     val seed: Int = -1,
@@ -665,7 +665,7 @@ class GenerateTask(
                 loraPrompt = baseParam.loraPrompt,
                 embeddingPrompt = baseParam.embeddingPrompt,
                 hrParam = hiresFixParam,
-                savedImg2ImgParam = savedImg2ImgParam,
+                savedImg2ImgParam = if (generateMode == "img2img") savedImg2ImgParam else null,
                 controlNetParam = controlNetParam,
                 regionRatio = regionPromptParam.dividerText,
                 regionCount = regionPromptParam.regionCount,
@@ -675,7 +675,7 @@ class GenerateTask(
                 enableRefiner = baseParam.enableRefiner,
                 refinerModelName = baseParam.refinerModel,
                 refinerSwitchAt = baseParam.refinerSwitchAt,
-                reactorParam = reactorParam,
+                reactorParam = if (reactorParam.enabled) reactorParam else null,
                 adetailerParam = adetailerParam,
                 xyzParam = xyzParam
             )

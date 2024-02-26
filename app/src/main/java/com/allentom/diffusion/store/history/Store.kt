@@ -351,7 +351,6 @@ object HistoryStore {
 
         // save reactor
         if (history.reactorParam?.enabled == true) {
-
             if (history.reactorParam?.singleImageResult != null && history.reactorParam?.singleImageResultFilename != null) {
                 val pair = Util.saveReactorSourceFile(
                     context,
@@ -376,7 +375,6 @@ object HistoryStore {
                 reactorUpscaler = history.reactorParam!!.upscaler,
                 reactorUpscalerVisibility = history.reactorParam!!.upscalerVisibility
             )
-
         }
         val savedHistoryId = database.historyDao().insert(
             historyEntity
