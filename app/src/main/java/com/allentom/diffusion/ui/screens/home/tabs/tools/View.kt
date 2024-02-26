@@ -72,7 +72,12 @@ fun TabTools(navController: NavController) {
                 navController.navigate(Screens.Tagger.route)
             },
             headlineContent = { Text(text = stringResource(id = R.string.tools_caption)) },
-            leadingContent = { Icon(swapIcon, contentDescription = "Caption") }
+            leadingContent = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_caption),
+                    contentDescription = "Caption"
+                )
+            }
         )
         Divider()
         ListItem(
