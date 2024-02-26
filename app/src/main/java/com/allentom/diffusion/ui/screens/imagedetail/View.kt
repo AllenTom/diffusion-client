@@ -282,8 +282,6 @@ fun ImageDetail(id: String, navController: NavController) {
                                 }
                                 Spacer(modifier = Modifier.height(64.dp))
                             }
-
-
                         }
                     }
 

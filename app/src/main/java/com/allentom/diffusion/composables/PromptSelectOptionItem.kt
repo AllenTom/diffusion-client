@@ -25,7 +25,7 @@ fun PromptSelectOptionItem(
     }
 ) {
     var showDialog by remember { mutableStateOf(false) }
-
+    val isWideDisplay = IsWideWindow()
     ListItem(
         modifier = Modifier.clickable { showDialog = true },
         headlineContent = { Text(text = label) },
@@ -38,6 +38,7 @@ fun PromptSelectOptionItem(
         PromptSelectDialog(
             promptList = value,
             title = title,
+            isWideDisplay = isWideDisplay,
             onDismiss = { showDialog = false },
             onValueChange = { prompts, region,template ->
                 showDialog = false

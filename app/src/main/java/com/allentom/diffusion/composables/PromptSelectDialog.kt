@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -57,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -67,6 +69,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
+import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.history.HistoryStore
 import com.allentom.diffusion.store.history.TemplateWithItems
 import com.allentom.diffusion.store.history.getAllTemplates
@@ -94,6 +97,7 @@ import kotlin.math.min
 fun PromptSelectDialog(
     promptList: List<Prompt>,
     title: String,
+    isWideDisplay: Boolean = false,
     onDismiss: () -> Unit,
     onValueChange: (List<Prompt>, RegionPromptParam?, TemplateParam?) -> Unit,
     regionParam: RegionPromptParam? = null,
@@ -202,6 +206,7 @@ fun PromptSelectDialog(
                 ) {
                     if (selectIndex == 0) {
                         PromptEditPanel(
+                            isWideDisplay = isWideDisplay,
                             selectedPromptList = selectedPromptList,
                             onUpdatePromptList = {
                                 selectedPromptList = it
@@ -225,6 +230,7 @@ fun PromptSelectDialog(
                         inputRegionParam?.let {
                             RegionalPrompterPanel(
                                 it,
+                                isWideDisplay = isWideDisplay,
                                 onValueChange = { newVal ->
                                     val totalRegion = newVal.getTotalRegionCount()
                                     selectedPromptList = selectedPromptList.map { prompt ->
@@ -260,6 +266,7 @@ fun PromptSelectDialog(
                         TemplatePrompt(
                             regionParam = inputRegionParam,
                             prompts = selectedPromptList,
+                            isWideDisplay = isWideDisplay,
                             onUpdated = {
                                 selectedPromptList = it
                             },
@@ -279,6 +286,7 @@ fun PromptSelectDialog(
 @Composable
 fun PromptEditPanel(
     selectedPromptList: List<Prompt>,
+    isWideDisplay: Boolean = false,
     onUpdatePromptList: (List<Prompt>) -> Unit,
     inputRegionParam: RegionPromptParam?
 ) {
@@ -315,248 +323,286 @@ fun PromptEditPanel(
         )
     }
 
-//    LaunchedEffect(Unit) {
-//        inputRegionParam?.let {
-//            var newRegionTree = parseRegionText(it.dividerText)
-//            newRegionTree = reIndexRegionTree(newRegionTree, useCommon = it.useCommon)
-//            regionTree = newRegionTree
-//        }
-//
-//    }
-
     var editMode by remember {
         mutableStateOf(false)
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        if (inputRegionParam?.enable == true) {
-            regionTree?.let {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    RegionDisplayView(
-                        regionTree = it,
+
+    @Composable
+    fun firstContent() {
+        Column {
+            if (inputRegionParam?.enable == true) {
+                regionTree?.let {
+                    Box(
                         modifier = Modifier
-                            .width(aspectRatio.first.dp)
-                            .height(aspectRatio.second.dp),
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        RegionDisplayView(
+                            regionTree = it,
+                            modifier = Modifier
+                                .width(aspectRatio.first.dp)
+                                .height(aspectRatio.second.dp),
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = {
+                    editMode = !editMode
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                IconButton(onClick = {
+                    currentSelectPromptIndex = null
+                    onUpdatePromptList(emptyList())
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
                     )
                 }
             }
-        }
-        if (selectPromptIndex != null) {
-            selectedPromptList.find { it.randomId == selectPromptIndex }
-                ?.let { prompt ->
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        FilterChip(
-                            selected = currentSelectPromptIndex == prompt.randomId,
-                            onClick = {
-                            },
-                            label = {
-                                Column(
-                                    modifier = Modifier.padding(4.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = prompt.piority.toString())
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Column(
-                                            modifier = Modifier.padding(4.dp)
-                                        ) {
-                                            Text(
-                                                text = prompt.getTranslationText(),
-                                                fontSize = 12.sp,
-                                                color = MaterialTheme.colorScheme.onBackground.copy(
-                                                    alpha = 0.6f
-                                                )
-                                            )
-                                            Text(prompt.text)
-
-                                        }
-
-                                    }
-
-
-                                }
-                            },
-                            leadingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        updateListByPrompt(prompt) {
-                                            it.copy(
-                                                piority = it.piority + 1
-                                            )
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowUp,
-                                        contentDescription = null,
-                                    )
-
-                                }
-                            },
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        updateListByPrompt(prompt) {
-                                            if (it == prompt) {
-                                                if (prompt.piority == 0) {
-                                                    return@updateListByPrompt it
-                                                }
-                                                return@updateListByPrompt it.copy(
-                                                    piority = it.piority - 1
-                                                )
-                                            } else {
-                                                it
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowDown,
-                                        contentDescription = null,
-                                    )
-                                }
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (inputRegionParam != null && inputRegionParam.enable) {
+                    for (regionIndex in 0 until inputRegionParam.getTotalRegionCount()) {
+                        if (inputRegionParam.useCommon && regionIndex == 0) {
+                            Text(text = stringResource(id = R.string.common_region))
+                        } else {
+                            Text(
+                                text = stringResource(
+                                    id = R.string.region,
+                                    regionIndex.toString()
+                                )
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        PromptEditContainer(promptList = selectedPromptList.filter {
+                            it.regionIndex == regionIndex
+                        }, onPromptClick = {
+                            currentSelectPromptIndex = it.randomId
+                        }, isItemSelected = {
+                            currentSelectPromptIndex == it.randomId
+                        }, onPromptDelete = { prompt ->
+                            if (currentSelectPromptIndex == prompt.randomId) {
+                                currentSelectPromptIndex = null
                             }
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
+                            onUpdatePromptList(
+                                selectedPromptList.filter { it != prompt }
+                            )
 
-                    inputRegionParam?.let { regionParam ->
-                        if (regionParam.enable) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState()),
-                            ) {
-                                for (regionIndex in 0 until regionParam.getTotalRegionCount()) {
-                                    FilterChip(
-                                        selected = prompt.regionIndex == regionIndex,
+                        }, editMode = editMode
+                        )
+                    }
+                } else {
+                    PromptEditContainer(
+                        promptList = selectedPromptList,
+                        onPromptClick = {
+                            currentSelectPromptIndex = it.randomId
+                        },
+                        isItemSelected = {
+                            currentSelectPromptIndex == it.randomId
+                        },
+                        onPromptDelete = { prompt ->
+                            if (currentSelectPromptIndex == prompt.randomId) {
+                                currentSelectPromptIndex = null
+                            }
+                            onUpdatePromptList(
+                                selectedPromptList.filter { it != prompt }
+                            )
+
+                        },
+                        editMode = editMode
+                    )
+                }
+
+            }
+        }
+    }
+
+    @Composable
+    fun secondContent() {
+        Column(
+            modifier = Modifier.thenIf(
+                isWideDisplay,
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ).thenIf(
+                !isWideDisplay,
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 300.dp)
+                    .verticalScroll(rememberScrollState())
+
+            )
+        ) {
+            if (selectPromptIndex != null) {
+                selectedPromptList.find { it.randomId == selectPromptIndex }
+                    ?.let { prompt ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Divider()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            FilterChip(
+                                selected = currentSelectPromptIndex == prompt.randomId,
+                                onClick = {
+                                },
+                                label = {
+                                    Column(
+                                        modifier = Modifier.padding(4.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(text = prompt.piority.toString())
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Column(
+                                                modifier = Modifier.padding(4.dp)
+                                            ) {
+                                                Text(
+                                                    text = prompt.getTranslationText(),
+                                                    fontSize = 12.sp,
+                                                    color = MaterialTheme.colorScheme.onBackground.copy(
+                                                        alpha = 0.6f
+                                                    )
+                                                )
+                                                Text(prompt.text)
+
+                                            }
+
+                                        }
+
+
+                                    }
+                                },
+                                leadingIcon = {
+                                    IconButton(
                                         onClick = {
                                             updateListByPrompt(prompt) {
                                                 it.copy(
-                                                    regionIndex = regionIndex
+                                                    piority = it.piority + 1
                                                 )
                                             }
-                                            currentSelectPromptIndex =
-                                                prompt.copy(regionIndex = regionIndex).randomId
-                                        },
-                                        label = {
-                                            if (regionParam.useCommon && regionIndex == 0) {
-                                                Text(stringResource(R.string.common_region))
-                                            } else {
-                                                Text(
-                                                    stringResource(
-                                                        id = R.string.region,
-                                                        regionIndex.toString()
-                                                    )
-                                                )
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowUp,
+                                            contentDescription = null,
+                                        )
 
+                                    }
+                                },
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            updateListByPrompt(prompt) {
+                                                if (it == prompt) {
+                                                    if (prompt.piority == 0) {
+                                                        return@updateListByPrompt it
+                                                    }
+                                                    return@updateListByPrompt it.copy(
+                                                        piority = it.piority - 1
+                                                    )
+                                                } else {
+                                                    it
+                                                }
                                             }
-                                        })
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowDown,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+
+                        inputRegionParam?.let { regionParam ->
+                            if (regionParam.enable) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                ) {
+                                    for (regionIndex in 0 until regionParam.getTotalRegionCount()) {
+                                        FilterChip(
+                                            selected = prompt.regionIndex == regionIndex,
+                                            onClick = {
+                                                updateListByPrompt(prompt) {
+                                                    it.copy(
+                                                        regionIndex = regionIndex
+                                                    )
+                                                }
+                                                currentSelectPromptIndex =
+                                                    prompt.copy(regionIndex = regionIndex).randomId
+                                            },
+                                            label = {
+                                                if (regionParam.useCommon && regionIndex == 0) {
+                                                    Text(stringResource(R.string.common_region))
+                                                } else {
+                                                    Text(
+                                                        stringResource(
+                                                            id = R.string.region,
+                                                            regionIndex.toString()
+                                                        )
+                                                    )
+
+                                                }
+                                            })
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
                                 }
                             }
                         }
-                    }
 
-                }
+                    }
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+    }
+    if (!isWideDisplay) {
+        Column {
+            secondContent()
+            firstContent()
+        }
+    } else {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            IconButton(onClick = {
-                editMode = !editMode
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null,
-                )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                firstContent()
+
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            IconButton(onClick = {
-                currentSelectPromptIndex = null
-                onUpdatePromptList(emptyList())
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                secondContent()
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Divider()
-        Spacer(modifier = Modifier.height(8.dp))
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-        ) {
-            if (inputRegionParam != null && inputRegionParam.enable) {
-                for (regionIndex in 0 until inputRegionParam.getTotalRegionCount()) {
-                    if (inputRegionParam.useCommon && regionIndex == 0) {
-                        Text(text = stringResource(id = R.string.common_region))
-                    } else {
-                        Text(
-                            text = stringResource(
-                                id = R.string.region,
-                                regionIndex.toString()
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    PromptEditContainer(promptList = selectedPromptList.filter {
-                        it.regionIndex == regionIndex
-                    }, onPromptClick = {
-                        currentSelectPromptIndex = it.randomId
-                    }, isItemSelected = {
-                        currentSelectPromptIndex == it.randomId
-                    }, onPromptDelete = { prompt ->
-                        if (currentSelectPromptIndex == prompt.randomId) {
-                            currentSelectPromptIndex = null
-                        }
-                        onUpdatePromptList(
-                            selectedPromptList.filter { it != prompt }
-                        )
 
-                    }, editMode = editMode
-                    )
-                }
-            } else {
-                PromptEditContainer(
-                    promptList = selectedPromptList,
-                    onPromptClick = {
-                        currentSelectPromptIndex = it.randomId
-                    },
-                    isItemSelected = {
-                        currentSelectPromptIndex == it.randomId
-                    },
-                    onPromptDelete = { prompt ->
-                        if (currentSelectPromptIndex == prompt.randomId) {
-                            currentSelectPromptIndex = null
-                        }
-                        onUpdatePromptList(
-                            selectedPromptList.filter { it != prompt }
-                        )
-
-                    },
-                    editMode = editMode
-                )
-            }
-
-        }
     }
 
 
@@ -882,6 +928,7 @@ fun main() {
 @Composable
 fun RegionalPrompterPanel(
     regionParam: RegionPromptParam,
+    isWideDisplay: Boolean = false,
     onValueChange: (RegionPromptParam) -> Unit = {},
     onUseCommonChange: (Boolean) -> Unit = {}
 ) {
@@ -1042,11 +1089,9 @@ fun RegionalPrompterPanel(
             onRegionTreeUpdate()
         }
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
+
+    @Composable
+    fun firstContent() {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1056,7 +1101,62 @@ fun RegionalPrompterPanel(
                 onValueChange(regionParam.copy(enable = it))
             })
         }
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = regionParam.dividerText, onValueChange = {
+                regionTree = parseRegionText(it)
+                reIndexRegionTree(regionTree, regionParam.useCommon)
+                val newRegionCount = getRegionCount(regionTree)
+                onValueChange(
+                    regionParam.copy(
+                        dividerText = it,
+                        regionCount = newRegionCount
+                    )
+                )
+                inputRegionCount = newRegionCount.toString()
+            }, label = {
+                Text(text = stringResource(R.string.region_divider_ratio))
+            }
+        )
         Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = inputRegionCount,
+            onValueChange = { inputVal ->
+                inputRegionCount = inputVal
+                try {
+                    onValueChange(regionParam.copy(regionCount = inputVal.toInt()))
+                } catch (e: Exception) {
+
+                }
+
+            },
+            label = {
+                Text(text = stringResource(R.string.region_count))
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            enabled = false
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = stringResource(R.string.region_usecommon), modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
+            Switch(
+                checked = regionParam.useCommon,
+                onCheckedChange = {
+                    onUseCommonChange(it)
+                    reIndexRegionTree(regionTree, it)
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun secondScreen() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -1069,7 +1169,8 @@ fun RegionalPrompterPanel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp),
+                .height(220.dp)
+                .background(color = Color.Black),
             contentAlignment = Alignment.Center
         ) {
             RegionDisplayView(
@@ -1192,58 +1293,32 @@ fun RegionalPrompterPanel(
             }
 
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = regionParam.dividerText, onValueChange = {
-                regionTree = parseRegionText(it)
-                reIndexRegionTree(regionTree, regionParam.useCommon)
-                val newRegionCount = getRegionCount(regionTree)
-                onValueChange(
-                    regionParam.copy(
-                        dividerText = it,
-                        regionCount = newRegionCount
-                    )
-                )
-                inputRegionCount = newRegionCount.toString()
-            }, label = {
-                Text(text = stringResource(R.string.region_divider_ratio))
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        if (!isWideDisplay) {
+            firstContent()
+            Spacer(modifier = Modifier.height(8.dp))
+            secondScreen()
+        } else {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    firstContent()
+                }
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    secondScreen()
+                }
             }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = inputRegionCount,
-            onValueChange = { inputVal ->
-                inputRegionCount = inputVal
-                try {
-                    onValueChange(regionParam.copy(regionCount = inputVal.toInt()))
-                } catch (e: Exception) {
-
-                }
-
-            },
-            label = {
-                Text(text = stringResource(R.string.region_count))
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            enabled = false
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = stringResource(R.string.region_usecommon), modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(8.dp))
-            Switch(
-                checked = regionParam.useCommon,
-                onCheckedChange = {
-                    onUseCommonChange(it)
-                    reIndexRegionTree(regionTree, it)
-                }
-            )
         }
     }
 }
@@ -1321,6 +1396,7 @@ data class TemplateItem(
 fun TemplatePrompt(
     regionParam: RegionPromptParam?,
     prompts: List<Prompt> = emptyList(),
+    isWideDisplay: Boolean = false,
     templateParam: TemplateParam = TemplateParam(),
     onUpdateTemplate: (TemplateParam) -> Unit = {},
     onUpdated: (List<Prompt>) -> Unit = {}
@@ -1605,6 +1681,122 @@ fun TemplatePrompt(
             }
         }
     }
+    @Composable
+    fun templateFirst() {
+        Column(
+            modifier = Modifier
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = stringResource(id = R.string.template))
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = {
+                    isEditTemplateMode = !isEditTemplateMode
+                }) {
+                    if (isEditTemplateMode) {
+                        Icon(Icons.Default.Close, "")
+                    } else {
+                        Icon(Icons.Default.Edit, "")
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .thenIf(isWideDisplay, Modifier.weight(1f))
+                    .thenIf(!isWideDisplay, Modifier.height(200.dp))
+                    .verticalScroll(rememberScrollState())
+            ) {
+                TemplateItemContainer(
+                    templateItems = selectedTemplate,
+                    closeable = isEditTemplateMode
+                ) {
+                    updateSelectedTemplate(selectedTemplate.filter { it1 -> it1.id != it.id })
+                }
+            }
+        }
+
+    }
+
+    @Composable
+    fun templateSecond() {
+        Column(
+            modifier = Modifier
+        ) {
+            Text(text = stringResource(R.string.template_slot))
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                templateSlotList.forEach {
+                    FilterChip(
+                        selected = it == selectedTemplateSlot,
+                        onClick = {
+                            selectedTemplateSlot = it
+                            refreshPromptList(it)
+                        },
+                        label = {
+                            Text(text = it)
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = stringResource(R.string.template_category))
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                slotCategoryList.forEach {
+                    FilterChip(
+                        selected = it == selectedCategory,
+                        onClick = {
+
+                        },
+                        label = {
+                            Text(text = it, modifier = Modifier.combinedClickable(
+                                onClick = {
+                                    switchCategory(it)
+                                },
+                                onLongClick = {
+                                    updateSelectedTemplate(
+                                        selectedTemplate + TemplateItem.fromCategory(
+                                            it,
+                                            selectedTemplateSlot!!
+                                        )
+                                    )
+                                }
+                            ))
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                PromptContainer(
+                    promptList = displayPromptList,
+                    onlyTranslate = true,
+                    onClickPrompt = {
+                        updateSelectedTemplate(
+                            selectedTemplate + TemplateItem.fromPrompt(it)
+                        )
+                    }
+                )
+            }
+        }
+
+    }
     Column {
         Row(
             modifier = Modifier
@@ -1644,107 +1836,31 @@ fun TemplatePrompt(
         Spacer(modifier = Modifier.height(8.dp))
         when (currentTab) {
             0 -> {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = stringResource(id = R.string.template))
-                    Spacer(modifier = Modifier.weight(1f))
-                    IconButton(onClick = {
-                        isEditTemplateMode = !isEditTemplateMode
-                    }) {
-                        if (isEditTemplateMode) {
-                            Icon(Icons.Default.Close, "")
-                        } else {
-                            Icon(Icons.Default.Edit, "")
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    TemplateItemContainer(
-                        templateItems = selectedTemplate,
-                        closeable = isEditTemplateMode
-                    ) {
-                        updateSelectedTemplate(selectedTemplate.filter { it1 -> it1.id != it.id })
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Divider()
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = stringResource(R.string.template_slot))
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.horizontalScroll(rememberScrollState())
-                ) {
-                    templateSlotList.forEach {
-                        FilterChip(
-                            selected = it == selectedTemplateSlot,
-                            onClick = {
-                                selectedTemplateSlot = it
-                                refreshPromptList(it)
-                            },
-                            label = {
-                                Text(text = it)
-                            }
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = stringResource(R.string.template_category))
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.horizontalScroll(rememberScrollState())
-                ) {
-                    slotCategoryList.forEach {
-                        FilterChip(
-                            selected = it == selectedCategory,
-                            onClick = {
+                if (!isWideDisplay) {
+                    Column {
+                        templateFirst()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        templateSecond()
 
-                            },
-                            label = {
-                                Text(text = it, modifier = Modifier.combinedClickable(
-                                    onClick = {
-                                        switchCategory(it)
-                                    },
-                                    onLongClick = {
-                                        updateSelectedTemplate(
-                                            selectedTemplate + TemplateItem.fromCategory(
-                                                it,
-                                                selectedTemplateSlot!!
-                                            )
-                                        )
-                                    }
-                                ))
-                            }
-                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            templateFirst()
+                        }
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            templateSecond()
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    PromptContainer(
-                        promptList = displayPromptList,
-                        onlyTranslate = true,
-                        onClickPrompt = {
-                            updateSelectedTemplate(
-                                selectedTemplate + TemplateItem.fromPrompt(it)
-                            )
-                        }
-                    )
-                }
+
             }
 
             1 -> {
