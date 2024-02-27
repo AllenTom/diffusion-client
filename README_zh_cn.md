@@ -38,6 +38,15 @@
   <img src="./assets/foldable_prompt.png" width="150" /> 
 </p>
 
+应用中的一些界面也针对平板电脑设备做了界面上的适配
+
+<p float="left">
+  <img src="./assets/tablet_draw_preview.jpg" width="150" />
+  <img src="./assets/tablet_image_gallery.jpg" width="150" /> 
+  <img src="./assets/tablet_progress_grid.jpg" width="150" /> 
+</p>
+
+
 ## 需求
 应用基于 [stable diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)，要使用应用，请先启动服务。[详见文档](https://github.com/AllenTom/diffusion-client/wiki/QuickStart-%E2%80%90-zh_cn#%E5%90%AF%E5%8A%A8-stable-diffusion-web-ui-%E6%9C%8D%E5%8A%A1)
 

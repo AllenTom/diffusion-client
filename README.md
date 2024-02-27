@@ -40,6 +40,14 @@ If you are a foldable device user like the developer, some interfaces in the app
   <img src="./assets/foldable_prompt.png" width="150" /> 
 </p>
 
+Some interfaces in application is also optimized for tablet devices
+
+<p float="left">
+  <img src="./assets/tablet_draw_preview.jpg" width="150" />
+  <img src="./assets/tablet_image_gallery.jpg" width="150" /> 
+  <img src="./assets/tablet_progress_grid.jpg" width="150" /> 
+</p>
+
 ## TODO
 - complete app document
 - adapt video generate plugin
