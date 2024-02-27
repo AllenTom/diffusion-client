@@ -31,18 +31,20 @@ fun SeedOptionItem(
     label: String,
     value: Long,
     title: String = label,
+    fullWidth: Boolean = true,
     onValueChange: (Long) -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var inputSeed by remember { mutableStateOf(value) }
     val iconDice = ImageVector.vectorResource(id = R.drawable.ic_dice)
     var inputTextFiledValue by remember { mutableStateOf(value.toString()) }
-
-    ListItem(
-        modifier = Modifier.clickable { showDialog = true },
-        headlineContent = { Text(text = label) },
-        supportingContent = { Text(text = value.toString()) }
-    )
+    OptionDisplay(
+        label = label,
+        value = value.toString(),
+        fullWidth = fullWidth
+    ) {
+        showDialog = true
+    }
     fun rollDice():Long{
         return (0..100000000).random().toLong()
     }

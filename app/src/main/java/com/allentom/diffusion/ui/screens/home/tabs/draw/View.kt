@@ -3,7 +3,6 @@ package com.allentom.diffusion.ui.screens.home.tabs.draw
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,12 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,8 +37,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
+import com.allentom.diffusion.composables.DetectDeviceType
+import com.allentom.diffusion.composables.DeviceType
 import com.allentom.diffusion.composables.ImageBase64PreviewDialog
-import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.ui.parts.GenProgressGrid
 import com.allentom.diffusion.ui.screens.home.tabs.draw.panels.ParamsModalBottomSheet
 import com.allentom.diffusion.ui.screens.home.tabs.draw.panels.ParamsPanel
@@ -89,7 +87,7 @@ fun DrawScreen() {
     var isImagePreviewerOpen by remember {
         mutableStateOf(false)
     }
-    val isWideDisplay = IsWideWindow()
+    val deviceType = DetectDeviceType()
 
     if (DrawViewModel.isSwitchingModel) {
         AlertDialog(
@@ -147,7 +145,8 @@ fun DrawScreen() {
                     GenProgressGrid(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f)
+                            .weight(1f),
+                        horizonLayout = deviceType == DeviceType.Tablet
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Box(
@@ -155,7 +154,7 @@ fun DrawScreen() {
                             .fillMaxWidth()
                     ) {
                         Row {
-                            if (!isWideDisplay) {
+                            if (deviceType == DeviceType.Phone) {
                                 Button(
                                     onClick = {
                                         isParamDisplayed = true
@@ -164,7 +163,6 @@ fun DrawScreen() {
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                             }
-
                             Button(
                                 modifier = Modifier.weight(1f),
                                 onClick = {
@@ -204,14 +202,17 @@ fun DrawScreen() {
                 )
             }
         }
-        if (isWideDisplay) {
+        if (deviceType != DeviceType.Phone) {
             Box(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(
+                        if (deviceType == DeviceType.Tablet) 0.75f
+                        else 1f
+                    )
                     .fillMaxWidth()
 
             ) {
-                isWideDisplay.takeIf { it }.let {
+                (deviceType != DeviceType.Phone).takeIf { it }.let {
                     ParamsPanel(
                         onSwitchVae = {
                             scope.launch {

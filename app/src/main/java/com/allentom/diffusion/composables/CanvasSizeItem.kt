@@ -1,12 +1,9 @@
 package com.allentom.diffusion.composables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,16 +14,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,12 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.allentom.diffusion.R
@@ -52,6 +44,7 @@ fun CanvasSizeItem(
     width: Int,
     height: Int,
     label: String,
+    fullWidth: Boolean = true,
     onConfirm: (Int, Int) -> Unit
 ) {
     var isPickupDialogShow by remember { mutableStateOf(false) }
@@ -70,19 +63,13 @@ fun CanvasSizeItem(
     val lockIcon = ImageVector.vectorResource(id = R.drawable.ic_lock)
     val unlockIcon = ImageVector.vectorResource(id = R.drawable.ic_unlock)
     val pickRatios = listOf("1:1", "4:3", "3:2", "16:9", "16:10", "21:9")
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                isPickupDialogShow = true
-            },
-        headlineContent = {
-            Text(text = label)
-        },
-        supportingContent = {
-            Text(text = "$width px x $height px")
-        }
-    )
+    OptionDisplay(
+        label = label,
+        value = "$width px x $height px",
+        fullWidth = fullWidth
+    ) {
+        isPickupDialogShow = true
+    }
     if (isPickupDialogShow) {
         AlertDialog(
             onDismissRequest = { isPickupDialogShow = false },

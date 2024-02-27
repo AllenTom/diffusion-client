@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.R
+import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.ui.DrawBarViewModel
 import com.allentom.diffusion.ui.parts.GenProgressGrid
@@ -59,6 +60,8 @@ import kotlinx.coroutines.launch
 fun DrawBar(
     extraContent: (@Composable () -> Unit)? = null
 ) {
+    val deviceType = DetectDeviceType()
+    val isTablet = deviceType == DeviceType.Tablet
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isParamsModalShow by remember { mutableStateOf(false) }
@@ -84,7 +87,12 @@ fun DrawBar(
         }
 
     if (isParamOpen) {
-        ModalBottomSheet(onDismissRequest = {
+        ModalBottomSheet(
+            modifier = Modifier.thenIf(
+                isTablet,
+                Modifier.fillMaxWidth()
+            ),
+            onDismissRequest = {
             isParamOpen = false
         }) {
             Column(
@@ -234,7 +242,7 @@ fun DrawBar(
                             .fillMaxWidth()
                             .weight(1f)
                     ) {
-                        GenProgressGrid(modifier = Modifier.fillMaxSize())
+                        GenProgressGrid(modifier = Modifier.fillMaxSize(), horizonLayout = isTablet)
                     }
 
                     1 ->
