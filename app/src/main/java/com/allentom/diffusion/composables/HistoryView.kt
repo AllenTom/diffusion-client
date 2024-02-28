@@ -480,6 +480,10 @@ fun HistoryView(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        ParamItem(label = stringResource(id = R.string.controlnet_controltype),
+                            value = { Text(text = it.controlType) })
+                        ParamItem(label = stringResource(id = R.string.controlnet_preprocessor),
+                            value = { Text(text = it.preprocessor) })
                         ParamItem(label = stringResource(id = R.string.param_guidance_start),
                             value = { Text(text = it.guidanceStart.toString()) })
                         ParamItem(label = stringResource(id = R.string.param_guidance_end),
@@ -491,6 +495,9 @@ fun HistoryView(
                             value = { Text(text = it.weight.toString()) })
                         ParamItem(label = stringResource(id = R.string.param_control_model),
                             value = { Text(text = it.model.toString()) })
+                        ParamItem(label = stringResource(id = R.string.controlnet_resizemode),
+                            value = { Text(text = ConstValues.ControlNetResizeModeList[it.resizeMode]) }
+                        )
                     }
                 }
             }

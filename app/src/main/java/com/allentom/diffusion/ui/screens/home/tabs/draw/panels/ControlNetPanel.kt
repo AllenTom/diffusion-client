@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
+import com.allentom.diffusion.api.entity.ControlType
 import com.allentom.diffusion.composables.ImageBase64PickupOptionItem
 import com.allentom.diffusion.composables.SliderOptionItem
 import com.allentom.diffusion.composables.SwitchOptionItem
@@ -133,6 +134,103 @@ fun ControlNetPanel(
                 ) {
                     onIndexUpdate(slot.copy(enabled = it))
                 }
+                ImageBase64PickupOptionItem(
+                    label = stringResource(R.string.param_control_image),
+                    value = slot.inputImage
+                ) { uri, it, _, _, _ ->
+                    onIndexUpdate(slot.copy(inputImage = it, inputImagePath = uri.toString()))
+                }
+                TextPickUpItem(
+                    label = stringResource(R.string.controlnet_controltype),
+                    value = slot.controlType,
+                    options = DrawViewModel.controlNetTypes.keys.toList()
+                ) {
+                    onIndexUpdate(
+                        slot.copy(
+                            controlType = it,
+                            model = DrawViewModel.controlNetTypes[it]?.defaultModel ?: ""
+                        )
+                    )
+                }
+                DrawViewModel.controlNetTypes.get(slot.controlType)?.let { controlType ->
+                    TextPickUpItem(
+                        label = stringResource(R.string.controlnet_preprocessor),
+                        value = slot.preprocessor,
+                        options = controlType.moduleList
+                    ) {
+                        onIndexUpdate(slot.copy(preprocessor = it))
+                    }
+                    controlType.modelList.let { modelList ->
+                        TextPickUpItem(
+                            label = stringResource(R.string.param_control_model),
+                            value = slot.model,
+                            options = modelList
+                        ) {
+                            onIndexUpdate(slot.copy(model = it))
+                        }
+                    }
+                }
+                DrawViewModel.modulesDetailList.get(slot.preprocessor)?.let { moduleDetail ->
+                    moduleDetail.sliders.forEachIndexed { idx, sl ->
+                        if (sl == null) {
+                            return@forEachIndexed
+                        }
+                        when (idx) {
+                            0 -> {
+                                SliderOptionItem(
+                                    value = slot.processorRes,
+                                    onValueChangeFloat = {
+                                        onIndexUpdate(slot.copy(processorRes = it))
+                                    },
+                                    valueRange = sl.min..sl.max,
+                                    label = sl.name,
+                                    steps = sl.step.let {
+                                        if (it == null) {
+                                            return@let 0
+                                        }
+                                        return@let ((sl.max - sl.min) / it).toInt()
+                                    }
+                                )
+                            }
+
+                            1 -> {
+                                SliderOptionItem(
+                                    value = slot.thresholdA,
+                                    onValueChangeFloat = {
+
+                                        onIndexUpdate(slot.copy(thresholdA = it))
+                                    },
+                                    valueRange = sl.min..sl.max,
+                                    label = sl.name,
+                                    steps = sl.step.let {
+                                        if (it == null) {
+                                            return@let 0
+                                        }
+                                        return@let ((sl.max - sl.min) / it).toInt()
+                                    }
+                                )
+                            }
+
+                            2 -> {
+                                SliderOptionItem(
+                                    value = slot.thresholdB,
+                                    onValueChangeFloat = {
+                                        onIndexUpdate(slot.copy(thresholdB = it))
+                                    },
+                                    valueRange = sl.min..sl.max,
+                                    label = sl.name,
+                                    steps = sl.step.let {
+                                        if (it == null) {
+                                            return@let 0
+                                        }
+                                        return@let ((sl.max - sl.min) / it).toInt()
+                                    }
+                                )
+                            }
+                        }
+
+                    }
+                }
                 SliderOptionItem(
                     label = stringResource(R.string.param_guidance_start),
                     value = slot.guidanceStart,
@@ -156,6 +254,19 @@ fun ControlNetPanel(
                 ) {
                     onIndexUpdate(slot.copy(controlMode = ConstValues.ControlNetModeList.indexOf(it)))
                 }
+                TextPickUpItem(
+                    label = stringResource(R.string.controlnet_resizemode),
+                    value = ConstValues.ControlNetResizeModeList[slot.resizeMode],
+                    options = ConstValues.ControlNetResizeModeList
+                ) {
+                    onIndexUpdate(
+                        slot.copy(
+                            resizeMode = ConstValues.ControlNetResizeModeList.indexOf(
+                                it
+                            )
+                        )
+                    )
+                }
                 SliderOptionItem(
                     label = stringResource(R.string.param_control_weight),
                     value = slot.weight,
@@ -164,19 +275,7 @@ fun ControlNetPanel(
                     onValueChangeFloat = {
                         onIndexUpdate(slot.copy(weight = it))
                     })
-                TextPickUpItem(
-                    label = stringResource(R.string.param_control_model),
-                    value = slot.model,
-                    options = DrawViewModel.controlNetModelList
-                ) {
-                    onIndexUpdate(slot.copy(model = it))
-                }
-                ImageBase64PickupOptionItem(
-                    label = stringResource(R.string.param_control_image),
-                    value = slot.inputImage
-                ) { uri, it, _, _, _ ->
-                    onIndexUpdate(slot.copy(inputImage = it, inputImagePath = uri.toString()))
-                }
+
             }
 
         }

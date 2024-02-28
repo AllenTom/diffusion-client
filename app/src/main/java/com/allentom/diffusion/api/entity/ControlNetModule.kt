@@ -28,3 +28,16 @@ data class ControlNetDetectResult(
     val info: String,
     val images: List<String>,
 )
+
+data class ControlType(
+
+    @SerializedName("module_list") var moduleList: ArrayList<String> = arrayListOf(),
+    @SerializedName("model_list") var modelList: ArrayList<String> = arrayListOf(),
+    @SerializedName("default_option") var defaultOption: String? = null,
+    @SerializedName("default_model") var defaultModel: String? = null
+
+)
+
+data class ControlTypesResult(
+    @SerializedName("control_types") var controlTypes: Map<String, ControlType> = mapOf()
+)

@@ -2,6 +2,7 @@ package com.allentom.diffusion.store.history
 
 import android.content.Context
 import android.net.Uri
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -22,15 +23,21 @@ data class ControlNetHistoryEntity(
     val controlNetHistoryId: Long = 0,
     val controlNetId: Long,
     val historyId: Long,
-    val processorRes: Int,
-    val thresholdA: Int,
-    val thresholdB: Int,
+    val processorRes: Float,
+    val thresholdA: Float,
+    val thresholdB: Float,
     val guidanceStart: Float,
     val guidanceEnd: Float,
     val controlMode: Int,
     val weight: Float,
     val model: String,
     val active: Boolean? = false,
+    @ColumnInfo(defaultValue = "All")
+    val controlType: String = "All",
+    @ColumnInfo(defaultValue = "none")
+    val preprocessor:String = "none",
+    @ColumnInfo(defaultValue = "1")
+    val resizeMode: Int = 1,
 ) {
     fun toControlNetSlot(): ControlNetSlot {
         return ControlNetSlot(
@@ -42,7 +49,13 @@ data class ControlNetHistoryEntity(
             controlMode = controlMode,
             weight = weight,
             model = model,
-            enabled = active ?: false
+            enabled = active ?: false,
+            controlType = controlType,
+            preprocessor = preprocessor,
+            processorRes = processorRes,
+            thresholdA = thresholdA,
+            thresholdB = thresholdB,
+            resizeMode = resizeMode
         )
     }
 }
@@ -123,10 +136,13 @@ fun SaveHistory.saveControlNet(context: Context) {
                         controlMode = slot.controlMode,
                         weight = slot.weight,
                         model = slot.model!!,
-                        processorRes = 0,
-                        thresholdA = 0,
-                        thresholdB = 0,
-                        active = slot.enabled
+                        processorRes = slot.processorRes,
+                        thresholdA = slot.thresholdA,
+                        thresholdB = slot.thresholdB,
+                        active = slot.enabled,
+                        controlType = slot.controlType,
+                        preprocessor = slot.preprocessor,
+                        resizeMode = slot.resizeMode
                     )
                 )
             }

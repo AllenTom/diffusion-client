@@ -5,6 +5,8 @@ import com.allentom.diffusion.api.entity.ControlModelList
 import com.allentom.diffusion.api.entity.ControlNetDetectResult
 import com.allentom.diffusion.api.entity.ControlNetModule
 import com.allentom.diffusion.api.entity.ControlNetVersion
+import com.allentom.diffusion.api.entity.ControlType
+import com.allentom.diffusion.api.entity.ControlTypesResult
 import com.allentom.diffusion.api.entity.ExtraSingleImageResult
 import com.allentom.diffusion.api.entity.HelperPing
 import com.allentom.diffusion.api.entity.Img2ImgResult
@@ -43,11 +45,11 @@ data class ControlNetArg(
     @SerializedName("enabled")
     val enabled: Boolean = false,
     @SerializedName("processor_res")
-    val processorRes: Int = 64,
+    val processorRes: Float = 64f,
     @SerializedName("threshold_a")
-    val thresholdA: Int = 64,
+    val thresholdA: Float = 64f,
     @SerializedName("threshold_b")
-    val thresholdB: Int = 64,
+    val thresholdB: Float = 64f,
     @SerializedName("guidance_start")
     val guidanceStart: Float = 0f,
     @SerializedName("guidance_end")
@@ -60,6 +62,10 @@ data class ControlNetArg(
     val inputImage: String = "",
     @SerializedName("model")
     val model: String = "",
+    @SerializedName("module")
+    val module: String = "none",
+    @SerializedName("resize_mode")
+    val resizeMode: Int = 1,
     @Expose
     val inputImagePath: String? = null,
     @Expose
@@ -646,7 +652,8 @@ interface SDWApi {
 
     @GET("/controlnet/module_list")
     suspend fun getControlNetModuleList(): Response<ControlNetModule>
-
+    @GET("/controlnet/control_types")
+    suspend fun getControlNetControlTypes(): Response<ControlTypesResult>
     @POST("/controlnet/detect")
     suspend fun detect(
         @Body request: ControlNetDetectRequest

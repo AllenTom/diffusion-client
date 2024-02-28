@@ -306,4 +306,9 @@
     <string name="use_this_seed">Use this seed</string>
     <string name="random">Random</string>
     <string name="selected_items">Selected %1$s items</string>
+    <string name="controlnet_resizemode">Resize mode</string>
+    <string name="controlnet_preprocessor">Preprocessor</string>
+    <string name="controlnet_controltype">Control type</string>
+    <string name="scale_to_fit_inner_fit">Scale to Fit (Inner Fit)</string>
+    <string name="envelope_outer_fit">Envelope (Outer Fit)</string>
 </resources>

@@ -307,4 +307,9 @@
     <string name="use_this_seed">使用当前种子</string>
     <string name="random">随机</string>
     <string name="selected_items">已选 %1$s 项</string>
+    <string name="controlnet_resizemode">缩放模式</string>
+    <string name="controlnet_preprocessor">预处理器</string>
+    <string name="controlnet_controltype">控制类型</string>
+    <string name="scale_to_fit_inner_fit">裁剪画布适配(向外)</string>
+    <string name="envelope_outer_fit">拓展画布适配(向内)</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.Context
 object ConstValues {
     lateinit var Img2ImgResizeModeList: List<String>
     lateinit var ControlNetModeList: List<String>
+    lateinit var ControlNetResizeModeList: List<String>
     lateinit var MaskInvertOptions: List<String>
     lateinit var InpaintingFillOptions: List<String>
     lateinit var InpaintingFullResOptions: List<String>
@@ -66,6 +67,11 @@ object ConstValues {
         SearchTypeMapping = mapOf(
             "prompt" to context.getString(R.string.param_prompt),
             "style" to context.getString(R.string.styles)
+        )
+        ControlNetResizeModeList = listOf(
+            context.getString(R.string.just_resize),
+            context.getString(R.string.scale_to_fit_inner_fit),
+            context.getString(R.string.envelope_outer_fit),
         )
 
     }

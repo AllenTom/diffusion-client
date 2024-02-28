@@ -39,7 +39,13 @@ fun applyControlParams(
                     weight = it.weight,
                     model = it.model ?: "",
                     inputImage = it.inputImage ?: "",
-                    inputImagePath = it.inputImagePath
+                    inputImagePath = it.inputImagePath,
+                    module = it.preprocessor,
+                    thresholdA = it.thresholdA,
+                    thresholdB = it.thresholdB,
+                    processorRes = it.processorRes,
+                    resizeMode = it.resizeMode
+
                 )
             }
         )

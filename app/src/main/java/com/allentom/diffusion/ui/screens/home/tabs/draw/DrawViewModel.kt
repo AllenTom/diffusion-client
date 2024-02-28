@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -23,9 +24,11 @@ import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.OptionsRequestBody
 import com.allentom.diffusion.api.entity.ApiError
 import com.allentom.diffusion.api.entity.ApiException
+import com.allentom.diffusion.api.entity.ControlType
 import com.allentom.diffusion.api.entity.Embedding
 import com.allentom.diffusion.api.entity.Lora
 import com.allentom.diffusion.api.entity.Model
+import com.allentom.diffusion.api.entity.ModuleDetail
 import com.allentom.diffusion.api.entity.Option
 import com.allentom.diffusion.api.entity.Progress
 import com.allentom.diffusion.api.entity.Sampler
@@ -156,6 +159,32 @@ suspend fun fetchAdetailerModelFromApi(): List<String> {
     return emptyList()
 }
 
+suspend fun fetchControlNetControlTypes(): Map<String, ControlType> {
+    try {
+        val list = getApiClient().getControlNetControlTypes()
+        val body = list.body()
+        if (list.isSuccessful && body != null) {
+            return list.body()!!.controlTypes
+        }
+    } catch (e: java.lang.Exception) {
+        return emptyMap()
+    }
+    return emptyMap()
+}
+
+suspend fun fetchControlNetModuleDetail(): Map<String,ModuleDetail> {
+    try {
+        val list = getApiClient().getControlNetModuleList()
+        val body = list.body()
+        if (list.isSuccessful && body != null) {
+            return list.body()!!.detail
+        }
+    } catch (e: java.lang.Exception) {
+        return emptyMap()
+    }
+    return emptyMap()
+
+}
 data class GenImageItem(
     val imageBase64: String?,
     val progress: Progress?,
@@ -267,7 +296,13 @@ data class ControlNetSlot(
     val weight: Float = 1f,
     val model: String? = null,
     val inputImage: String? = null,
-    val inputImagePath: String? = null
+    val inputImagePath: String? = null,
+    val controlType:String = "All",
+    val preprocessor: String = "none",
+    val processorRes: Float = 64f,
+    val thresholdA : Float = 64f,
+    val thresholdB : Float = 64f,
+    val resizeMode: Int = 1,
 )
 
 data class TemplateParam(
@@ -791,7 +826,11 @@ object DrawViewModel {
     var loraList by mutableStateOf<List<Lora>>(emptyList())
 
     var inputControlNetParams by mutableStateOf(ControlNetParam())
+    var controlNetTypes by mutableStateOf<Map<String, ControlType>>(emptyMap())
     var controlNetModelList by mutableStateOf<List<String>>(emptyList())
+
+    var modulesDetailList by mutableStateOf<Map<String, ModuleDetail>>(emptyMap())
+
 
     var enableControlNetFeat by mutableStateOf(false)
     var generateMode by mutableStateOf("text2img")
@@ -1192,6 +1231,22 @@ object DrawViewModel {
                 getApiClient().getControlModelList().body()?.modelList ?: emptyList()
             endTime = System.currentTimeMillis()
             Log.d("initViewModel", "Call time for getControlModelList: ${endTime - startTime} ms")
+
+            startTime = System.currentTimeMillis()
+            controlNetTypes = fetchControlNetControlTypes()
+            endTime = System.currentTimeMillis()
+            Log.d(
+                "initViewModel",
+                "Call time for fetchControlNetControlTypes: ${endTime - startTime} ms"
+            )
+
+            startTime = System.currentTimeMillis()
+            modulesDetailList =  fetchControlNetModuleDetail()
+            endTime = System.currentTimeMillis()
+            Log.d(
+                "initViewModel",
+                "Call time for fetchControlNetModuleDetail: ${endTime - startTime} ms"
+            )
         }
 
         startTime = System.currentTimeMillis()
