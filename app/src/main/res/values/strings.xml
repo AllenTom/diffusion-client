@@ -311,4 +311,8 @@
     <string name="controlnet_controltype">Control type</string>
     <string name="scale_to_fit_inner_fit">Scale to Fit (Inner Fit)</string>
     <string name="envelope_outer_fit">Envelope (Outer Fit)</string>
+    <string name="import_history">Import history</string>
+    <string name="pick_up_a_file">Pick up a file</string>
+    <string name="export_history">export history</string>
+    <string name="history_exported">History exported</string>
 </resources>

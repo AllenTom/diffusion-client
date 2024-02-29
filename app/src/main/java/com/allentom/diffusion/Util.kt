@@ -17,6 +17,8 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.net.URL
 import java.security.MessageDigest
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -469,5 +471,10 @@ object Util {
         return String.format("%.${decimal}f", (value / baseFloat).toInt() * baseFloat).toFloat()
     }
 
+    fun getNowString(): String {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formattedNow = LocalDateTime.now().format(formatter)
+        return formattedNow
+    }
 
 }

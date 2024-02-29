@@ -23,6 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -30,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
+import com.allentom.diffusion.composables.HistoryImportDialog
 import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawScreen
 import com.allentom.diffusion.ui.screens.home.tabs.gallery.GalleryView
@@ -44,13 +49,18 @@ fun HomePage(navController: NavController) {
     val toolsIcon = ImageVector.vectorResource(id = R.drawable.ic_tools)
     val imageFitIcon = ImageVector.vectorResource(id = R.drawable.ic_image_fit)
     val imageCropIcon = ImageVector.vectorResource(id = R.drawable.ic_image_crop)
-    val appIcon = ImageVector.vectorResource(id = R.drawable.ic_launcher_foreground)
+    var isImportHistoryDialogOpen by remember { mutableStateOf(false) }
     val iconsMapping = listOf(
         Icons.Filled.Create,
         galleryIcon,
         toolsIcon
     )
     val isWideDisplay = IsWideWindow()
+    if (isImportHistoryDialogOpen) {
+        HistoryImportDialog(onDismiss = {
+            isImportHistoryDialogOpen = false
+        })
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -59,13 +69,20 @@ fun HomePage(navController: NavController) {
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-
                     Text("Diffusion")
-
-
                 },
                 actions = {
                     if (state.selectedIndex == 0) {
+                        IconButton(
+                            onClick = {
+                                isImportHistoryDialogOpen = true
+                            }
+                        ) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.ic_import_history),
+                                contentDescription = "Menu",
+                            )
+                        }
                         IconButton(
                             onClick = {
                                 navController.navigate(Screens.History.route)

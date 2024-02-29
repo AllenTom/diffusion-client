@@ -312,4 +312,8 @@
     <string name="controlnet_controltype">控制类型</string>
     <string name="scale_to_fit_inner_fit">裁剪画布适配(向外)</string>
     <string name="envelope_outer_fit">拓展画布适配(向内)</string>
+    <string name="import_history">导入历史</string>
+    <string name="pick_up_a_file">选择文件</string>
+    <string name="export_history">导出历史</string>
+    <string name="history_exported">已导出历史</string>
 </resources>

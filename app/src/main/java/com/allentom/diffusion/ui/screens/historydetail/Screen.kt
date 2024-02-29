@@ -1,7 +1,10 @@
 package com.allentom.diffusion.ui.screens.historydetail
 
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -52,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
@@ -63,23 +67,33 @@ import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.HistoryView
 import com.allentom.diffusion.composables.ImageUriPreviewDialog
 import com.allentom.diffusion.composables.IsWideWindow
+import com.allentom.diffusion.store.export.ExportHistory
 import com.allentom.diffusion.store.history.HistoryStore
 import com.allentom.diffusion.store.history.ImageHistory
 import com.allentom.diffusion.store.history.SaveHistory
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.reactor.ReactorViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun HistoryDetailScreen(navController: NavController, historyId: Long) {
+    val context = LocalContext.current
+
     var saveHistory by remember {
         mutableStateOf<SaveHistory?>(null)
     }
 
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
 
     var isHistoryActionOpen by remember {
@@ -99,7 +113,26 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
         refresh()
     }
 
-
+    val createDocumentLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+            uri?.let {
+                saveHistory?.let { saveHistory ->
+                    scope.launch(Dispatchers.IO) {
+                        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                            val gson = GsonBuilder().setPrettyPrinting().create()
+                            val exportHistory = ExportHistory()
+                            exportHistory.assignWithHistory(saveHistory)
+                            val jsonString = gson.toJson(exportHistory)
+                            outputStream.write(jsonString.toByteArray(StandardCharsets.UTF_8))
+                        }
+                    }
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.history_exported), Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     if (isHistoryActionOpen) {
         BottomActionSheet(items = listOf(
             ActionItem(text = stringResource(id = R.string.apply), onAction = {
@@ -107,12 +140,17 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
                     scope.launch(Dispatchers.IO) {
                         DrawViewModel.applyHistory(context, saveHistory)
                     }
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.already_apply), Toast.LENGTH_SHORT
-                    ).show()
                 }
             }),
+            ActionItem(text = stringResource(R.string.export_history), onAction = {
+                createDocumentLauncher.launch(
+                    "diffusion_export_${Util.getNowString()}_${
+                        Util.randomString(
+                            4
+                        )
+                    }.json"
+                )
+            })
         ), onDismiss = {
             isHistoryActionOpen = false
         })
@@ -252,6 +290,7 @@ fun FirstScreen(
             ).show()
         }
     }
+
     fun saveImageToDeviceGallery(imageHistory: ImageHistory) {
         scope.launch(Dispatchers.IO) {
             imageHistory.saveToDeviceGallery(context)
