@@ -70,7 +70,12 @@ object Util {
         // Read the image file and convert it to a byte array
         val inputStream: InputStream = context.contentResolver.openInputStream(imageUri)!!
         val imageBytes = inputStream.readBytes()
-        val ext = imageUri.toString().substring(imageUri.toString().lastIndexOf(".") + 1)
+        var ext = imageUri.toString().substring(imageUri.toString().lastIndexOf(".") + 1)
+        if (imageUri.toString().startsWith("content")) {
+            context.contentResolver.getType(imageUri)?.let {
+                ext = it.substringAfter("/")
+            }
+        }
         // Generate a unique name for the image
         val uuid = UUID.randomUUID().toString()
         val fileName = "${uuid}.${ext}"
