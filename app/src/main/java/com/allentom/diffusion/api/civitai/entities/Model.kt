@@ -10,7 +10,7 @@ data class CivitaiModel(
     val poi: Boolean,
     val nsfw: Boolean,
     val allowNoCredit: Boolean,
-    val allowCommercialUse: String,
+    val allowCommercialUse: Any,
     val allowDerivatives: Boolean,
     val allowDifferentLicense: Boolean,
     val stats: Stats,
