@@ -1,11 +1,6 @@
 package com.allentom.diffusion.ui.screens.lora.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -13,13 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,28 +29,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
-import com.allentom.diffusion.api.entity.Lora
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.LoraGrid
 import com.allentom.diffusion.composables.MatchOptionDialog
-import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
-import com.allentom.diffusion.store.prompt.LoraPrompt
 import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import com.allentom.diffusion.ui.screens.lora.detail.LoraDetailViewModel
@@ -82,7 +65,8 @@ fun LoraListScreen(navController: NavController) {
 
     fun refresh() {
         scope.launch(Dispatchers.IO) {
-            DrawViewModel.loadLora(context)
+            DrawViewModel.loraList = DrawViewModel.loadLora(context)
+            loraList = DrawViewModel.loraList
         }
     }
     LaunchedEffect(Unit) {

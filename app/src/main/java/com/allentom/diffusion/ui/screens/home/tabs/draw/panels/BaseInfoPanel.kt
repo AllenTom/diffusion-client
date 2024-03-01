@@ -1,7 +1,6 @@
 package com.allentom.diffusion.ui.screens.home.tabs.draw.panels
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +15,7 @@ import com.allentom.diffusion.composables.DetectDeviceType
 import com.allentom.diffusion.composables.DeviceType
 import com.allentom.diffusion.composables.EmbeddingSelectOptionItem
 import com.allentom.diffusion.composables.LoraSelectOptionItem
+import com.allentom.diffusion.composables.ModelSelectOptionItem
 import com.allentom.diffusion.composables.PromptSelectOptionItem
 import com.allentom.diffusion.composables.SeedOptionItem
 import com.allentom.diffusion.composables.SliderOptionItem
@@ -36,13 +36,20 @@ fun BaseInfoPanel(
         horizontalArrangement = Arrangement.spacedBy(if (fullWidth)16.dp else 0.dp),
         verticalArrangement = Arrangement.spacedBy(if (fullWidth)0.dp else 0.dp)
     ) {
-        TextPickUpItem(
+        ModelSelectOptionItem(
             label = stringResource(R.string.param_model),
-            value = DrawViewModel.useModelName,
-            fullWidth = fullWidth,
-            options = DrawViewModel.models.map { it.title }) {
-            onSwitchModel(it)
+            value = DrawViewModel.useModelName.toString(),
+            modelList = DrawViewModel.models
+        ) {
+            onSwitchModel(it.title)
         }
+//        TextPickUpItem(
+//            label = stringResource(R.string.param_model),
+//            value = DrawViewModel.useModelName,
+//            fullWidth = fullWidth,
+//            options = DrawViewModel.models.map { it.title }) {
+//
+//        }
         PromptSelectOptionItem(
             label = stringResource(id = R.string.param_prompt),
             value = DrawViewModel.baseParam.promptText,

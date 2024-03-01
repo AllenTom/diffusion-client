@@ -41,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -54,6 +53,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
+import com.allentom.diffusion.api.entity.Model
 import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.composables.ActionItem
 import com.allentom.diffusion.composables.BottomActionSheet
@@ -72,7 +72,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ModelListScreen(navController: NavController) {
     var modelList by remember {
-        mutableStateOf<List<ModelEntity>>(emptyList())
+        mutableStateOf<List<Model>>(emptyList())
     }
     var itemImageFit by remember {
         mutableStateOf(AppConfigStore.config.modelViewDisplayMode)
@@ -91,12 +91,8 @@ fun ModelListScreen(navController: NavController) {
     fun refresh() {
         scope.launch(Dispatchers.IO) {
             val result = getApiClient().getModels()
-            result.body()?.let {
-                DrawViewModel.models = it
-            }
-            modelList = ModelStore.getAll(context).filter {
-                DrawViewModel.models.any { model -> model.modelName == it.name || model.title == it.name }
-            }
+            DrawViewModel.models = DrawViewModel.loadModel(context)
+            modelList = DrawViewModel.models
         }
     }
     LaunchedEffect(Unit) {
@@ -146,12 +142,12 @@ fun ModelListScreen(navController: NavController) {
             totalMatchModel = list.size
             currentMatchModel = 0
             list.forEach { model ->
-                if (model.civitaiApiId != null && isSkipExist == true) {
+                if (model.entity.civitaiApiId != null && isSkipExist == true) {
                     currentMatchModel++
                     return@forEach
                 }
                 try {
-                    ModelStore.matchModelByModelId(context, model.modelId)
+                    ModelStore.matchModelByModelId(context, model.entity.modelId)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -179,7 +175,7 @@ fun ModelListScreen(navController: NavController) {
                             totalMatchModel
                         )
                     )
-                    Text(text = modelList[currentMatchModel].name)
+                    Text(text = modelList[currentMatchModel].entity.name)
                     Spacer(modifier = Modifier.height(8.dp))
                     LinearProgressIndicator(
                         progress = currentMatchModel.toFloat() / totalMatchModel.toFloat(),
@@ -292,7 +288,7 @@ fun ModelListScreen(navController: NavController) {
                                     }
                                     .combinedClickable(
                                         onLongClick = {
-                                            currentModel = model
+                                            currentModel = model.entity
                                             actionMenuDisplay = true
                                         },
                                         onClick = {
@@ -300,7 +296,7 @@ fun ModelListScreen(navController: NavController) {
                                             navController.navigate(
                                                 Screens.ModelDetailScreen.route.replace(
                                                     "{modelId}",
-                                                    model.modelId.toString()
+                                                    model.entity.modelId.toString()
                                                 )
                                             )
 
@@ -316,9 +312,9 @@ fun ModelListScreen(navController: NavController) {
                                             .fillMaxSize()
                                             .thenIf(itemImageFit == "Fit", Modifier.blur(16.dp))
                                     ) {
-                                        if (model.coverPath != null) {
+                                        if (model.entity.coverPath != null) {
                                             AsyncImage(
-                                                model = model.coverPath,
+                                                model = model.entity.coverPath,
                                                 contentDescription = null,
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier.fillMaxSize(),
@@ -337,10 +333,10 @@ fun ModelListScreen(navController: NavController) {
                                             contentAlignment = Alignment.Center,
                                         ) {
 
-                                            if (model.coverPath != null) {
+                                            if (model.entity.coverPath != null) {
                                                 if (itemImageFit == "Fit") {
                                                     AsyncImage(
-                                                        model = model.coverPath,
+                                                        model = model.entity.coverPath,
                                                         contentDescription = null,
                                                         contentScale = ContentScale.Fit,
                                                         modifier = Modifier.fillMaxSize(),
@@ -370,7 +366,7 @@ fun ModelListScreen(navController: NavController) {
                                         ) {
                                             Column {
                                                 Text(
-                                                    text = model.title ?: model.name,
+                                                    text = model.title,
                                                     fontSize = 16.sp,
                                                     maxLines = 2,
                                                     color = MaterialTheme.colorScheme.onPrimaryContainer,

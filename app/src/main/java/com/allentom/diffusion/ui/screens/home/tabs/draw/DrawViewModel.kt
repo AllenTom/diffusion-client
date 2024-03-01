@@ -1121,6 +1121,14 @@ object DrawViewModel {
         }
     }
 
+    suspend fun loadModel(context: Context) :List<Model> {
+        val modelList = fetchModelFromApi()
+        return modelList.map {
+            val ent = ModelStore.getOrCreate(context, it.modelName)
+            it.copy(entity = ent)
+        }
+    }
+
     suspend fun initViewModel(context: Context) {
         var startTime: Long
         var endTime: Long
@@ -1163,7 +1171,7 @@ object DrawViewModel {
         Log.d("initViewModel", "Call time for fetchDataFromApi: ${endTime - startTime} ms")
 
         startTime = System.currentTimeMillis()
-        models = fetchModelFromApi()
+        models = loadModel(context)
         ModelStore.insertNameIfNotExistMany(context, models.map { it.modelName })
         endTime = System.currentTimeMillis()
         Log.d("initViewModel", "Call time for fetchModelFromApi: ${endTime - startTime} ms")
