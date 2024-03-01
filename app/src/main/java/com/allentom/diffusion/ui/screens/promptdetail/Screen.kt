@@ -71,9 +71,11 @@ fun PromptDetailScreen(id: Long) {
             TopAppBar(
                 title = {
                     Row {
-                        Text(text = propmt?.text ?: "")
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(text = propmt?.nameCn ?: "")
+                        Text(text = propmt?.text ?: "", maxLines = 1)
+                        if (propmt?.text != propmt?.nameCn) {
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = propmt?.nameCn ?: "", maxLines = 1)
+                        }
                     }
 
                 },

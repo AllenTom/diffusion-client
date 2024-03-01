@@ -141,14 +141,6 @@ fun HistoryView(
                 titleComponent = {
                     SectionTitle(title = stringResource(R.string.param_negative_prompt))
                 },
-                onClickPrompt = {
-                    navController.navigate(
-                        Screens.PromptDetail.route.replace(
-                            "{promptId}",
-                            it.promptId.toString()
-                        )
-                    )
-                },
                 canScroll = false
             ) {
                 promptActionState.onOpenActionBottomSheet(it, "negativePrompt")
