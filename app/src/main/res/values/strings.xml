@@ -315,4 +315,5 @@
     <string name="pick_up_a_file">Pick up a file</string>
     <string name="export_history">export history</string>
     <string name="history_exported">History exported</string>
+    <string name="search">Search</string>
 </resources>

@@ -49,6 +49,7 @@ import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import com.allentom.diffusion.composables.CivitaiModelSelectDialog
+import com.allentom.diffusion.composables.LoraSelectDialog
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.ModelStore

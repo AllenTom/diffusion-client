@@ -46,31 +46,10 @@ fun LoraSelectOptionItem(
                     )
                 }
             }
-//            FlowRow {
-//                value.forEach {
-//                    AssistChip(
-//                        onClick = {
-//
-//                        },
-//                        label = {
-//                            Text(text = it.name)
-//                        },
-//                        leadingIcon = {
-//                            if (it.weight != 0f) {
-//                                Text(text = String.format("%.1f", it.weight))
-//                            }
-//                        },
-//                        trailingIcon = {
-//                            Text(text = it.prompts.size.toString())
-//                        }
-//                    )
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                }
-//            }
         }
     )
     if (showDialog) {
-        CivitaiModelSelectDialog(
+        LoraSelectDialog(
             loraList = loraList,
             value = value,
             title = title,

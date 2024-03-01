@@ -316,4 +316,5 @@
     <string name="pick_up_a_file">选择文件</string>
     <string name="export_history">导出历史</string>
     <string name="history_exported">已导出历史</string>
+    <string name="search">搜索</string>
 </resources>

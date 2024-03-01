@@ -53,7 +53,9 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
+import com.allentom.diffusion.api.entity.Lora
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.composables.LoraGrid
 import com.allentom.diffusion.composables.MatchOptionDialog
 import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
@@ -69,7 +71,7 @@ import kotlinx.coroutines.launch
 fun LoraListScreen(navController: NavController) {
     val modelIcon = ImageVector.vectorResource(id = R.drawable.ic_model)
     var loraList by remember {
-        mutableStateOf(emptyList<LoraPrompt>())
+        mutableStateOf(DrawViewModel.loraList)
     }
     var itemImageFit by remember {
         mutableStateOf(AppConfigStore.config.loraViewDisplayMode)
@@ -80,9 +82,7 @@ fun LoraListScreen(navController: NavController) {
 
     fun refresh() {
         scope.launch(Dispatchers.IO) {
-            loraList = PromptStore.getAllLoraPrompt(context).map { it.toPrompt() }.filter {
-                DrawViewModel.loraList.any { lora -> lora.name == it.name }
-            }
+            DrawViewModel.loadLora(context)
         }
     }
     LaunchedEffect(Unit) {
@@ -237,115 +237,22 @@ fun LoraListScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            LazyVerticalGrid(
+            LoraGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                columns = GridCells.Fixed(columns),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                items(loraList.size) { idx ->
-                    val prompt = loraList[idx]
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-
-                            }
-                            .combinedClickable(
-                                onClick = {
-                                    LoraDetailViewModel.asNew()
-                                    navController.navigate(
-                                        Screens.LoraPromptDetail.route.replace(
-                                            "{id}",
-                                            prompt.id.toString()
-                                        )
-                                    )
-
-                                }
-                            )
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .height(220.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .thenIf(itemImageFit == "Fit", Modifier.blur(16.dp))
-                            ) {
-                                if (prompt.previewPath != null) {
-                                    AsyncImage(
-                                        model = prompt.previewPath,
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                            }
-                            Column(
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .height(150.dp)
-                                        .padding(8.dp)
-                                        .fillMaxWidth(),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-
-                                    if (prompt.previewPath != null) {
-                                        if (itemImageFit == "Fit") {
-                                            AsyncImage(
-                                                model = prompt.previewPath,
-                                                contentDescription = null,
-                                                contentScale = ContentScale.Fit,
-                                                modifier = Modifier.fillMaxSize(),
-                                            )
-                                        }
-                                    } else {
-                                        Icon(
-                                            modelIcon,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .width(48.dp)
-                                                .height(48.dp),
-
-                                            )
-
-                                    }
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxWidth()
-                                        .background(
-                                            MaterialTheme.colorScheme.primaryContainer.copy(
-                                                alpha = 0.7f
-                                            )
-                                        )
-                                        .padding(8.dp),
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = prompt.title.ifBlank { prompt.name },
-                                            fontSize = 16.sp,
-                                            maxLines = 2,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        )
-                                    }
-                                }
-
-                            }
-
-                        }
-
-                    }
-                }
-
-            }
+                columnCount = columns,
+                loraList = loraList,
+                itemImageFit = itemImageFit,
+                onCLick = {
+                    LoraDetailViewModel.asNew()
+                    navController.navigate(
+                        Screens.LoraPromptDetail.route.replace(
+                            "{id}",
+                            it.entity?.id.toString()
+                        )
+                    )
+                })
             DrawBar()
         }
 
