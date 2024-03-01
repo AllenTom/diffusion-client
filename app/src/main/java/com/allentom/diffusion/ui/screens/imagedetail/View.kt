@@ -6,12 +6,14 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
@@ -47,6 +49,8 @@ import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.entity.Upscale
 import com.allentom.diffusion.api.getApiClient
+import com.allentom.diffusion.composables.DetectDeviceType
+import com.allentom.diffusion.composables.DeviceType
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.HistoryView
 import com.allentom.diffusion.composables.ImageUriPreviewDialog
@@ -76,6 +80,7 @@ fun ImageDetail(id: String, navController: NavController) {
     var isPreviewDialogOpen by remember { mutableStateOf(false) }
     var isUpscaling by remember { mutableStateOf(false) }
     var upscalerList by remember { mutableStateOf(emptyList<Upscale>()) }
+    var useDevice = DetectDeviceType()
     fun refresh() {
         scope.launch(Dispatchers.IO) {
             val imageHistory =
@@ -126,8 +131,6 @@ fun ImageDetail(id: String, navController: NavController) {
         AppConfigStore.config =
             AppConfigStore.config.copy(extraImageHistory = extraParam.copy(image = null))
         AppConfigStore.saveData(context)
-
-
     }
     if (isParamDisplayed) {
         ExtraPanel(
@@ -246,23 +249,60 @@ fun ImageDetail(id: String, navController: NavController) {
     ) { paddingValues ->
         // GalleryDetail screen UI
         Column(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+            Row(
+                modifier = Modifier.weight(1f)
             ) {
-                genHistory?.let { genHis ->
-                    galleryItem?.let { imgHis ->
-                        LazyColumn {
-                            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    genHistory?.let { genHis ->
+                        galleryItem?.let { imgHis ->
+                            if (useDevice == DeviceType.Phone) {
+                                Column(
+                                    modifier = Modifier
+                                        .verticalScroll(rememberScrollState())
+                                        .fillMaxSize()
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(16.dp)
+                                            .height(200.dp)
+                                            .fillMaxWidth()
+                                    ) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(LocalContext.current)
+                                                .data(imgHis.path)
+                                                .crossfade(true)
+                                                .build(),
+                                            contentScale = ContentScale.Fit,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .clickable {
+                                                    isPreviewDialogOpen = true
+                                                }
+                                        )
+                                    }
+
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 16.dp)
+                                    ) {
+                                        HistoryView(currentHistory = genHis, navController)
+                                    }
+
+                                    Spacer(modifier = Modifier.height(64.dp))
+
+                                }
+                            } else {
                                 Box(
                                     modifier = Modifier
-                                        .padding(16.dp)
-                                        .fillMaxWidth()
-                                        .height(200.dp)
-                                        .wrapContentHeight()
+                                        .fillMaxSize().padding(16.dp)
                                 ) {
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
@@ -272,23 +312,29 @@ fun ImageDetail(id: String, navController: NavController) {
                                         contentScale = ContentScale.Fit,
                                         contentDescription = null,
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight()
+                                            .fillMaxSize()
                                             .clickable {
                                                 isPreviewDialogOpen = true
                                             }
                                     )
                                 }
-                                Box(
-                                    modifier = Modifier.padding(horizontal = 16.dp)
-                                ) {
-                                    HistoryView(currentHistory = genHis, navController)
-                                }
-                                Spacer(modifier = Modifier.height(64.dp))
+
                             }
                         }
-                    }
 
+                    }
+                }
+                if (useDevice != DeviceType.Phone) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = 64.dp)
+                    ) {
+                        genHistory?.let { genHis ->
+                            HistoryView(currentHistory = genHis, navController)
+                        }
+                    }
                 }
             }
             DrawBar()

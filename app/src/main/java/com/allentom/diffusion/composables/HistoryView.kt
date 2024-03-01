@@ -42,6 +42,7 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.store.history.SaveHistory
+import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.ui.screens.historydetail.ParamItem
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DisplayBase64Image
 import com.allentom.diffusion.ui.screens.model.detail.ModelDetailViewModel
@@ -52,7 +53,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun HistoryView(
     currentHistory: SaveHistory,
-    navController: NavController
+    navController: NavController,
+    displayFirstGroup: Boolean = true,
+    displaySecondGroup: Boolean = true
 ) {
     var isImage2ImageInputPreviewOpen by remember {
         mutableStateOf(false)
@@ -94,49 +97,23 @@ fun HistoryView(
     }
 
     PromptAction(promptActionState)
-
-    Column {
+    @Composable
+    fun firstGroup() {
         if (currentHistory.regionEnable == true) {
-            Text(
-                text = stringResource(id = R.string.regional),
-                fontWeight = FontWeight.W500,
-                fontSize = 18.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            FlowRow(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                ParamItem(label = stringResource(R.string.region_divider_ratio),
-                    value = { Text(text = currentHistory.regionRatio.toString()) })
-            }
-            var regionCount = currentHistory.regionCount ?: 0
-            if (currentHistory.regionUseCommon == true) {
-                regionCount += 1
-            }
-            for (i in 0 until regionCount) {
-                PromptDisplayView(
-                    promptList = currentHistory.prompt.filter { it.regionIndex == i },
-                    titleComponent = {
-                        if (currentHistory.regionUseCommon == true && i == 0) {
-                            SectionTitle(title = stringResource(id = R.string.common_region))
-                        } else {
-                            SectionTitle(title = stringResource(id = R.string.region, i.toString()))
-                        }
-                    },
-                    onClickPrompt = {
-                        navController.navigate(
-                            Screens.PromptDetail.route.replace(
-                                "{promptId}",
-                                it.promptId.toString()
-                            )
+            regionalPromptHistoryDisplay(
+                currentHistory = currentHistory,
+                onPromptClick = { prompt ->
+                    navController.navigate(
+                        Screens.PromptDetail.route.replace(
+                            "{promptId}",
+                            prompt.promptId.toString()
                         )
-                    },
-                    canScroll = false
-                ) {
-                    promptActionState.onOpenActionBottomSheet(it, "prompt")
+                    )
+                },
+                onPromptActionClick = {
+                    promptActionState.onOpenActionBottomSheet(currentHistory.prompt, "prompt")
                 }
-            }
+            )
         } else {
             currentHistory.prompt.takeIf { it.isNotEmpty() }?.let {
                 PromptDisplayView(
@@ -177,6 +154,9 @@ fun HistoryView(
                 promptActionState.onOpenActionBottomSheet(it, "negativePrompt")
             }
         }
+    }
+    @Composable
+    fun secondGroup(){
         currentHistory.loraPrompt.takeIf { it.isNotEmpty() }?.let {
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(title = stringResource(R.string.param_lora))
@@ -820,6 +800,14 @@ fun HistoryView(
             }
         }
     }
+    Column {
+        if (displayFirstGroup) {
+            firstGroup()
+        }
+        if (displaySecondGroup) {
+            secondGroup()
+        }
+    }
 
 
 }
@@ -831,4 +819,48 @@ fun SectionTitle(title: String) {
         fontWeight = FontWeight.W500,
         fontSize = 18.sp
     )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun regionalPromptHistoryDisplay(
+    currentHistory: SaveHistory,
+    onPromptClick: (Prompt) -> Unit,
+    onPromptActionClick: () -> Unit
+) {
+    Text(
+        text = stringResource(id = R.string.regional),
+        fontWeight = FontWeight.W500,
+        fontSize = 18.sp
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    FlowRow(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        ParamItem(label = stringResource(R.string.region_divider_ratio),
+            value = { Text(text = currentHistory.regionRatio.toString()) })
+    }
+    var regionCount = currentHistory.regionCount ?: 0
+    if (currentHistory.regionUseCommon == true) {
+        regionCount += 1
+    }
+    for (i in 0 until regionCount) {
+        PromptDisplayView(
+            promptList = currentHistory.prompt.filter { it.regionIndex == i },
+            titleComponent = {
+                if (currentHistory.regionUseCommon == true && i == 0) {
+                    SectionTitle(title = stringResource(id = R.string.common_region))
+                } else {
+                    SectionTitle(title = stringResource(id = R.string.region, i.toString()))
+                }
+            },
+            onClickPrompt = {
+                onPromptClick(it)
+            },
+            canScroll = false
+        ) {
+            onPromptActionClick()
+        }
+    }
 }
