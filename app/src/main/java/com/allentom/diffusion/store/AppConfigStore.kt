@@ -16,7 +16,8 @@ data class AppConfig(
     val saveCivitaiImageFilter: CivitaiImageFilter? = null,
     val enablePlugin: Boolean = false,
     val modelViewDisplayMode: String = "Crop",
-    val loraViewDisplayMode: String = "Crop"
+    val loraViewDisplayMode: String = "Crop",
+    val promptDetailViewDisplayMode:String = "Crop",
 )
 
 object AppConfigStore {

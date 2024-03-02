@@ -63,6 +63,7 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.ControlNetImportDialog
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.composables.gridCountForDeviceWidth
 import com.allentom.diffusion.store.ControlNetStore
 import com.allentom.diffusion.store.SaveControlNet
 import com.allentom.diffusion.ui.DrawBarViewModel
@@ -89,9 +90,8 @@ fun ControlNetScreen(navController: NavController) {
         }
     }
 
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val columns = screenWidthDp / 180 // Adjust this value to change the width of each column
+
+    val columns = gridCountForDeviceWidth(itemWidth = 180)
 
 
     var isSelectMode by remember {

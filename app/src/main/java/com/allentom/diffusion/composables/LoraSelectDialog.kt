@@ -77,9 +77,8 @@ fun LoraSelectDialog(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val columns = screenWidthDp / 180
+
+    val columns = gridCountForDeviceWidth(itemWidth = 180)
 
     fun refreshSearchResult() {
         searchResults = if (inputLoraText.isNotEmpty()) {

@@ -42,6 +42,7 @@ import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.LoraGrid
 import com.allentom.diffusion.composables.MatchOptionDialog
+import com.allentom.diffusion.composables.gridCountForDeviceWidth
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
@@ -153,9 +154,8 @@ fun LoraListScreen(navController: NavController) {
         }
     }
 
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val columns = screenWidthDp / 180
+
+    val columns = gridCountForDeviceWidth(itemWidth = 180)
     Scaffold(
         topBar = {
             TopAppBar(

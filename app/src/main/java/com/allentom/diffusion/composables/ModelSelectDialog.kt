@@ -36,9 +36,8 @@ fun ModelSelectDialog(
     var searchResults by remember {
         mutableStateOf<List<Model>>(emptyList())
     }
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val columns = screenWidthDp / 180
+    
+    val columns = gridCountForDeviceWidth(itemWidth = 180)
 
     fun refreshSearchResult() {
         searchResults = if (inputLoraText.isNotEmpty()) {
@@ -88,14 +87,16 @@ fun ModelSelectDialog(
                     Spacer(modifier = Modifier.height(16.dp))
                     if (useDevice == DeviceType.Phone) {
                         ModelList(
-                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
                             modelList = searchResults,
                             onSelect = {
                                 onValueChange(it)
                                 onDismiss()
                             }
                         )
-                    }else{
+                    } else {
                         ModelGrid(
                             columnCount = columns,
                             modelList = searchResults,

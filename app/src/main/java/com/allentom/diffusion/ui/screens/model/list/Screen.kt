@@ -59,6 +59,7 @@ import com.allentom.diffusion.composables.ActionItem
 import com.allentom.diffusion.composables.BottomActionSheet
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.composables.MatchOptionDialog
+import com.allentom.diffusion.composables.gridCountForDeviceWidth
 import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.ModelEntity
@@ -98,9 +99,8 @@ fun ModelListScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         refresh()
     }
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val columns = screenWidthDp / 180
+
+    val columns = gridCountForDeviceWidth(itemWidth = 180)
     var actionMenuDisplay by remember { mutableStateOf(false) }
     var currentModel by remember { mutableStateOf<ModelEntity?>(null) }
     val modelIcon = ImageVector.vectorResource(id = R.drawable.ic_model)

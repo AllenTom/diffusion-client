@@ -50,6 +50,7 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.composables.gridCountForDeviceWidth
 import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.history.HistoryStore
 import com.allentom.diffusion.store.history.ImageHistory
@@ -69,9 +70,7 @@ fun GalleryView(navController: NavController) {
             galleryItems = HistoryStore.getFavoriteImageHistory(context)
         }
     }
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val columns = screenWidthDp / 120 // Adjust this value to change the width of each column
+    val columns = gridCountForDeviceWidth(itemWidth = 120)
     var selectedImageItemIds by remember { mutableStateOf(listOf<String>()) }
     val downloadIcon = ImageVector.vectorResource(id = R.drawable.ic_download)
     val unFavoriteIcon = ImageVector.vectorResource(id = R.drawable.ic_unfavo)
