@@ -127,4 +127,12 @@ data class LoraPrompt(
     fun isTriggered(prompt: Prompt): Boolean {
         return prompts.any { it.text == prompt.text }
     }
+
+    fun getDisplayText(): String {
+        return if (title.isNotEmpty()) {
+            title
+        } else {
+            name
+        }
+    }
 }

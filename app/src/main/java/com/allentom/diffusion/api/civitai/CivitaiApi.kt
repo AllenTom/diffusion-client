@@ -35,10 +35,11 @@ interface CivitaiApi {
         @Query("modelId") modelId: Long? = null,
         @Query("modelVersionId") modelVersionId: Long? = null,
         @Query("username") username: String? = null,
-        @Query("nsfw") nsfw: String? = "X",
-        @Query("sort") sort: String? = "Most Reactions",
-        @Query("period") period: String? = "Month",
+        @Query("nsfw") nsfw: String? = null,
+        @Query("sort") sort: String? = null,
+        @Query("period") period: String? = null,
         @Query("page") page: Int? = 1,
+        @Query("imageId") imageId: String? = null
     ): Response<CivitaiImageListResult>
 
     @GET("/api/v1/models/{id}")

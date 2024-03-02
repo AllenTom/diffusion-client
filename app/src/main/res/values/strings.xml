@@ -316,4 +316,9 @@
     <string name="export_history">export history</string>
     <string name="history_exported">History exported</string>
     <string name="search">Search</string>
+    <string name="url_or_id_of_the_civitai_image">url or id of the civitai image</string>
+    <string name="not_installed">"not installed "</string>
+    <string name="civitai_resources">Resources</string>
+    <string name="parameters">Parameters</string>
+    <string name="import_from_civitai_image">Import from civitai image</string>
 </resources>

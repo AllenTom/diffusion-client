@@ -103,7 +103,7 @@ data class ImageResource(
     val hash: String?,
     val name: String,
     val type: String,
-    val weight: Double?,
+    val weight: Float?,
 )
 
 data class CivitaiResource(

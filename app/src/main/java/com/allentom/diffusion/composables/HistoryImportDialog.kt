@@ -66,6 +66,7 @@ enum class ImportOptionKeys {
     Width,
     Height,
     CfgScale,
+    DenoisingStrength,
     ReactorParam,
     ControlNetSlotEnable,
     ControlNetSlotInputImage,

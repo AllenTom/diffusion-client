@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
+import com.allentom.diffusion.composables.CivitaiImageImport
 import com.allentom.diffusion.composables.HistoryImportDialog
 import com.allentom.diffusion.composables.IsWideWindow
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawScreen
@@ -49,7 +50,9 @@ fun HomePage(navController: NavController) {
     val toolsIcon = ImageVector.vectorResource(id = R.drawable.ic_tools)
     val imageFitIcon = ImageVector.vectorResource(id = R.drawable.ic_image_fit)
     val imageCropIcon = ImageVector.vectorResource(id = R.drawable.ic_image_crop)
+    val downloadFromCivitaiImage = ImageVector.vectorResource(id = R.drawable.ic_download_web)
     var isImportHistoryDialogOpen by remember { mutableStateOf(false) }
+    var isImportCivitaiImageDialogOpen by remember { mutableStateOf(false) }
     val iconsMapping = listOf(
         Icons.Filled.Create,
         galleryIcon,
@@ -60,6 +63,11 @@ fun HomePage(navController: NavController) {
         HistoryImportDialog(onDismiss = {
             isImportHistoryDialogOpen = false
         })
+    }
+    if (isImportCivitaiImageDialogOpen) {
+        CivitaiImageImport {
+            isImportCivitaiImageDialogOpen = false
+        }
     }
     Scaffold(
         topBar = {
@@ -73,6 +81,16 @@ fun HomePage(navController: NavController) {
                 },
                 actions = {
                     if (state.selectedIndex == 0) {
+                        IconButton(
+                            onClick = {
+                                isImportCivitaiImageDialogOpen = true
+                            }
+                        ) {
+                            Icon(
+                                downloadFromCivitaiImage,
+                                contentDescription = "Menu",
+                            )
+                        }
                         IconButton(
                             onClick = {
                                 isImportHistoryDialogOpen = true
@@ -116,10 +134,12 @@ fun HomePage(navController: NavController) {
                         if (!HomeViewModel.gallerySelectMode) {
                             IconButton(
                                 onClick = {
-                                    HomeViewModel.gallerySelectMode = !HomeViewModel.gallerySelectMode
+                                    HomeViewModel.gallerySelectMode =
+                                        !HomeViewModel.gallerySelectMode
                                 }
                             ) {
-                                Icon(Icons.Default.Check,
+                                Icon(
+                                    Icons.Default.Check,
                                     contentDescription = "Select",
                                 )
                             }
