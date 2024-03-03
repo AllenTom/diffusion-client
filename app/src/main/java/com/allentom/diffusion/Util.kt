@@ -1,11 +1,13 @@
 package com.allentom.diffusion
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Base64
 import androidx.compose.ui.graphics.asImageBitmap
 import com.allentom.diffusion.store.prompt.Prompt
@@ -18,8 +20,6 @@ import java.io.OutputStream
 import java.net.URL
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
@@ -255,25 +255,6 @@ object Util {
         inputStream.close()
         outputStream.close()
     }
-
-    fun saveImageBase64ToGallery(
-        imageBase64: String,
-        fileName: String,
-        folderName: String = "Diffusion"
-    ) {
-        val imageBytes = Base64.decode(imageBase64, Base64.DEFAULT)
-        val picturesDirectory =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val diffusionDirectory = File(picturesDirectory, folderName)
-        if (!diffusionDirectory.exists()) {
-            diffusionDirectory.mkdir()
-        }
-        val newFile = File(diffusionDirectory, fileName)
-        val outputStream: OutputStream = FileOutputStream(newFile)
-        outputStream.write(imageBytes)
-        outputStream.close()
-    }
-
     fun downloadImage(url: String): ByteArray {
         val connection = URL(url).openConnection()
         connection.connect()
@@ -482,6 +463,31 @@ object Util {
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val formattedNow = formatter.format(Date())
         return formattedNow
+    }
+
+    fun saveImageToGallery(context: Context, base64Str: String, fileName: String) {
+        // Decode the Base64 string to a Bitmap
+        val decodedString = Base64.decode(base64Str, Base64.DEFAULT)
+        val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+
+        // Create a file in the gallery directory
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/Diffusion")
+            }
+        }
+
+        // Write the Bitmap to the file
+        val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        uri?.let {
+            val outputStream: OutputStream? = context.contentResolver.openOutputStream(it)
+            outputStream?.let { os ->
+                decodedByte.compress(Bitmap.CompressFormat.PNG, 100, os)
+                os.close()
+            }
+        }
     }
 
 }

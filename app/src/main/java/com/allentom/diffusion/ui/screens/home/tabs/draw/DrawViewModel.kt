@@ -447,7 +447,7 @@ class GenerateTask(
             } else {
                 seed
             }
-            val imageName = "diffusion_${i}_${imageSeed}.jpg"
+            val imageName = "diffusion_${i}_${imageSeed}.png"
             genItemList += GenImageItem(null, null, imageSeed, imageName, null)
         }
         currentHistory = null

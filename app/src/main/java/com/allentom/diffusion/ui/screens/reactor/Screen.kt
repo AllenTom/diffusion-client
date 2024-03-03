@@ -193,7 +193,11 @@ fun ReactorScreen() {
             if (imgBase64 != null) {
                 val filename =
                     "diffusion_reactor_${UUID.randomUUID().toString().subSequence(0, 6)}.png"
-                Util.saveImageBase64ToGallery(imgBase64, filename)
+                Util.saveImageToGallery(
+                    context,
+                    imgBase64,
+                    filename
+                )
 
 
             }

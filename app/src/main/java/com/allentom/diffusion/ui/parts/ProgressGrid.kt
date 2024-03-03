@@ -119,10 +119,7 @@ fun GenProgressGrid(
     fun saveToDeviceGallery(imageItem: GenImageItem) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                Util.saveImageBase64ToGallery(
-                    imageItem.getDisplayImageBase64()!!,
-                    imageItem.imageName
-                )
+                Util.saveImageToGallery(context, imageItem.getDisplayImageBase64()!!, imageItem.imageName.replace(".png",""))
             }
             Toast.makeText(
                 context,
