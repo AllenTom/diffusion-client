@@ -194,20 +194,23 @@ fun ImageDetail(id: String, navController: NavController) {
                             text = { Text(stringResource(id = R.string.upscale)) }
                         )
                         Divider()
-                        DropdownMenuItem(
-                            onClick = {
-                                expanded = false
-                                galleryItem?.path?.let {
-                                    ReactorViewModel.addToReactorImages(
-                                        Uri.parse(it),
-                                        it.substringAfterLast("/")
-                                    )
-                                    navController.navigate(Screens.ReactorScreen.route)
-                                }
+                        if (DrawViewModel.enableReactorFeat) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    expanded = false
+                                    galleryItem?.path?.let {
+                                        ReactorViewModel.addToReactorImages(
+                                            Uri.parse(it),
+                                            it.substringAfterLast("/")
+                                        )
+                                        navController.navigate(Screens.ReactorScreen.route)
+                                    }
 
-                            },
-                            text = { Text(stringResource(R.string.send_to_reactor)) }
-                        )
+                                },
+                                text = { Text(stringResource(R.string.send_to_reactor)) }
+                            )
+                        }
+
 
                         DropdownMenuItem(
                             onClick = {

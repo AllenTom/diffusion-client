@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.composables.DrawBar
+import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 
 @Composable
 fun TabTools(navController: NavController) {
@@ -34,25 +35,28 @@ fun TabTools(navController: NavController) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        ListItem(
-            modifier = Modifier.clickable {
-                navController.navigate(Screens.ControlNetList.route)
-            },
-            headlineContent = { Text(text = stringResource(id = R.string.tools_control_net)) },
-            leadingContent = { Icon(controlNetIcon, contentDescription = "Control net") }
-        )
-        ListItem(
-            modifier = Modifier.clickable {
-                navController.navigate(Screens.ControlNetPreprocess.route)
-            },
-            headlineContent = { Text(text = stringResource(id = R.string.tools_control_net_preprocess)) },
-            leadingContent = {
-                Icon(
-                    controlNetPreprocessIcon,
-                    contentDescription = "ControlNet Preprocess"
-                )
-            }
-        )
+        if (DrawViewModel.enableControlNetFeat) {
+            ListItem(
+                modifier = Modifier.clickable {
+                    navController.navigate(Screens.ControlNetList.route)
+                },
+                headlineContent = { Text(text = stringResource(id = R.string.tools_control_net)) },
+                leadingContent = { Icon(controlNetIcon, contentDescription = "Control net") }
+            )
+            ListItem(
+                modifier = Modifier.clickable {
+                    navController.navigate(Screens.ControlNetPreprocess.route)
+                },
+                headlineContent = { Text(text = stringResource(id = R.string.tools_control_net_preprocess)) },
+                leadingContent = {
+                    Icon(
+                        controlNetPreprocessIcon,
+                        contentDescription = "ControlNet Preprocess"
+                    )
+                }
+            )
+        }
+
         ListItem(
             modifier = Modifier.clickable {
                 navController.navigate(Screens.ExtraImage.route)
@@ -60,13 +64,16 @@ fun TabTools(navController: NavController) {
             headlineContent = { Text(text = stringResource(id = R.string.tools_extra_image)) },
             leadingContent = { Icon(extraImageIcon, contentDescription = "Extra image") }
         )
-        ListItem(
-            modifier = Modifier.clickable {
-                navController.navigate(Screens.ReactorScreen.route)
-            },
-            headlineContent = { Text(text = stringResource(id = R.string.reactor)) },
-            leadingContent = { Icon(swapIcon, contentDescription = "Reactor") }
-        )
+        if (DrawViewModel.enableReactorFeat) {
+            ListItem(
+                modifier = Modifier.clickable {
+                    navController.navigate(Screens.ReactorScreen.route)
+                },
+                headlineContent = { Text(text = stringResource(id = R.string.reactor)) },
+                leadingContent = { Icon(swapIcon, contentDescription = "Reactor") }
+            )
+        }
+
         ListItem(
             modifier = Modifier.clickable {
                 navController.navigate(Screens.Tagger.route)

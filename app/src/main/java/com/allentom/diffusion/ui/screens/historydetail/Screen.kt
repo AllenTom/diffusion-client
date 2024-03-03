@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -114,7 +115,7 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
     }
 
     val createDocumentLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+        rememberLauncherForActivityResult(CreateDocument("todo/todo")) { uri ->
             uri?.let {
                 saveHistory?.let { saveHistory ->
                     scope.launch(Dispatchers.IO) {
@@ -340,8 +341,7 @@ fun FirstScreen(
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
-            Box(
-            ) {
+            Box {
                 Icon(
                     Icons.Rounded.MoreVert,
                     contentDescription = null,
@@ -391,27 +391,30 @@ fun FirstScreen(
                             }
                         }
                     )
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Send,
-                                contentDescription = null
-                            )
-
-                        },
-                        text = { Text(stringResource(id = R.string.send_to_reactor)) },
-                        onClick = {
-                            isActionMenuShow = false
-                            scope.launch {
-                                ReactorViewModel.addToReactorImages(
-                                    uri = Uri.parse(it.path),
-                                    name = it.path.split("/").last()
+                    if (DrawViewModel.enableReactorFeat) {
+                        DropdownMenuItem(
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Send,
+                                    contentDescription = null
                                 )
-                                Util.readImageWithPathToBase64(it.path)
-                                navController.navigate(Screens.ReactorScreen.route)
+
+                            },
+                            text = { Text(stringResource(id = R.string.send_to_reactor)) },
+                            onClick = {
+                                isActionMenuShow = false
+                                scope.launch {
+                                    ReactorViewModel.addToReactorImages(
+                                        uri = Uri.parse(it.path),
+                                        name = it.path.split("/").last()
+                                    )
+                                    Util.readImageWithPathToBase64(it.path)
+                                    navController.navigate(Screens.ReactorScreen.route)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(

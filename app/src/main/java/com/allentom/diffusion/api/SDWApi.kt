@@ -20,6 +20,7 @@ import com.allentom.diffusion.api.entity.RactorResultImage
 import com.allentom.diffusion.api.entity.ReactorModelList
 import com.allentom.diffusion.api.entity.ReactorUpscaleList
 import com.allentom.diffusion.api.entity.SDWEmbeddingList
+import com.allentom.diffusion.api.entity.SDWExtension
 import com.allentom.diffusion.api.entity.Sampler
 import com.allentom.diffusion.api.entity.Text2ImageResult
 import com.allentom.diffusion.api.entity.Upscale
@@ -652,8 +653,10 @@ interface SDWApi {
 
     @GET("/controlnet/module_list")
     suspend fun getControlNetModuleList(): Response<ControlNetModule>
+
     @GET("/controlnet/control_types")
     suspend fun getControlNetControlTypes(): Response<ControlTypesResult>
+
     @POST("/controlnet/detect")
     suspend fun detect(
         @Body request: ControlNetDetectRequest
@@ -690,5 +693,8 @@ interface SDWApi {
     suspend fun reactorImage(
         @Body request: ReactorRequestBody
     ): Response<RactorResultImage>
+
+    @GET("/sdapi/v1/extensions")
+    suspend fun getExtensions(): Response<List<SDWExtension>>
 
 }

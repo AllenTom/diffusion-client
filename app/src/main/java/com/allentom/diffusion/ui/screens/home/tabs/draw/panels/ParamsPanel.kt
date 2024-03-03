@@ -84,18 +84,23 @@ fun ParamsPanel(
                     }, label = {
                         Text(stringResource(id = R.string.param_img2Img))
                     }, selected = tabIndex == 3)
-                    Spacer(modifier = Modifier.width(16.dp))
-                    FilterChip(onClick = {
-                        tabIndex = 4
-                    }, label = {
-                        Text(stringResource(R.string.reactor))
-                    }, selected = tabIndex == 4)
-                    Spacer(modifier = Modifier.width(16.dp))
-                    FilterChip(onClick = {
-                        tabIndex = 5
-                    }, label = {
-                        Text(stringResource(R.string.adetailer))
-                    }, selected = tabIndex == 5)
+                    if (DrawViewModel.enableReactorFeat) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        FilterChip(onClick = {
+                            tabIndex = 4
+                        }, label = {
+                            Text(stringResource(R.string.reactor))
+                        }, selected = tabIndex == 4)
+                    }
+                    if (DrawViewModel.enableAdetailerFeat) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        FilterChip(onClick = {
+                            tabIndex = 5
+                        }, label = {
+                            Text(stringResource(R.string.adetailer))
+                        }, selected = tabIndex == 5)
+                    }
+
                     Spacer(modifier = Modifier.width(16.dp))
                     FilterChip(onClick = {
                         tabIndex = 6

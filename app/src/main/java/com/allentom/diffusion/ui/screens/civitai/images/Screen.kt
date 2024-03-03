@@ -191,8 +191,7 @@ fun CivitaiImagesScreen(navController: NavController) {
                             contentScale = ContentScale.Crop,
                             imageLoader = ImageCacheHelper.imageLoader,
                         ) {
-                            val state = painter.state
-                            when (state) {
+                            when (val state = painter.state) {
                                 is AsyncImagePainter.State.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),

@@ -21,7 +21,7 @@ fun PromptSelectOptionItem(
     title: String = label,
     regionPromptParam: RegionPromptParam? = null,
     templateParam: TemplateParam? = null,
-    onValueChange: (List<Prompt>, RegionPromptParam?,TemplateParam?) -> Unit = { _, _,_ ->
+    onValueChange: (List<Prompt>, RegionPromptParam?, TemplateParam?) -> Unit = { _, _, _ ->
     }
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -40,11 +40,11 @@ fun PromptSelectOptionItem(
             title = title,
             isWideDisplay = isWideDisplay,
             onDismiss = { showDialog = false },
-            onValueChange = { prompts, region,template ->
+            onValueChange = { prompts, region, template ->
                 showDialog = false
-                onValueChange(prompts, region,template)
+                onValueChange(prompts, region, template)
             },
-            regionParam = regionPromptParam,
+            regionParam = if (DrawViewModel.enableRegionPrompterFeat) regionPromptParam else null,
             templateParam = templateParam
         )
     }

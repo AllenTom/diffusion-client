@@ -127,7 +127,7 @@ fun DrawScreen() {
             }
         )
     }
-    Row() {
+    Row {
         Box(
             modifier = Modifier
                 .weight(1f)

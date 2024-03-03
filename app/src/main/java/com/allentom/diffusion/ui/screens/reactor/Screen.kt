@@ -483,7 +483,7 @@ fun ReactorScreen() {
                                                 )
                                                 .clickable {
                                                     ReactorViewModel.images =
-                                                        ReactorViewModel.images.mapIndexed() { index, item ->
+                                                        ReactorViewModel.images.mapIndexed { index, item ->
                                                             if (index == idx) {
                                                                 item.copy(
                                                                     isExport = !item.isExport

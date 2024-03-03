@@ -351,7 +351,7 @@ fun CivitaiImageImport(
         val useModel = resources.filter {
             selectedResource.contains(it.id) && it.model != null
         }.firstOrNull()
-        scope.launch() {
+        scope.launch {
             useModel?.let {
                 it.model?.let {
                     if (it.title != DrawViewModel.useModelName) {

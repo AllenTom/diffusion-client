@@ -40,8 +40,7 @@ fun PromptDisplayView(
     var selectMode by remember {
         mutableStateOf(false)
     }
-    Column(
-    ) {
+    Column {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {

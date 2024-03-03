@@ -356,7 +356,7 @@ fun LoraDetailScreen(
                                 isActionMenuShow = false
                             }
                         )
-                        if (AppConfigStore.config.enablePlugin) {
+                        if (DrawViewModel.enableDiffusionHelperFeat) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.auto_match_with_civitai)) },
                                 onClick = {
@@ -514,8 +514,7 @@ fun LoraDetailScreen(
                                                     }
                                                 }
                                             }
-                                            FlowRow(
-                                            ) {
+                                            FlowRow {
                                                 it.forEach { prompt ->
                                                     FilterChip(
                                                         onClick = {

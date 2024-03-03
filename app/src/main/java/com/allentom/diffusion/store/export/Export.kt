@@ -105,7 +105,7 @@ data class ExportHistory(
     var controlNetParam: ExportControlNetParam? = null
 
 ) : Serializable {
-    public fun assignWithHistory(saveHistory: SaveHistory) {
+    fun assignWithHistory(saveHistory: SaveHistory) {
         this.prompt = saveHistory.prompt.map {
             ExportPrompt.fromPrompt(it)
         }

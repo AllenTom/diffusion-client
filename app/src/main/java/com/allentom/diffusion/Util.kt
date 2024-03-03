@@ -45,7 +45,7 @@ object Util {
     }
 
     fun formatUnixTime(unixTime: Long): String {
-        val timeFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+        val timeFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
         return timeFormat.format(unixTime)
     }
 

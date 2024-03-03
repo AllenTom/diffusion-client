@@ -197,7 +197,7 @@ fun LoraListScreen(navController: NavController) {
                         )
 
                     }
-                    if (AppConfigStore.config.enablePlugin) {
+                    if (DrawViewModel.enableDiffusionHelperFeat) {
                         DropdownMenu(
                             expanded = isActionMenuShow,
                             onDismissRequest = { isActionMenuShow = false }

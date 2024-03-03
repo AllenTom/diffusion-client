@@ -21,6 +21,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
+import com.allentom.diffusion.api.ApiHelper
 import com.allentom.diffusion.api.OptionsRequestBody
 import com.allentom.diffusion.api.entity.ApiError
 import com.allentom.diffusion.api.entity.ApiException
@@ -65,6 +66,12 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import kotlin.math.max
+
+val CONTROLNET_EXTENSION_NAME = "sd-webui-controlnet"
+val REACTOR_EXTENSION_NAME = "sd-webui-reactor"
+val REGIONAL_PROMPTER_EXTENSION_NAME = "sd-webui-regional-prompter"
+val ADETAILER_EXTENSION_NAME = "adetailer"
+val DEFFUSION_HELPER_EXTENSION_NAME = "diffusion-helper"
 
 suspend fun fetchDataFromApi(): List<Sampler> {
     val list = getApiClient().getSamplers()
@@ -338,7 +345,7 @@ data class XYZParam(
         return null
     }
 
-    fun getXAxisIndex(index: Int): Int? {
+    fun getXAxisIndex(index: Int): Int {
         val xAxisCount = max(xAxis?.getGenCount() ?: 0, 1)
         return index % xAxisCount
     }
@@ -833,6 +840,11 @@ object DrawViewModel {
 
 
     var enableControlNetFeat by mutableStateOf(false)
+    var enableReactorFeat by mutableStateOf(false)
+    var enableAdetailerFeat by mutableStateOf(false)
+    var enableRegionPrompterFeat by mutableStateOf(false)
+    var enableDiffusionHelperFeat by mutableStateOf(false)
+
     var generateMode by mutableStateOf("text2img")
 
     var img2ImgParam by mutableStateOf(Img2ImgParam())
@@ -890,7 +902,7 @@ object DrawViewModel {
                 width = savedImg2ImgParam.width,
                 height = savedImg2ImgParam.height,
                 cfgScale = savedImg2ImgParam.cfgScale,
-                denoisingStrength = savedImg2ImgParam.denoisingStrength ?: 0.4f,
+                denoisingStrength = savedImg2ImgParam.denoisingStrength,
                 imgFilename = savedImg2ImgParam.path,
             )
             if (savedImg2ImgParam.inpaint == true) {
@@ -1133,22 +1145,6 @@ object DrawViewModel {
         var startTime: Long
         var endTime: Long
 
-        //check helper
-        try {
-            val result = getApiClient().ping()
-            if (result.isSuccessful && result.body()?.pong == true) {
-                AppConfigStore.config = AppConfigStore.config.copy(
-                    enablePlugin = true
-                )
-            }
-        } catch (
-            e: Exception
-        ) {
-            e.printStackTrace()
-        }
-
-
-
         startTime = System.currentTimeMillis()
         if (AppConfigStore.config.isInitPrompt) {
             PromptStore.refresh(context)
@@ -1197,42 +1193,59 @@ object DrawViewModel {
         Log.d("initViewModel", "Call time for fetchEmbeddingFromApi: ${endTime - startTime} ms")
 
         startTime = System.currentTimeMillis()
-        reactorUpscalerList = fetchReactorUpscalerFromApi()
-        endTime = System.currentTimeMillis()
-        Log.d(
-            "initViewModel",
-            "Call time for fetchReactorUpscalerFromApi: ${endTime - startTime} ms"
-        )
+        val extensions = getApiClient().getExtensions()
+        if (extensions.isSuccessful) {
+            extensions.body()?.let { exts ->
+                exts.forEach {
+                    when(it.name) {
+                        CONTROLNET_EXTENSION_NAME ->
+                            enableControlNetFeat = it.enabled
+                        REACTOR_EXTENSION_NAME ->
+                            enableReactorFeat = it.enabled
+                        ADETAILER_EXTENSION_NAME ->
+                            enableAdetailerFeat = it.enabled
+                        REGIONAL_PROMPTER_EXTENSION_NAME ->
+                            enableRegionPrompterFeat = it.enabled
+                        DEFFUSION_HELPER_EXTENSION_NAME ->
+                            enableDiffusionHelperFeat = it.enabled
+                    }
+                }
 
-        startTime = System.currentTimeMillis()
-        reactorModelList = fetchReactorModelFromApi()
-        if (reactorModelList.isNotEmpty()) {
-            reactorParam = reactorParam.copy(model = reactorModelList.first())
+            }
         }
-        endTime = System.currentTimeMillis()
-        Log.d(
-            "initViewModel",
-            "Call time for fetchReactorModelFromApi: ${endTime - startTime} ms"
-        )
-
-        startTime = System.currentTimeMillis()
-        adetailerModelList = fetchAdetailerModelFromApi()
-        endTime = System.currentTimeMillis()
-        Log.d(
-            "initViewModel",
-            "Call time for fetchAdetailerModelFromApi: ${endTime - startTime} ms"
-        )
-
-        // check controlnet version
-        try {
+        if (enableReactorFeat) {
             startTime = System.currentTimeMillis()
-            getApiClient().getControlNetVersion().body()
+            reactorUpscalerList = fetchReactorUpscalerFromApi()
             endTime = System.currentTimeMillis()
-            Log.d("initViewModel", "Call time for getControlNetVersion: ${endTime - startTime} ms")
-            enableControlNetFeat = true
-        } catch (e: Exception) {
-            e.printStackTrace()
+            Log.d(
+                "initViewModel",
+                "Call time for fetchReactorUpscalerFromApi: ${endTime - startTime} ms"
+            )
+
+            startTime = System.currentTimeMillis()
+            reactorModelList = fetchReactorModelFromApi()
+            if (reactorModelList.isNotEmpty()) {
+                reactorParam = reactorParam.copy(model = reactorModelList.first())
+            }
+            endTime = System.currentTimeMillis()
+            Log.d(
+                "initViewModel",
+                "Call time for fetchReactorModelFromApi: ${endTime - startTime} ms"
+            )
         }
+
+        if (enableAdetailerFeat) {
+            startTime = System.currentTimeMillis()
+            adetailerModelList = fetchAdetailerModelFromApi()
+            endTime = System.currentTimeMillis()
+            Log.d(
+                "initViewModel",
+                "Call time for fetchAdetailerModelFromApi: ${endTime - startTime} ms"
+            )
+        }
+
+
+
         if (enableControlNetFeat) {
             startTime = System.currentTimeMillis()
             controlNetModelList =
@@ -1256,7 +1269,6 @@ object DrawViewModel {
                 "Call time for fetchControlNetModuleDetail: ${endTime - startTime} ms"
             )
         }
-
         startTime = System.currentTimeMillis()
         options = getApiClient().getOptions().body()
         endTime = System.currentTimeMillis()

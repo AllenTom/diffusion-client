@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -243,7 +242,7 @@ fun ModelListScreen(navController: NavController) {
                             contentDescription = "menu",
                         )
                     }
-                    if (AppConfigStore.config.enablePlugin) {
+                    if (DrawViewModel.enableDiffusionHelperFeat) {
                         DropdownMenu(
                             expanded = isMoreMenuDisplay,
                             onDismissRequest = { isMoreMenuDisplay = false }

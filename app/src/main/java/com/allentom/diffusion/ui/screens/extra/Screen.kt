@@ -413,7 +413,7 @@ fun ExtraScreen() {
                                         )
                                         .clickable {
                                             ExtraViewModel.inputImages =
-                                                ExtraViewModel.inputImages.mapIndexed() { index, item ->
+                                                ExtraViewModel.inputImages.mapIndexed { index, item ->
                                                     if (index == idx) {
                                                         item.copy(isExport = !item.isExport)
                                                     } else {

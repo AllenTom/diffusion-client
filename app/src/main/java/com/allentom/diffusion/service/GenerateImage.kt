@@ -28,7 +28,7 @@ fun applyControlParams(
     alwaysonScripts: AlwaysonScripts,
     controlNetParam: ControlNetParam?
 ): AlwaysonScripts {
-    if (controlNetParam != null) {
+    if (controlNetParam != null && controlNetParam.slots.isNotEmpty()) {
         alwaysonScripts.controlNet = ControlNetWrapper(
             args = controlNetParam.slots.map {
                 ControlNetArg(

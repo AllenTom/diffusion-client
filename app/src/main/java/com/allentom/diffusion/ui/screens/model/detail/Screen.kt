@@ -49,13 +49,13 @@ import coil.compose.AsyncImage
 import com.allentom.diffusion.R
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import com.allentom.diffusion.composables.CivitaiModelSelectDialog
-import com.allentom.diffusion.composables.LoraSelectDialog
 import com.allentom.diffusion.composables.DrawBar
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.ModelStore
 import com.allentom.diffusion.ui.parts.CivitaiImageGrid
 import com.allentom.diffusion.ui.parts.CivitaiModelView
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageFilterPanel
+import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -249,7 +249,7 @@ fun ModelDetailScreen(navController: NavController, id: Long) {
                                 isMoreMenuDisplay = false
                             }
                         )
-                        if (AppConfigStore.config.enablePlugin) {
+                        if (DrawViewModel.enableDiffusionHelperFeat) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.auto_match_with_civitai)) },
                                 onClick = {

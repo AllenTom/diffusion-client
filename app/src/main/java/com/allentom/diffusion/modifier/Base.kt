@@ -1,4 +1,4 @@
-package com.allentom.diffusion.modifier;
+package com.allentom.diffusion.modifier
 
 import android.content.Context
 import com.allentom.diffusion.R

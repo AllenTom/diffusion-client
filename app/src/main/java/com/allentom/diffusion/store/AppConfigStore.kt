@@ -14,7 +14,6 @@ data class AppConfig(
     val reactorImageHistory: ReactorParam? = null,
     val isInitPrompt: Boolean = true,
     val saveCivitaiImageFilter: CivitaiImageFilter? = null,
-    val enablePlugin: Boolean = false,
     val modelViewDisplayMode: String = "Crop",
     val loraViewDisplayMode: String = "Crop",
     val promptDetailViewDisplayMode:String = "Crop",

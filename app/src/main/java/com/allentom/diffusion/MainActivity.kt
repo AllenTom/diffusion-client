@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
             val sc: SSLContext = SSLContext.getInstance("TLS")
             // trustAllCerts信任所有的证书
             sc.init(null, trustAllCerts, SecureRandom())
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.socketFactory)
 
             HttpsURLConnection.setDefaultHostnameVerifier(object : HostnameVerifier {
                 override fun verify(p0: String?, p1: SSLSession?): Boolean {

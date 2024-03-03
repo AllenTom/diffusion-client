@@ -50,7 +50,7 @@ fun MaskDrawOptionItem(
         InpaintDialog(
             onDismiss = { showDialog = false },
             onConfirm = {
-                showDialog = false;
+                showDialog = false
                 onConfirm(it)
             },
             backgroundImageBase64 = backgroundImageBase64,

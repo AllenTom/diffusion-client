@@ -111,7 +111,7 @@ object StyleStore {
         val database = AppDatabaseHelper.getDatabase(context)
         val style = database.styleDao().getById(styleId) ?: return
         style.prompts.forEach { prompt ->
-            val promptId = prompt.promptId ?: return@forEach
+            val promptId = prompt.promptId
             val crossRef = StylePromptCrossRef(styleId, promptId)
             database.stylePromptDao().delete(crossRef)
         }
@@ -122,7 +122,7 @@ object StyleStore {
         val database = AppDatabaseHelper.getDatabase(context)
         var style = database.styleDao().getById(styleId) ?: return
         style.prompts.forEach { prompt ->
-            val promptId = prompt.promptId ?: return@forEach
+            val promptId = prompt.promptId
             val crossRef = StylePromptCrossRef(styleId, promptId)
             database.stylePromptDao().delete(crossRef)
         }

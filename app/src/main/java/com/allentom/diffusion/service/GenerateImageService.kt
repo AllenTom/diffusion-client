@@ -71,7 +71,4 @@ class GenerateImageService : Service() {
         return null
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }

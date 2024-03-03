@@ -31,7 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.R
-import com.allentom.diffusion.api.entity.ControlType
 import com.allentom.diffusion.composables.ImageBase64PickupOptionItem
 import com.allentom.diffusion.composables.SliderOptionItem
 import com.allentom.diffusion.composables.SwitchOptionItem

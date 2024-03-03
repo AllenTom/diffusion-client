@@ -122,7 +122,7 @@ object ControlNetStore {
             val savePath = Util.saveControlNetToAppData(context, uri)
             var previewPath = ""
             if (previewUri != null) {
-                previewPath = Util.saveControlNetPreviewToAppData(context,previewUri!!,imageMd5)
+                previewPath = Util.saveControlNetPreviewToAppData(context, previewUri,imageMd5)
             }
             val controlNetId = db.controlNetDao().insert(
                 ControlNetEntity(
