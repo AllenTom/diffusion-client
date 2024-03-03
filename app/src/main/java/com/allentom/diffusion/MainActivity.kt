@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import com.allentom.diffusion.api.civitai.CivitaiApiHelper
 import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.modifier.registerModifier
+import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.ControlNetStore
 import com.allentom.diffusion.ui.screens.civitai.CivitaiModelImageScreen
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageDetailScreen
@@ -53,12 +54,58 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 class MainActivity : ComponentActivity() {
+
+    fun handleSSLHandshake() {
+        try {
+            var trustAllCerts:Array<TrustManager> = arrayOf<TrustManager>(object: X509TrustManager {
+                override fun checkClientTrusted(p0: Array<out X509Certificate>?, p1: String?) {
+
+                }
+
+                override fun checkServerTrusted(p0: Array<out X509Certificate>?, p1: String?) {
+
+                }
+
+                override fun getAcceptedIssuers(): Array<X509Certificate?> {
+                    val arrayOfNulls = arrayOfNulls<X509Certificate?>(0)
+                    return arrayOfNulls
+                }
+
+            })
+
+            val sc: SSLContext = SSLContext.getInstance("TLS")
+            // trustAllCerts信任所有的证书
+            sc.init(null, trustAllCerts, SecureRandom())
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+
+            HttpsURLConnection.setDefaultHostnameVerifier(object : HostnameVerifier {
+                override fun verify(p0: String?, p1: SSLSession?): Boolean {
+                    return true
+                }
+
+            })
+
+        }catch (e:Exception){
+
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        handleSSLHandshake()
+        AppConfigStore.refresh(this)
         ConstValues.initValues(this)
         setContent {
             DiffusionTheme {

@@ -18,6 +18,7 @@ data class AppConfig(
     val modelViewDisplayMode: String = "Crop",
     val loraViewDisplayMode: String = "Crop",
     val promptDetailViewDisplayMode:String = "Crop",
+    val disbaleSSLVerification: Boolean = false
 )
 
 object AppConfigStore {

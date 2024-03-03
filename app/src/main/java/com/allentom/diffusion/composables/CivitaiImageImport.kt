@@ -354,7 +354,9 @@ fun CivitaiImageImport(
         scope.launch() {
             useModel?.let {
                 it.model?.let {
-                    DrawViewModel.switchModel(it.modelName)
+                    if (it.title != DrawViewModel.useModelName) {
+                        DrawViewModel.switchModel(it.title)
+                    }
                 }
             }
             Toast.makeText(context, context.getString(R.string.params_applied), Toast.LENGTH_SHORT).show()

@@ -321,4 +321,6 @@
     <string name="civitai_resources">Resources</string>
     <string name="parameters">Parameters</string>
     <string name="import_from_civitai_image">Import from civitai image</string>
+    <string name="disable_ssl_verification">Disable SSL Verification</string>
+    <string name="options">Options</string>
 </resources>

@@ -1,8 +1,10 @@
 package com.allentom.diffusion.ui.screens.login
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,14 +13,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,12 +50,15 @@ import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
     var urlInput by remember { mutableStateOf("") }
     var urlList by remember { mutableStateOf(emptyList<String>()) }
     var isLoading by remember { mutableStateOf(true) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var optionModalOpen by remember { mutableStateOf(false) }
+    var disableSSLVerification by remember { mutableStateOf(AppConfigStore.config.disbaleSSLVerification) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     fun completeUrl(url: String): String {
@@ -59,6 +68,7 @@ fun LoginScreen(navController: NavController) {
             "http://$url"
         }
     }
+
     suspend fun onGoToUrl(url: String) {
         isLoading = true
         val apiUrl = completeUrl(url)
@@ -99,13 +109,49 @@ fun LoginScreen(navController: NavController) {
 
     }
     LaunchedEffect(Unit) {
-        AppConfigStore.refresh(context)
         urlList = AppConfigStore.config.saveUrls
         val lastUrl = AppConfigStore.config.sdwUrl
         if (lastUrl != null && lastUrl != "") {
             onGoToUrl(lastUrl)
         } else {
             isLoading = false
+        }
+    }
+
+    if (optionModalOpen) {
+        ModalBottomSheet(onDismissRequest = {
+            optionModalOpen = false
+        }) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(text = stringResource(R.string.options), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.disable_ssl_verification),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = disableSSLVerification,
+                        onCheckedChange = {
+                            AppConfigStore.updateAndSave(context) {
+                                disableSSLVerification = it.disbaleSSLVerification.not()
+                                it.copy(disbaleSSLVerification = it.disbaleSSLVerification.not())
+                            }
+                        }
+                    )
+                }
+            }
         }
     }
     Scaffold(
@@ -139,17 +185,30 @@ fun LoginScreen(navController: NavController) {
                         onValueChange = { urlInput = it },
                         label = { Text(stringResource(R.string.login_url)) },
                         trailingIcon = {
-                            IconButton(onClick = {
-                                scope.launch {
-                                    onGoToUrl(urlInput)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                IconButton(onClick = {
+                                    optionModalOpen = true
+                                }) {
+                                    Icon(Icons.Filled.Settings, contentDescription = null)
                                 }
-                            }) {
-                                Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        onGoToUrl(urlInput)
+                                    }
+                                }) {
+                                    Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                                }
                             }
+
                         },
                     )
                     Spacer(modifier = Modifier.height(32.dp))
-                    Text(text = stringResource(R.string.login_history_url), fontWeight = FontWeight.W400)
+                    Text(
+                        text = stringResource(R.string.login_history_url),
+                        fontWeight = FontWeight.W400
+                    )
                     LazyColumn {
                         items(urlList.size) {
                             ListItem(
@@ -162,17 +221,17 @@ fun LoginScreen(navController: NavController) {
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(0.dp)
                                     .clickable {
                                         scope.launch {
                                             onGoToUrl(urlList[it])
                                         }
-                                    }
+                                    },
                             )
                         }
                     }
                 }
             }
+
             Spacer(modifier = Modifier.weight(1f))
         }
 
