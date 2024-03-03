@@ -323,4 +323,7 @@
     <string name="import_from_civitai_image">Import from civitai image</string>
     <string name="disable_ssl_verification">Disable SSL Verification</string>
     <string name="options">Options</string>
+    <string name="enable_auth">Enable auth</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
 </resources>

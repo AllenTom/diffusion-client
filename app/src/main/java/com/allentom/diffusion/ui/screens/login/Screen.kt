@@ -44,11 +44,14 @@ import androidx.navigation.NavController
 import com.allentom.diffusion.R
 import com.allentom.diffusion.Screens
 import com.allentom.diffusion.api.ApiHelper
+import com.allentom.diffusion.api.entity.SDWError
 import com.allentom.diffusion.api.getApiClient
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.Credentials
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +62,9 @@ fun LoginScreen(navController: NavController) {
     val snackbarHostState = remember { SnackbarHostState() }
     var optionModalOpen by remember { mutableStateOf(false) }
     var disableSSLVerification by remember { mutableStateOf(AppConfigStore.config.disbaleSSLVerification) }
+    var enableAuth by remember { mutableStateOf(false) }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     fun completeUrl(url: String): String {
@@ -72,20 +78,40 @@ fun LoginScreen(navController: NavController) {
     suspend fun onGoToUrl(url: String) {
         isLoading = true
         val apiUrl = completeUrl(url)
-        ApiHelper.createTestInstance(apiUrl)
+        var auth: String? = null
+        AppConfigStore.config.saveAuths.get(apiUrl)?.let {
+            auth = it
+        }
+        if (enableAuth) {
+            auth = Credentials.basic(username, password)
+        }
+        ApiHelper.createTestInstance(apiUrl, auth)
         try {
             val options = getApiClient().getOptions()
+            if (!options.isSuccessful) {
+                options.errorBody()?.let {
+                    val gson = Gson()
+                    val error = gson.fromJson(it.string(), SDWError::class.java)
+                    throw Exception(error.detail)
+                }
+                throw Exception("Connection error")
+            }
+
             AppConfigStore.config = AppConfigStore.config.copy(
                 sdwUrl = apiUrl,
                 saveUrls = AppConfigStore.config.saveUrls.toMutableList().filter { existUrl ->
                     existUrl != apiUrl
                 }.toMutableList().apply {
                     add(0, apiUrl)
+                },
+                saveAuths = AppConfigStore.config.saveAuths.toMutableMap().apply {
+                    auth?.let {
+                        put(apiUrl, it)
+                    }
                 }
             )
             AppConfigStore.saveData(context)
-            ApiHelper.createInstance(apiUrl)
-
+            ApiHelper.createInstance(apiUrl, auth)
             scope.launch(Dispatchers.IO) {
                 DrawViewModel.initViewModel(context)
                 scope.launch(Dispatchers.Main) {
@@ -95,12 +121,12 @@ fun LoginScreen(navController: NavController) {
                         }
                     }
                 }
-
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             isLoading = false
             snackbarHostState.showSnackbar(
-                message = "Connection error",
+                message ="Error: " + e.message.toString(),
             )
             return
         } finally {
@@ -129,7 +155,11 @@ fun LoginScreen(navController: NavController) {
                         .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(text = stringResource(R.string.options), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(R.string.options),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
                 Row(
                     modifier = Modifier
@@ -148,6 +178,23 @@ fun LoginScreen(navController: NavController) {
                                 disableSSLVerification = it.disbaleSSLVerification.not()
                                 it.copy(disbaleSSLVerification = it.disbaleSSLVerification.not())
                             }
+                        }
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.enable_auth),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = enableAuth,
+                        onCheckedChange = {
+                            enableAuth = it
                         }
                     )
                 }
@@ -204,6 +251,25 @@ fun LoginScreen(navController: NavController) {
 
                         },
                     )
+                    if (enableAuth) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            value = username,
+                            onValueChange = { username = it },
+                            label = { Text(stringResource(R.string.username)) },
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            value = password,
+                            onValueChange = { password = it },
+                            label = { Text(stringResource(R.string.password)) },
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(
                         text = stringResource(R.string.login_history_url),

@@ -6,10 +6,10 @@ import com.allentom.diffusion.ui.screens.extra.ExtraImageParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-
 data class AppConfig(
     val sdwUrl: String? = null,
     val saveUrls: List<String> = emptyList(),
+    val saveAuths:Map<String, String> = emptyMap(),
     val extraImageHistory: ExtraImageParam? = null,
     val reactorImageHistory: ReactorParam? = null,
     val isInitPrompt: Boolean = true,

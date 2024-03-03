@@ -1,7 +1,10 @@
 package com.allentom.diffusion.api
 
 import com.allentom.diffusion.store.AppConfigStore
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.security.SecureRandom
@@ -11,6 +14,14 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
+class BasicAuthInterceptor(val token:String) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request: Request = chain.request()
+        val authenticatedRequest: Request = request.newBuilder()
+            .header("Authorization", token).build()
+        return chain.proceed(authenticatedRequest)
+    }
+}
 
 object ApiHelper {
     private var trustAllCerts: Array<TrustManager> = arrayOf(
@@ -27,7 +38,7 @@ object ApiHelper {
         }
     )
     lateinit var instance: Retrofit
-    fun createInstance(baseUrl: String) {
+    fun createInstance(baseUrl: String,auth: String?) {
         val sslContext = SSLContext.getInstance("SSL")
         sslContext.init(null, trustAllCerts, SecureRandom())
         val client = OkHttpClient.Builder()
@@ -40,6 +51,9 @@ object ApiHelper {
                     sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
                     hostnameVerifier { hostname, session -> true }
                 }
+                if (auth != null) {
+                    addInterceptor(BasicAuthInterceptor(auth))
+                }
             }
             .build()
         instance = Retrofit.Builder().baseUrl(baseUrl)
@@ -48,7 +62,7 @@ object ApiHelper {
             .build()
     }
 
-    fun createTestInstance(baseUrl: String) {
+    fun createTestInstance(baseUrl: String, auth: String?) {
         val sslContext = SSLContext.getInstance("SSL")
         sslContext.init(null, trustAllCerts, SecureRandom())
         val client = OkHttpClient.Builder()
@@ -56,6 +70,9 @@ object ApiHelper {
                 if (AppConfigStore.config.disbaleSSLVerification) {
                     sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
                     hostnameVerifier { hostname, session -> true }
+                }
+                if (auth != null) {
+                    addInterceptor(BasicAuthInterceptor(auth))
                 }
             }
             .build()

@@ -324,4 +324,7 @@
     <string name="import_from_civitai_image">导入 Civitai 图片</string>
     <string name="disable_ssl_verification">关闭 SSL 证书认证</string>
     <string name="options">选项</string>
+    <string name="enable_auth">启用用户认证</string>
+    <string name="username">用户名</string>
+    <string name="password">密码</string>
 </resources>
