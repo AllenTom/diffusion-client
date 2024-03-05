@@ -1,6 +1,8 @@
 package com.allentom.diffusion.api.translate
 
+import com.allentom.diffusion.api.translate.baidutranslate.BaiduTranslator
 import com.allentom.diffusion.api.translate.googletranslate.GoogleTranslator
+import com.allentom.diffusion.store.AppConfigStore
 
 
 data class TranslateResult(
@@ -18,10 +20,16 @@ class TranslateHelper {
     companion object {
         lateinit var currentTranslator: Translator
         fun initTranslator() {
-            currentTranslator = GoogleTranslator()
+            when (AppConfigStore.config.translateEngine) {
+                "Google" -> {
+                    currentTranslator = GoogleTranslator()
+                }
+                "Baidu" -> {
+                     currentTranslator = BaiduTranslator()
+                }
+            }
             currentTranslator.init()
         }
-
         fun getTranslator(): Translator {
             return this.currentTranslator
         }

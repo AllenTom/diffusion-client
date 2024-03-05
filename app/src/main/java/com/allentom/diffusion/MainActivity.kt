@@ -64,46 +64,12 @@ import javax.net.ssl.X509TrustManager
 
 class MainActivity : ComponentActivity() {
 
-    fun handleSSLHandshake() {
-        try {
-            var trustAllCerts:Array<TrustManager> = arrayOf<TrustManager>(object: X509TrustManager {
-                override fun checkClientTrusted(p0: Array<out X509Certificate>?, p1: String?) {
 
-                }
-
-                override fun checkServerTrusted(p0: Array<out X509Certificate>?, p1: String?) {
-
-                }
-
-                override fun getAcceptedIssuers(): Array<X509Certificate?> {
-                    val arrayOfNulls = arrayOfNulls<X509Certificate?>(0)
-                    return arrayOfNulls
-                }
-
-            })
-
-            val sc: SSLContext = SSLContext.getInstance("TLS")
-            // trustAllCerts信任所有的证书
-            sc.init(null, trustAllCerts, SecureRandom())
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.socketFactory)
-
-            HttpsURLConnection.setDefaultHostnameVerifier(object : HostnameVerifier {
-                override fun verify(p0: String?, p1: SSLSession?): Boolean {
-                    return true
-                }
-
-            })
-
-        }catch (e:Exception){
-
-        }
-    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        handleSSLHandshake()
         AppConfigStore.refresh(this)
         ConstValues.initValues(this)
         setContent {
@@ -112,7 +78,6 @@ class MainActivity : ComponentActivity() {
             }
         }
         TranslateHelper.initTranslator()
-
         ControlNetStore.refresh(this)
         DrawViewModel.init(this)
         val scope = lifecycleScope

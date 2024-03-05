@@ -331,4 +331,9 @@
     <string name="result">结果</string>
     <string name="translate">翻译</string>
     <string name="input">输入</string>
+    <string name="translate_engine">翻译引擎</string>
+    <string name="baidu_app_key">APP ID</string>
+    <string name="baidu_secret_key">密钥</string>
+    <string name="baidu_translate_option_dialog_title">百度翻译配置</string>
+    <string name="baidu_translate_option">配置百度翻译</string>
 </resources>

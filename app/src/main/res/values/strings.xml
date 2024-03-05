@@ -330,4 +330,9 @@
     <string name="result">Result</string>
     <string name="translate">Translate</string>
     <string name="input">Input</string>
+    <string name="translate_engine">Translate engine</string>
+    <string name="baidu_app_key">APP ID</string>
+    <string name="baidu_secret_key">Secret</string>
+    <string name="baidu_translate_option_dialog_title">Baidu translate option</string>
+    <string name="baidu_translate_option">Config baidu translate option</string>
 </resources>
