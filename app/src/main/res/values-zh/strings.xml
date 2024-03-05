@@ -327,4 +327,8 @@
     <string name="enable_auth">启用用户认证</string>
     <string name="username">用户名</string>
     <string name="password">密码</string>
+    <string name="translate_failed">翻译出错</string>
+    <string name="result">结果</string>
+    <string name="translate">翻译</string>
+    <string name="input">输入</string>
 </resources>

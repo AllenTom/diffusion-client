@@ -1,6 +1,7 @@
 package com.allentom.diffusion.store
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.Insert

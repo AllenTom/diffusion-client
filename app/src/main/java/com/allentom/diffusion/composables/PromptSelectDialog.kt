@@ -59,8 +59,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -438,19 +440,21 @@ fun PromptEditPanel(
     @Composable
     fun secondContent() {
         Column(
-            modifier = Modifier.thenIf(
-                isWideDisplay,
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ).thenIf(
-                !isWideDisplay,
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 300.dp)
-                    .verticalScroll(rememberScrollState())
+            modifier = Modifier
+                .thenIf(
+                    isWideDisplay,
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                )
+                .thenIf(
+                    !isWideDisplay,
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp)
+                        .verticalScroll(rememberScrollState())
 
-            )
+                )
         ) {
             if (selectPromptIndex != null) {
                 selectedPromptList.find { it.randomId == selectPromptIndex }
@@ -638,7 +642,9 @@ fun PromptLibraryPanel(
         mutableStateOf(false)
     }
     val searchTypeItems = listOf("prompt", "style")
-
+    var translateDialogShow by remember {
+        mutableStateOf(false)
+    }
     fun refreshSearchResult() {
         scope.launch(Dispatchers.IO) {
             when (searchType) {
@@ -672,10 +678,37 @@ fun PromptLibraryPanel(
             }
         }
     }
+
+    if (translateDialogShow) {
+        TranslateDialog(
+            onDismiss = {
+                translateDialogShow = false
+            },
+            onConfirm = {
+                inputPromptText = it
+                translateDialogShow = false
+                refreshSearchResult()
+            },
+            initialText = inputPromptText
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        Row {
+            Row {
+                IconButton(onClick = {
+                    translateDialogShow = true
+                }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_translate),
+                        contentDescription = null
+                    )
+
+                }
+            }
+        }
         regionParam?.let {
             if (regionParam.enable) {
                 Row(

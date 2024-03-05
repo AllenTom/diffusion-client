@@ -1,19 +1,27 @@
 package com.allentom.diffusion.composables
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.prompt.Prompt
 
+
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun PromptChip(
     prompt: Prompt,
     onClickPrompt: ((Prompt) -> Unit)? = {},
@@ -21,20 +29,36 @@ fun PromptChip(
     tail: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    FilterChip(
-        modifier = modifier,
-        selected = selected,
-        leadingIcon = {
-            if (prompt.piority != 0) {
-                Text(text = prompt.piority.toString())
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+
+            .thenIf(selected, Modifier.background(MaterialTheme.colorScheme.primaryContainer))
+            .thenIf(
+                !selected,
+                Modifier.border(
+                    1.dp,
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(8.dp)
+                )
+            )
+            .clickable {
+                onClickPrompt?.invoke(prompt)
             }
-        },
-        onClick = {
-            onClickPrompt?.invoke(prompt)
-        },
-        label = {
+            .padding(8.dp)
+    ) {
+        Row(
+            modifier = Modifier,
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        ) {
+            Box {
+                if (prompt.piority != 0) {
+                    Text(text = prompt.piority.toString(), fontSize = 12.sp)
+                }
+            }
+            Spacer(modifier = Modifier.width(2.dp))
             Column(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.weight(1f, fill = false)
             ) {
                 Text(
                     text = prompt.getTranslationText(),
@@ -43,9 +67,7 @@ fun PromptChip(
                 )
                 Text(text = prompt.text)
             }
-        },
-        trailingIcon = {
             tail?.invoke()
         }
-    )
+    }
 }

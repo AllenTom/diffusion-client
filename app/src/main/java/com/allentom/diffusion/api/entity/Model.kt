@@ -7,6 +7,6 @@ import java.io.Serializable
 data class Model(
     @SerializedName("title") val title: String,
     @SerializedName("model_name") val modelName: String,
-    @SerializedName("sha256") val sha256: String,
+    @SerializedName("sha256") val sha256: String?,
     val entity:ModelEntity
 ):Serializable

@@ -8,10 +8,8 @@ import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
@@ -20,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.allentom.diffusion.api.civitai.CivitaiApiHelper
 import com.allentom.diffusion.api.getApiClient
+import com.allentom.diffusion.api.translate.TranslateHelper
 import com.allentom.diffusion.modifier.registerModifier
 import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.ControlNetStore
@@ -112,6 +111,7 @@ class MainActivity : ComponentActivity() {
                 DiffusionApp()
             }
         }
+        TranslateHelper.initTranslator()
 
         ControlNetStore.refresh(this)
         DrawViewModel.init(this)

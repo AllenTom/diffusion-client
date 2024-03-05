@@ -326,4 +326,8 @@
     <string name="enable_auth">Enable auth</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="translate_failed">Translate failed</string>
+    <string name="result">Result</string>
+    <string name="translate">Translate</string>
+    <string name="input">Input</string>
 </resources>

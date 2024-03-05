@@ -157,7 +157,7 @@ fun CivitaiImageImport(
                                 "model" -> {
                                     val model = it.hash?.let { hash ->
                                         DrawViewModel.models.find { model ->
-                                            model.sha256.startsWith(hash)
+                                            model.sha256?.startsWith(hash) ?: false
                                         }
                                     }
                                     resources = resources + ImportResource(
