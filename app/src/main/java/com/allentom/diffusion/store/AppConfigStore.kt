@@ -1,6 +1,7 @@
 package com.allentom.diffusion.store
 
 import android.content.Context
+import com.allentom.diffusion.api.translate.TranslateLanguages
 import com.allentom.diffusion.ui.screens.civitai.images.CivitaiImageFilter
 import com.allentom.diffusion.ui.screens.extra.ExtraImageParam
 import com.allentom.diffusion.ui.screens.home.tabs.draw.ReactorParam
@@ -22,6 +23,8 @@ data class AppConfig(
     var translateEngine: String = "Google",
     var baiduTranslateAppId: String = "",
     var baiduTranslateSecretKey: String = "",
+    var onlyDisplayTranslateOnPromptSelectDialog: Boolean = true,
+    val preferredLanguage: TranslateLanguages = TranslateLanguages.English
 )
 
 object AppConfigStore {

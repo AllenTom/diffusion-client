@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.allentom.diffusion.ConstValues
 import com.allentom.diffusion.MainActivity
 import com.allentom.diffusion.R
 import com.allentom.diffusion.api.translate.TranslateHelper
@@ -38,6 +39,7 @@ import com.allentom.diffusion.store.AppConfigStore
 fun SettingScreen() {
     val context = LocalContext.current
     var translateEngine by remember { mutableStateOf(AppConfigStore.config.translateEngine) }
+    var preferredLanguage by remember { mutableStateOf(AppConfigStore.config.preferredLanguage) }
     fun onLogOut(context: Context) {
         AppConfigStore.config = AppConfigStore.config.copy(sdwUrl = "")
         AppConfigStore.saveData(context)
@@ -85,7 +87,7 @@ fun SettingScreen() {
                     value = translateEngine,
                     options = listOf("Google", "Baidu"),
                     onValueChange = {
-                        AppConfigStore.updateAndSave(context) {config ->
+                        AppConfigStore.updateAndSave(context) { config ->
                             config.copy(translateEngine = it)
                         }
                         translateEngine = it
@@ -103,6 +105,19 @@ fun SettingScreen() {
                             )
                         }
                     )
+                }
+                TextPickUpItem(
+                    label = stringResource(R.string.preferred_language),
+                    value = preferredLanguage,
+                    onGetDisplayValue = { _, value ->
+                        ConstValues.TranslateLangs[value] ?: value.name
+                    },
+                    options = TranslateHelper.getToLanguage()
+                ) { selectVal ->
+                    preferredLanguage = selectVal
+                    AppConfigStore.updateAndSave(context) {
+                        it.copy(preferredLanguage = selectVal)
+                    }
                 }
                 Spacer(modifier = Modifier.padding(top = 16.dp))
                 Button(

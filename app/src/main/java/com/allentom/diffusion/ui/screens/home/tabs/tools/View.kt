@@ -98,7 +98,7 @@ fun TabTools(navController: NavController) {
             modifier = Modifier.clickable {
                 navController.navigate(Screens.StylesScreen.route)
             },
-            headlineContent = { Text("Styles") },
+            headlineContent = { Text(stringResource(R.string.styles_library)) },
             leadingContent = { Icon(promptStyleIcon, contentDescription = "Styles") }
         )
         ListItem(

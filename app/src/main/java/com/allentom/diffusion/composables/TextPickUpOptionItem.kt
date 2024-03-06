@@ -28,20 +28,28 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.extension.thenIf
 
 @Composable
-fun TextPickUpItem(
+fun <T : Any> TextPickUpItem(
     label: String,
-    value: String?,
+    value: T?,
     title: String = label,
-    options: List<String>,
+    options: List<T>,
     modifier: Modifier = Modifier,
     fullWidth: Boolean = true,
-    onGetDisplayValue: (index: Int, value: String) -> String = { _, newVal -> newVal },
-    onValueChange: (String) -> Unit = {}
+    onGetDisplayValue: (index: Int, value: T) -> String = { _, newVal -> newVal.toString() },
+    onValueChange: (T) -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    fun displayValue():String{
+        options.forEachIndexed { index, t ->
+            if (t == value) {
+                return onGetDisplayValue(index, t)
+            }
+        }
+        return ""
+    }
     OptionDisplay(
         label = label,
-        value = value.toString(),
+        value = displayValue(),
         modifier = modifier,
         fullWidth = fullWidth,
     ) {

@@ -27,6 +27,7 @@ fun PromptChip(
     onClickPrompt: ((Prompt) -> Unit)? = {},
     selected: Boolean = false,
     tail: (@Composable () -> Unit)? = null,
+    onlyShowTranslation: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -38,7 +39,7 @@ fun PromptChip(
                 !selected,
                 Modifier.border(
                     1.dp,
-                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(8.dp)
                 )
             )
@@ -56,16 +57,28 @@ fun PromptChip(
                     Text(text = prompt.piority.toString(), fontSize = 12.sp)
                 }
             }
-            Spacer(modifier = Modifier.width(2.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Column(
                 modifier = Modifier.weight(1f, fill = false)
             ) {
-                Text(
-                    text = prompt.getTranslationText(),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                )
-                Text(text = prompt.text)
+                if (onlyShowTranslation) {
+                    Text(text = prompt.getTranslationText())
+                } else {
+                    if (prompt.getTranslationText() != prompt.text) {
+                        Text(
+                            text = prompt.getTranslationText(),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        )
+                    } else {
+                        Text(
+                            "No translation",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                    }
+
+                    Text(text = prompt.text)
+                }
             }
             tail?.invoke()
         }

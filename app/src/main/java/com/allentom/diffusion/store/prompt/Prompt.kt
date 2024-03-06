@@ -80,7 +80,7 @@ data class SavePrompt(
         fun fromPrompt(prompt: Prompt): SavePrompt {
             return SavePrompt(
                 text = prompt.text,
-                nameCn = prompt.text,
+                nameCn = prompt.translation ?: prompt.text,
                 time = System.currentTimeMillis(),
                 count = 0,
                 category = "User"
@@ -119,7 +119,7 @@ interface PromptDao {
     fun update(prompt: SavePrompt)
 
     @Query("SELECT * FROM prompt")
-    fun getAllNotes(): Flow<List<SavePrompt>>
+    fun getAllPrompts(): Flow<List<SavePrompt>>
 
     @Query("SELECT * FROM prompt WHERE text = :text limit 1")
     fun getLibraryPrompt(text: String): SavePrompt?

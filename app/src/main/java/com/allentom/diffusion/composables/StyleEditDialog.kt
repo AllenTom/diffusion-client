@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -45,8 +46,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -83,9 +86,72 @@ fun StyleEditDialog(
         mutableStateOf(0)
     }
 
-    var editMode by remember {
+    var selectMode by remember {
         mutableStateOf(false)
     }
+    var selectedPromptIds by remember {
+        mutableStateOf<List<String>>(emptyList())
+    }
+    var deleteSelectedPromptConfirmDialog by remember {
+        mutableStateOf(false)
+    }
+
+    fun deleteSelectedPrompt() {
+        inputStylePrompt = inputStylePrompt.copy(
+            prompts = inputStylePrompt.prompts.filter {
+                it.randomId !in selectedPromptIds
+            }
+        )
+    }
+
+
+    fun selectAllPrompt() {
+        selectedPromptIds = inputStylePrompt.prompts.map { it.randomId }
+    }
+
+    fun onCloseSelectMode() {
+        selectMode = false
+        selectedPromptIds = emptyList()
+    }
+
+    if (deleteSelectedPromptConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                deleteSelectedPromptConfirmDialog = false
+            },
+            title = {
+                Text(text = stringResource(R.string.delete_confirm))
+            },
+            text = {
+                Text(
+                    text = stringResource(
+                        R.string.are_you_sure_to_delete_selected_prompts,
+                        selectedPromptIds.size
+                    )
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    deleteSelectedPrompt()
+                    onCloseSelectMode()
+                    deleteSelectedPromptConfirmDialog = false
+                }) {
+                    Text(text = stringResource(id = R.string.confirm))
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    deleteSelectedPromptConfirmDialog = false
+                }) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            }
+        )
+    }
+
+
+
+
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -154,25 +220,55 @@ fun StyleEditDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            IconButton(onClick = {
-                                editMode = !editMode
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = null,
-                                )
+                            if (!selectMode) {
+                                IconButton(onClick = {
+                                    selectMode = !selectMode
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            IconButton(onClick = {
-                                inputStylePrompt = inputStylePrompt.copy(
-                                    prompts = emptyList()
-                                )
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = null,
-                                )
+                            if (selectMode) {
+                                IconButton(
+                                    enabled = selectedPromptIds.isNotEmpty(),
+                                    onClick = {
+                                        deleteSelectedPromptConfirmDialog = true
+                                    }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null,
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(onClick = {
+                                    selectAllPrompt()
+                                }) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(R.drawable.ic_select_all),
+                                        contentDescription = null,
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(onClick = {
+                                    onCloseSelectMode()
+                                }) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(R.drawable.ic_unselect_all),
+                                        contentDescription = null,
+                                    )
+                                }
+                                IconButton(onClick = {
+                                    selectMode = !selectMode
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
+
                         }
                         Column(
                             modifier = Modifier
@@ -182,19 +278,20 @@ fun StyleEditDialog(
                             PromptEditContainer(
                                 promptList = inputStylePrompt.prompts,
                                 onPromptClick = {
+                                    if (selectMode) {
+                                        if (it.randomId in selectedPromptIds) {
+                                            selectedPromptIds = selectedPromptIds.filter {id ->
+                                                id != it.randomId
+                                            }
+                                        } else {
+                                            selectedPromptIds = selectedPromptIds + it.randomId
+                                        }
+                                    }
 
                                 },
                                 isItemSelected = {
-                                    false
+                                    it.randomId in selectedPromptIds
                                 },
-                                onPromptDelete = { prompt ->
-                                    inputStylePrompt = inputStylePrompt.copy(
-                                        prompts = inputStylePrompt.prompts.filter {
-                                            it.randomId != prompt.randomId
-                                        }
-                                    )
-                                },
-                                editMode = editMode
                             )
 
                         }

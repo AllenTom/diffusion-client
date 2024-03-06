@@ -1,6 +1,7 @@
 package com.allentom.diffusion
 
 import android.content.Context
+import com.allentom.diffusion.api.translate.TranslateLanguages
 
 object ConstValues {
     lateinit var Img2ImgResizeModeList: List<String>
@@ -14,6 +15,7 @@ object ConstValues {
     lateinit var AdetailerMaskMergeOptions: List<String>
     lateinit var HiresFixModeList: List<String>
     lateinit var SearchTypeMapping: Map<String, String>
+    lateinit var TranslateLangs: Map<TranslateLanguages,String>
     fun initValues(context: Context) {
         Img2ImgResizeModeList = listOf(
             context.getString(R.string.just_resize),
@@ -73,6 +75,37 @@ object ConstValues {
             context.getString(R.string.scale_to_fit_inner_fit),
             context.getString(R.string.envelope_outer_fit),
         )
+        TranslateLangs = mapOf(
+            TranslateLanguages.Auto to context.getString(R.string.auto),
+            TranslateLanguages.Chinese to context.getString(R.string.chinese),
+            TranslateLanguages.English to context.getString(R.string.english),
+            TranslateLanguages.Korean to context.getString(R.string.korean),
+            TranslateLanguages.Japanese to context.getString(R.string.japanese),
+            TranslateLanguages.French to context.getString(R.string.french),
+            TranslateLanguages.Spanish to context.getString(R.string.spanish),
+            TranslateLanguages.Thai to context.getString(R.string.thai),
+            TranslateLanguages.Arabic to context.getString(R.string.arabic),
+            TranslateLanguages.Russian to context.getString(R.string.russian),
+            TranslateLanguages.Portuguese to context.getString(R.string.portuguese),
+            TranslateLanguages.German to context.getString(R.string.german),
+            TranslateLanguages.Italian to context.getString(R.string.italian),
+            TranslateLanguages.Greek to context.getString(R.string.greek),
+            TranslateLanguages.Dutch to context.getString(R.string.dutch),
+            TranslateLanguages.Polish to context.getString(R.string.polish),
+            TranslateLanguages.Bulgarian to context.getString(R.string.bulgarian),
+            TranslateLanguages.Estonian to context.getString(R.string.estonian),
+            TranslateLanguages.Danish to context.getString(R.string.danish),
+            TranslateLanguages.Finnish to context.getString(R.string.finnish),
+            TranslateLanguages.Czech to context.getString(R.string.czech),
+            TranslateLanguages.Romanian to context.getString(R.string.romanian),
+            TranslateLanguages.Slovenian to context.getString(R.string.slovenian),
+            TranslateLanguages.Swedish to context.getString(R.string.swedish),
+            TranslateLanguages.Hungarian to context.getString(R.string.hungarian),
+            TranslateLanguages.TraditionalChinese to context.getString(R.string.traditional_chinese),
+            TranslateLanguages.Vietnamese to context.getString(R.string.vietnamese)
+        )
 
     }
+
+
 }

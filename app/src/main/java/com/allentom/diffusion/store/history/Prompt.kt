@@ -98,7 +98,12 @@ fun savePrompt(context: Context, historyId: Long, prompts: List<Prompt>, promptT
     prompts.forEach { prompt ->
         val promptEntity = database.promptDao().getPrompt(prompt.text)
         val promptId = if (promptEntity != null) {
-            database.promptDao().update(promptEntity)
+            database.promptDao().update(
+                promptEntity.copy(
+                    nameCn = prompt.translation ?: promptEntity.nameCn,
+                    count = promptEntity.count + 1
+                )
+            )
             promptEntity.promptId
         } else {
             database.promptDao().insert(SavePrompt.fromPrompt(prompt))

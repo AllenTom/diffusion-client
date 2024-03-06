@@ -10,11 +10,51 @@ data class TranslateResult(
 )
 
 interface Translator {
-    suspend fun translate(text: String): TranslateResult
+    suspend fun translate(
+        text: String, source: TranslateLanguages = TranslateLanguages.Auto,
+        to: TranslateLanguages = TranslateLanguages.English
+    ): TranslateResult
+
     fun init()
+
+    fun supportFromLanguage(): List<TranslateLanguages> {
+        return listOf(TranslateLanguages.Auto)
+    }
+
+    fun supportToLanguage(): List<TranslateLanguages> {
+        return listOf(TranslateLanguages.English)
+    }
 }
 
-
+enum class TranslateLanguages {
+    Auto,
+    Chinese,
+    English,
+    Korean,
+    Japanese,
+    French,
+    Spanish,
+    Thai,
+    Arabic,
+    Russian,
+    Portuguese,
+    German,
+    Italian,
+    Greek,
+    Dutch,
+    Polish,
+    Bulgarian,
+    Estonian,
+    Danish,
+    Finnish,
+    Czech,
+    Romanian,
+    Slovenian,
+    Swedish,
+    Hungarian,
+    TraditionalChinese,
+    Vietnamese
+}
 
 class TranslateHelper {
     companion object {
@@ -24,17 +64,32 @@ class TranslateHelper {
                 "Google" -> {
                     currentTranslator = GoogleTranslator()
                 }
+
                 "Baidu" -> {
-                     currentTranslator = BaiduTranslator()
+                    currentTranslator = BaiduTranslator()
                 }
             }
             currentTranslator.init()
         }
+
         fun getTranslator(): Translator {
             return this.currentTranslator
         }
-        suspend fun translateText(text: String): TranslateResult {
-            return getTranslator().translate(text)
+
+        suspend fun translateText(
+            text: String,
+            source: TranslateLanguages = TranslateLanguages.Auto,
+            to: TranslateLanguages = TranslateLanguages.English
+        ): TranslateResult {
+            return getTranslator().translate(text, source, to)
+        }
+
+        fun getFromLanguage(): List<TranslateLanguages> {
+            return getTranslator().supportFromLanguage()
+        }
+
+        fun getToLanguage(): List<TranslateLanguages> {
+            return getTranslator().supportToLanguage()
         }
     }
 }

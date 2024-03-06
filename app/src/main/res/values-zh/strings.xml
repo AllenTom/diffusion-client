@@ -336,4 +336,41 @@
     <string name="baidu_secret_key">密钥</string>
     <string name="baidu_translate_option_dialog_title">百度翻译配置</string>
     <string name="baidu_translate_option">配置百度翻译</string>
+
+
+    <string name="auto">自动</string>
+    <string name="chinese">中文</string>
+    <string name="english">英文</string>
+    <string name="korean">韩文</string>
+    <string name="japanese">日文</string>
+    <string name="french">法文</string>
+    <string name="spanish">西班牙文</string>
+    <string name="thai">泰文</string>
+    <string name="arabic">阿拉伯文</string>
+    <string name="russian">俄文</string>
+    <string name="portuguese">葡萄牙文</string>
+    <string name="german">德文</string>
+    <string name="italian">意大利文</string>
+    <string name="greek">希腊文</string>
+    <string name="dutch">荷兰文</string>
+    <string name="polish">波兰文</string>
+    <string name="bulgarian">保加利亚文</string>
+    <string name="estonian">爱沙尼亚文</string>
+    <string name="danish">丹麦文</string>
+    <string name="finnish">芬兰文</string>
+    <string name="czech">捷克文</string>
+    <string name="romanian">罗马尼亚文</string>
+    <string name="slovenian">斯洛文尼亚文</string>
+    <string name="swedish">瑞典文</string>
+    <string name="hungarian">匈牙利文</string>
+    <string name="traditional_chinese">繁体中文</string>
+    <string name="vietnamese">越南文</string>
+    <string name="edit_prompt">编辑提示词</string>
+    <string name="select_prompts_count">%1$s 个提示词</string>
+    <string name="weight">权重</string>
+    <string name="delete_confirm">删除确认</string>
+    <string name="are_you_sure_to_delete_selected_prompts">确定要删除所选的 %1$s 个提示词?</string>
+    <string name="preferred_language">翻译时偏好语言</string>
+    <string name="styles_library">样式库</string>
+
 </resources>
