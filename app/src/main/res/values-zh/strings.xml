@@ -372,5 +372,6 @@
     <string name="are_you_sure_to_delete_selected_prompts">确定要删除所选的 %1$s 个提示词?</string>
     <string name="preferred_language">翻译时偏好语言</string>
     <string name="styles_library">样式库</string>
-
+    <string name="update_selected_prompts">更新选择的%1$s个提示词</string>
+    <string name="only_translate_without_translated">只翻译没有翻译过的提示词</string>
 </resources>

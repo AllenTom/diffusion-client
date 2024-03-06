@@ -370,4 +370,6 @@
     <string name="are_you_sure_to_delete_selected_prompts">Are you sure to delete selected %1$s prompts?</string>
     <string name="preferred_language">Preferred Language</string>
     <string name="styles_library">Styles Library</string>
+    <string name="update_selected_prompts">Update selected %1$s prompts</string>
+    <string name="only_translate_without_translated">Only translate without translated</string>
 </resources>

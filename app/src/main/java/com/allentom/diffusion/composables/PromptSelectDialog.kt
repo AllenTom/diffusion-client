@@ -317,6 +317,9 @@ fun PromptEditPanel(
     var isTranslateDialogShow by remember {
         mutableStateOf(false)
     }
+    var isBatchTranslateDialogShow by remember {
+        mutableStateOf(false)
+    }
 
     fun getCurrentSelectPrompt(): Prompt? {
         return selectedPromptList.find { it.randomId == selectPromptIndex }
@@ -407,10 +410,12 @@ fun PromptEditPanel(
                 Text(text = stringResource(R.string.delete_confirm))
             },
             text = {
-                Text(text = stringResource(
-                    R.string.are_you_sure_to_delete_selected_prompts,
-                    selectedPromptIds.size
-                ))
+                Text(
+                    text = stringResource(
+                        R.string.are_you_sure_to_delete_selected_prompts,
+                        selectedPromptIds.size
+                    )
+                )
             },
             confirmButton = {
                 Button(onClick = {
@@ -452,6 +457,24 @@ fun PromptEditPanel(
             )
         }
 
+    }
+    if (isBatchTranslateDialogShow) {
+        BatchTranslatePromptDialog(
+            onDismiss = {
+                isBatchTranslateDialogShow = false
+            },
+            inputPrompts = selectedPromptList.filter { selectedPromptIds.contains(it.randomId) },
+            onUpdated = { updatePromptList ->
+                onUpdatePromptList(selectedPromptList.map {
+                    val updatedPrompt = updatePromptList.find { uit -> it.randomId == uit.randomId }
+                    if (updatedPrompt != null) {
+                        return@map updatedPrompt
+                    } else {
+                        return@map it
+                    }
+                })
+            }
+        )
     }
 
     @Composable
@@ -706,20 +729,36 @@ fun PromptEditPanel(
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = stringResource(
-                        R.string.select_prompts_count,
-                        selectedPromptIds.size
-                    ))
+                    Text(
+                        text = stringResource(
+                            R.string.select_prompts_count,
+                            selectedPromptIds.size
+                        )
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    IconButton(onClick = {
-                        deleteConfirmDialogShow = true
-                    }) {
+                    IconButton(
+                        enabled = selectedPromptIds.isNotEmpty(),
+                        onClick = {
+                            deleteConfirmDialogShow = true
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
+                            contentDescription = null
+                        )
+                    }
+                    IconButton(
+                        enabled = selectedPromptIds.isNotEmpty(),
+                        onClick = {
+                            isBatchTranslateDialogShow = true
+                        }
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_translate),
                             contentDescription = null
                         )
                     }
