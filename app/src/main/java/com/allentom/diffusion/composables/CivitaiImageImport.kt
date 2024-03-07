@@ -59,7 +59,10 @@ import com.allentom.diffusion.api.civitai.getCivitaiApiClient
 import com.allentom.diffusion.api.entity.Lora
 import com.allentom.diffusion.api.entity.Model
 import com.allentom.diffusion.extension.thenIf
+import com.allentom.diffusion.store.AppConfigStore
 import com.allentom.diffusion.store.prompt.LoraPrompt
+import com.allentom.diffusion.store.prompt.Prompt
+import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,15 +92,12 @@ fun CivitaiImageImport(
     var imageData by remember {
         mutableStateOf<CivitaiImageItem?>(null)
     }
-    var prompt =
-        imageData?.meta?.prompt?.split(",")?.filter { it.isNotEmpty() }?.map {
-            Util.parsePrompt(it)
-        } ?: emptyList()
-    var negativePrompt =
-        imageData?.meta?.negativePrompt?.split(",")?.filter { it.isNotEmpty() }
-            ?.map {
-                Util.parsePrompt(it)
-            } ?: emptyList()
+    var promptList by remember {
+        mutableStateOf(emptyList<Prompt>())
+    }
+    var negativePromptList by remember {
+        mutableStateOf(emptyList<Prompt>())
+    }
     var imageWidth by remember {
         mutableStateOf(0)
     }
@@ -118,6 +118,15 @@ fun CivitaiImageImport(
     }
     var selectedResource by remember {
         mutableStateOf(emptyList<String>())
+    }
+    var displayTranslate by remember {
+        mutableStateOf(AppConfigStore.config.importCivitaiDialogTranslate)
+    }
+    var promptTranslateDialogOpen by remember {
+        mutableStateOf(false)
+    }
+    var negativePromptTranslateDialogOpen by remember {
+        mutableStateOf(false)
     }
     val baseParamKeys = listOf(
         ImportOptionKeys.CfgScale,
@@ -148,10 +157,12 @@ fun CivitaiImageImport(
                 imageData = images.body()?.items?.firstOrNull()
                 imageData?.let { data ->
                     data.meta?.let { meta ->
+                        // parse size
                         meta.size?.split("x")?.let {
                             imageWidth = it[0].toInt()
                             imageHeight = it[1].toInt()
                         }
+                        // parse resource
                         meta.resources?.forEach {
                             when (it.type) {
                                 "model" -> {
@@ -184,10 +195,31 @@ fun CivitaiImageImport(
                                 }
                             }
                         }
+                        // parse prompt
+                        promptList = meta.prompt?.split(",")?.filter { it.isNotEmpty() }?.map {
+                            Util.parsePrompt(it)
+                        }?.map {
+                            val savedPrompt =
+                                PromptStore.getPromptByName(context, it.text)?.toPrompt()
+                            if (savedPrompt != null) {
+                                return@map savedPrompt
+                            }
+                            return@map it
+                        } ?: emptyList()
 
+                        negativePromptList =
+                            meta.negativePrompt?.split(",")?.filter { it.isNotEmpty() }
+                                ?.map {
+                                    Util.parsePrompt(it)
+                                }?.map {
+                                    val savedPrompt =
+                                        PromptStore.getPromptByName(context, it.text)?.toPrompt()
+                                    if (savedPrompt != null) {
+                                        return@map savedPrompt
+                                    }
+                                    return@map it
+                                } ?: emptyList()
                     }
-
-
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -213,7 +245,7 @@ fun CivitaiImageImport(
     }
 
     fun onSelectAllPrompt() {
-        selectedPrompt = prompt.map { it.text }
+        selectedPrompt = promptList.map { it.text }
     }
 
     fun onUnselectAllPrompt() {
@@ -229,7 +261,7 @@ fun CivitaiImageImport(
     }
 
     fun onSelectAllNegativePrompt() {
-        selectedNegativePrompt = negativePrompt.map { it.text }
+        selectedNegativePrompt = negativePromptList.map { it.text }
     }
 
     fun onUnselectAllNegativePrompt() {
@@ -289,8 +321,8 @@ fun CivitaiImageImport(
 
     fun onApply() {
         var baseParam = DrawViewModel.baseParam.copy(
-            promptText = prompt.filter { selectedPrompt.contains(it.text) },
-            negativePromptText = negativePrompt.filter { selectedNegativePrompt.contains(it.text) },
+            promptText = promptList.filter { selectedPrompt.contains(it.text) },
+            negativePromptText = negativePromptList.filter { selectedNegativePrompt.contains(it.text) },
         )
 
         selectedParamKeys.forEach { key ->
@@ -359,8 +391,16 @@ fun CivitaiImageImport(
                     }
                 }
             }
-            Toast.makeText(context, context.getString(R.string.params_applied), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.params_applied), Toast.LENGTH_SHORT)
+                .show()
             onDismiss()
+        }
+    }
+
+    fun onSwitchTranslate() {
+        displayTranslate = !displayTranslate
+        AppConfigStore.updateAndSave(context) {
+            it.copy(importCivitaiDialogTranslate = displayTranslate)
         }
     }
     if (DrawViewModel.isSwitchingModel) {
@@ -371,6 +411,44 @@ fun CivitaiImageImport(
             confirmButton = { },
             dismissButton = { }
         )
+    }
+
+    if (promptTranslateDialogOpen) {
+        BatchTranslatePromptDialog(
+            onDismiss = {
+                promptTranslateDialogOpen = false
+            },
+            inputPrompts = promptList
+        ) {updatedPromptList ->
+            // update
+            promptList = promptList.map {
+                val updatedPrompt = updatedPromptList.find { up -> up.text == it.text }
+                if (updatedPrompt != null) {
+                    return@map updatedPrompt
+                }
+                return@map it
+            }
+            promptTranslateDialogOpen = false
+        }
+    }
+
+    if (negativePromptTranslateDialogOpen) {
+        BatchTranslatePromptDialog(
+            onDismiss = {
+                negativePromptTranslateDialogOpen = false
+            },
+            inputPrompts = negativePromptList
+        ) {updatedPromptList ->
+            // update
+            negativePromptList = negativePromptList.map {
+                val updatedPrompt = updatedPromptList.find { up -> up.text == it.text }
+                if (updatedPrompt != null) {
+                    return@map updatedPrompt
+                }
+                return@map it
+            }
+            negativePromptTranslateDialogOpen = false
+        }
     }
 
     @Composable
@@ -392,6 +470,14 @@ fun CivitaiImageImport(
                         fontWeight = FontWeight.W600,
                         fontSize = 18.sp
                     )
+                    IconButton(onClick = {
+                        onSwitchTranslate()
+                    }) {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.ic_translate_mode),
+                            contentDescription = "Translate"
+                        )
+                    }
                     IconButton(onClick = {
                         onSelectAll()
                     }) {
@@ -426,6 +512,7 @@ fun CivitaiImageImport(
                             )
 
                     ) {
+                        // display prompt
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -437,6 +524,15 @@ fun CivitaiImageImport(
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(modifier = Modifier.width(16.dp))
+                            IconButton(onClick = {
+                                promptTranslateDialogOpen = !promptTranslateDialogOpen
+                            }) {
+                                Icon(
+                                    ImageVector.vectorResource(R.drawable.ic_translate),
+                                    contentDescription = "Translate"
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
                             IconButton(onClick = { onSelectAllPrompt() }) {
                                 Icon(
                                     ImageVector.vectorResource(R.drawable.ic_select_all),
@@ -460,18 +556,21 @@ fun CivitaiImageImport(
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                prompt.forEach {
+                                promptList.forEach {
                                     PromptChip(
                                         prompt = it,
                                         onClickPrompt = {
                                             onSelectPrompt(it.text)
                                         },
-                                        selected = selectedPrompt.contains(it.text)
+                                        selected = selectedPrompt.contains(it.text),
+                                        onlyShowTranslation = displayTranslate
                                     )
                                 }
                             }
                         }
+                        // display negative prompt
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -484,8 +583,17 @@ fun CivitaiImageImport(
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             IconButton(onClick = {
+                                negativePromptTranslateDialogOpen = !negativePromptTranslateDialogOpen
+                            }) {
+                                Icon(
+                                    ImageVector.vectorResource(R.drawable.ic_translate),
+                                    contentDescription = "Translate"
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(onClick = {
                                 selectedNegativePrompt =
-                                    negativePrompt.map { it.text }
+                                    negativePromptList.map { it.text }
                             }) {
                                 Icon(
                                     ImageVector.vectorResource(R.drawable.ic_select_all),
@@ -511,8 +619,9 @@ fun CivitaiImageImport(
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                negativePrompt.forEach {
+                                negativePromptList.forEach {
                                     PromptChip(
                                         prompt = it,
                                         onClickPrompt = {
@@ -520,7 +629,8 @@ fun CivitaiImageImport(
                                         },
                                         selected = selectedNegativePrompt.contains(
                                             it.text
-                                        )
+                                        ),
+                                        onlyShowTranslation = displayTranslate
                                     )
                                 }
                             }
@@ -858,7 +968,7 @@ fun CivitaiImageImport(
                                         second()
                                     }
 
-                                }else{
+                                } else {
                                     first()
                                 }
                             }

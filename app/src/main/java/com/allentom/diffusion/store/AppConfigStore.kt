@@ -24,7 +24,8 @@ data class AppConfig(
     var baiduTranslateAppId: String = "",
     var baiduTranslateSecretKey: String = "",
     var onlyDisplayTranslateOnPromptSelectDialog: Boolean = true,
-    val preferredLanguage: TranslateLanguages = TranslateLanguages.English
+    val preferredLanguage: TranslateLanguages = TranslateLanguages.English,
+    val importCivitaiDialogTranslate:Boolean = true,
 )
 
 object AppConfigStore {

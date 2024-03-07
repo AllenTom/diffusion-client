@@ -250,6 +250,10 @@ object PromptStore {
         return AppDatabaseHelper.getDatabase(context).promptDao().getPromptByCategory(category)
     }
 
+    fun getPromptByName(context: Context, name: String): SavePrompt? {
+        return AppDatabaseHelper.getDatabase(context).promptDao().getPrompt(name)
+    }
+
     fun getOrCreateLoraPromptByName(context: Context, name: String): LoraPromptEntity {
         val db = AppDatabaseHelper.getDatabase(context)
         val prompt = db.loraPromptDao().getPrompt(name)

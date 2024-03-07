@@ -349,7 +349,7 @@ object Util {
         if (parseText.split(":").size == 2) {
             parseText = parseText.split(":")[0]
         }
-        return Prompt(text = parseText, piority = piority)
+        return Prompt(text = parseText, piority = piority, translation = parseText)
     }
 
     fun randomColor(): Int {
