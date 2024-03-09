@@ -33,7 +33,7 @@ data class CivitaiModelVersion(
     val stats: Stats,
     val model: Model,
     val files: List<File>,
-    val images: List<Image>,
+    val images: List<CivitaiImageItem>,
     val downloadUrl: String,
     val trainedWords: List<String> = emptyList(),
 ):Serializable
