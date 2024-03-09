@@ -253,7 +253,7 @@ fun CivitaiModelView(
                             Spacer(modifier = Modifier.height(16.dp))
                             ListItem(
                                 headlineContent = {
-                                    Text(stringResource(id =R.string.name))
+                                    Text(stringResource(id = R.string.name))
                                 }, supportingContent = {
                                     Text(text = cvModel.name)
                                 }
@@ -304,7 +304,8 @@ fun CivitaiModelView(
                                         factory = { context -> TextView(context) },
                                         update = {
                                             it.text = HtmlCompat.fromHtml(
-                                                cvModel.description ?: context.getString(R.string.no_description),
+                                                cvModel.description
+                                                    ?: context.getString(R.string.no_description),
                                                 HtmlCompat.FROM_HTML_MODE_COMPACT
                                             )
                                         }
@@ -314,6 +315,7 @@ fun CivitaiModelView(
                         }
 
                     }
+
                     1 -> {
                         modelVersion?.stats?.let { stats ->
                             Spacer(modifier = Modifier.height(16.dp))
@@ -340,7 +342,8 @@ fun CivitaiModelView(
                                         factory = { context -> TextView(context) },
                                         update = {
                                             it.text = HtmlCompat.fromHtml(
-                                                modelVersion.description ?: context.getString(R.string.no_description),
+                                                modelVersion.description
+                                                    ?: context.getString(R.string.no_description),
                                                 HtmlCompat.FROM_HTML_MODE_COMPACT
                                             )
                                         }
@@ -440,13 +443,8 @@ fun CivitaiImageGrid(
                             SubcomposeAsyncImageContent(
                                 modifier = Modifier
                                     .clickable {
-                                        CivitaiImageListViewModel.imageList = civitaiImageList
-                                        navController.navigate(
-                                            Screens.CivitaiImageDetail.route.replace(
-                                                "{id}",
-                                                item.id.toString()
-                                            )
-                                        )
+                                        CivitaiImageViewModel.image = item
+                                        navController.navigate(Screens.CivitaiModelImageScreen.route)
                                     }
                             )
                         }
