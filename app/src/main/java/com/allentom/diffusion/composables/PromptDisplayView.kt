@@ -31,6 +31,7 @@ fun PromptDisplayView(
     title: String = "Prompt",
     titleComponent: (@Composable () -> Unit)? = null,
     canScroll: Boolean = true,
+    toolbar: (@Composable () -> Unit)? = null,
     onClickPrompt: ((Prompt) -> Unit)? = {},
     onAction: (List<Prompt>) -> Unit
 ) {
@@ -50,6 +51,9 @@ fun PromptDisplayView(
                 Text(text = title)
             }
             Spacer(modifier = Modifier.weight(1f))
+            if (toolbar != null) {
+                toolbar()
+            }
             if (selectedPromptList.isNotEmpty()) {
                 TextButton(onClick = {
                     val contextPrompt = promptList.filter { prompt ->

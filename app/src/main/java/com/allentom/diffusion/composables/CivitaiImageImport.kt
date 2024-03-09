@@ -56,26 +56,16 @@ import com.allentom.diffusion.R
 import com.allentom.diffusion.Util
 import com.allentom.diffusion.api.civitai.entities.CivitaiImageItem
 import com.allentom.diffusion.api.civitai.getCivitaiApiClient
-import com.allentom.diffusion.api.entity.Lora
-import com.allentom.diffusion.api.entity.Model
 import com.allentom.diffusion.extension.thenIf
 import com.allentom.diffusion.store.AppConfigStore
+import com.allentom.diffusion.store.civitai.CivitaiImage
+import com.allentom.diffusion.store.civitai.ImportResource
 import com.allentom.diffusion.store.prompt.LoraPrompt
 import com.allentom.diffusion.store.prompt.Prompt
 import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.ui.screens.home.tabs.draw.DrawViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-data class ImportResource(
-    val id: String = Util.randomString(6),
-    val type: String,
-    val name: String,
-    val hash: String?,
-    val weight: Float? = null,
-    val model: Model? = null,
-    val lora: Lora? = null
-)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -89,21 +79,14 @@ fun CivitaiImageImport(
     var inputSource by remember {
         mutableStateOf("")
     }
-    var imageData by remember {
-        mutableStateOf<CivitaiImageItem?>(null)
+    var civitaiImage by remember {
+        mutableStateOf<CivitaiImage?>(null)
     }
-    var promptList by remember {
-        mutableStateOf(emptyList<Prompt>())
-    }
-    var negativePromptList by remember {
-        mutableStateOf(emptyList<Prompt>())
-    }
-    var imageWidth by remember {
-        mutableStateOf(0)
-    }
-    var imageHeight by remember {
-        mutableStateOf(0)
-    }
+    val imageData = civitaiImage?.raw
+    val promptList = civitaiImage?.promptList ?: emptyList()
+    val negativePromptList = civitaiImage?.negativePromptList ?: emptyList()
+    val imageWidth = civitaiImage?.width
+    val imageHeight = civitaiImage?.height
     var resources by remember {
         mutableStateOf<List<ImportResource>>(emptyList())
     }
@@ -154,72 +137,8 @@ fun CivitaiImageImport(
                 if (!images.isSuccessful) {
                     return@launch
                 }
-                imageData = images.body()?.items?.firstOrNull()
-                imageData?.let { data ->
-                    data.meta?.let { meta ->
-                        // parse size
-                        meta.size?.split("x")?.let {
-                            imageWidth = it[0].toInt()
-                            imageHeight = it[1].toInt()
-                        }
-                        // parse resource
-                        meta.resources?.forEach {
-                            when (it.type) {
-                                "model" -> {
-                                    val model = it.hash?.let { hash ->
-                                        DrawViewModel.models.find { model ->
-                                            model.sha256?.startsWith(hash) ?: false
-                                        }
-                                    }
-                                    resources = resources + ImportResource(
-                                        type = it.type,
-                                        name = it.name,
-                                        hash = it.hash,
-                                        weight = it.weight,
-                                        model = model,
-
-                                        )
-                                }
-
-                                "lora" -> {
-                                    val lora = DrawViewModel.loraList.find { lora ->
-                                        lora.name == it.name
-                                    }
-                                    resources = resources + ImportResource(
-                                        type = it.type,
-                                        name = it.name,
-                                        hash = it.hash,
-                                        weight = it.weight,
-                                        lora = lora
-                                    )
-                                }
-                            }
-                        }
-                        // parse prompt
-                        promptList = meta.prompt?.split(",")?.filter { it.isNotEmpty() }?.map {
-                            Util.parsePrompt(it)
-                        }?.map {
-                            val savedPrompt =
-                                PromptStore.getPromptByName(context, it.text)?.toPrompt()
-                            if (savedPrompt != null) {
-                                return@map savedPrompt
-                            }
-                            return@map it
-                        } ?: emptyList()
-
-                        negativePromptList =
-                            meta.negativePrompt?.split(",")?.filter { it.isNotEmpty() }
-                                ?.map {
-                                    Util.parsePrompt(it)
-                                }?.map {
-                                    val savedPrompt =
-                                        PromptStore.getPromptByName(context, it.text)?.toPrompt()
-                                    if (savedPrompt != null) {
-                                        return@map savedPrompt
-                                    }
-                                    return@map it
-                                } ?: emptyList()
-                    }
+                images.body()?.items?.firstOrNull()?.let {
+                    civitaiImage = CivitaiImage.fromCivitaiImageItem(context, it)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -346,13 +265,16 @@ fun CivitaiImageImport(
                 }
 
                 ImportOptionKeys.Width -> {
-                    baseParam = baseParam.copy(width = imageWidth)
+                    imageWidth?.let {
+                        baseParam = baseParam.copy(width = it)
+                    }
                 }
 
                 ImportOptionKeys.Height -> {
-                    baseParam = baseParam.copy(height = imageHeight)
+                    imageHeight?.let {
+                        baseParam = baseParam.copy(height = it)
+                    }
                 }
-
                 else -> {
 
                 }
@@ -421,13 +343,15 @@ fun CivitaiImageImport(
             inputPrompts = promptList
         ) {updatedPromptList ->
             // update
-            promptList = promptList.map {
-                val updatedPrompt = updatedPromptList.find { up -> up.text == it.text }
-                if (updatedPrompt != null) {
-                    return@map updatedPrompt
+            civitaiImage = civitaiImage?.copy(
+                promptList = promptList.map {
+                    val updatedPrompt = updatedPromptList.find { up -> up.text == it.text }
+                    if (updatedPrompt != null) {
+                        return@map updatedPrompt
+                    }
+                    return@map it
                 }
-                return@map it
-            }
+            )
             promptTranslateDialogOpen = false
         }
     }
@@ -440,13 +364,15 @@ fun CivitaiImageImport(
             inputPrompts = negativePromptList
         ) {updatedPromptList ->
             // update
-            negativePromptList = negativePromptList.map {
-                val updatedPrompt = updatedPromptList.find { up -> up.text == it.text }
-                if (updatedPrompt != null) {
-                    return@map updatedPrompt
+            civitaiImage = civitaiImage?.copy(
+                negativePromptList = negativePromptList.map {
+                    val updatedPrompt = updatedPromptList.find { up -> up.text == it.text }
+                    if (updatedPrompt != null) {
+                        return@map updatedPrompt
+                    }
+                    return@map it
                 }
-                return@map it
-            }
+            )
             negativePromptTranslateDialogOpen = false
         }
     }
