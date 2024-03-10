@@ -215,7 +215,10 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
                                             Spacer(modifier = Modifier.height(16.dp))
                                             SecondScreen(
                                                 currentHistory = currentHistory,
-                                                navController = navController
+                                                navController = navController,
+                                                onUpdateHistory = {
+                                                    saveHistory = it
+                                                }
                                             )
                                         }
                                     }
@@ -235,7 +238,10 @@ fun HistoryDetailScreen(navController: NavController, historyId: Long) {
                                         item {
                                             SecondScreen(
                                                 currentHistory = currentHistory,
-                                                navController = navController
+                                                navController = navController,
+                                                onUpdateHistory = {
+                                                    saveHistory = it
+                                                }
                                             )
                                         }
                                     }
@@ -502,8 +508,25 @@ fun FirstScreen(
 }
 
 @Composable
-fun SecondScreen(currentHistory: SaveHistory, navController: NavController) {
-    HistoryView(currentHistory = currentHistory, navController)
+fun SecondScreen(
+    currentHistory: SaveHistory,
+    navController: NavController,
+    onUpdateHistory: (SaveHistory) -> Unit = {}
+) {
+    HistoryView(
+        currentHistory = currentHistory,
+        navController = navController,
+        onPromptUpdate = {
+            onUpdateHistory(currentHistory.copy(
+                prompt = it
+            ))
+        },
+        onNegativePromptUpdate = {
+            onUpdateHistory(currentHistory.copy(
+                negativePrompt = it
+            ))
+        }
+    )
     Spacer(modifier = Modifier.height(120.dp))
 }
 

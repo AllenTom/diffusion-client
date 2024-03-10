@@ -296,7 +296,20 @@ fun ImageDetail(id: String, navController: NavController) {
                                     Box(
                                         modifier = Modifier.padding(horizontal = 16.dp)
                                     ) {
-                                        HistoryView(currentHistory = genHis, navController)
+                                        HistoryView(
+                                            currentHistory = genHis,
+                                            navController = navController,
+                                            onPromptUpdate = {
+                                                genHistory = genHistory?.copy(
+                                                    prompt = it
+                                                )
+                                            },
+                                            onNegativePromptUpdate = {
+                                                genHistory = genHistory?.copy(
+                                                    negativePrompt = it
+                                                )
+                                            }
+                                        )
                                     }
 
                                     Spacer(modifier = Modifier.height(64.dp))
@@ -335,7 +348,20 @@ fun ImageDetail(id: String, navController: NavController) {
                             .padding(bottom = 64.dp)
                     ) {
                         genHistory?.let { genHis ->
-                            HistoryView(currentHistory = genHis, navController)
+                            HistoryView(
+                                currentHistory = genHis,
+                                navController = navController,
+                                onPromptUpdate = {
+                                    genHistory = genHistory?.copy(
+                                        prompt = it
+                                    )
+                                },
+                                onNegativePromptUpdate = {
+                                    genHistory = genHistory?.copy(
+                                        negativePrompt = it
+                                    )
+                                }
+                            )
                         }
                     }
                 }

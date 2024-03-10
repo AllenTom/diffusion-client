@@ -19,6 +19,8 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,7 +59,9 @@ fun HistoryView(
     currentHistory: SaveHistory,
     navController: NavController,
     displayFirstGroup: Boolean = true,
-    displaySecondGroup: Boolean = true
+    displaySecondGroup: Boolean = true,
+    onPromptUpdate: (List<Prompt>) -> Unit = {},
+    onNegativePromptUpdate: (List<Prompt>) -> Unit = {}
 ) {
     var isImage2ImageInputPreviewOpen by remember {
         mutableStateOf(false)
@@ -73,6 +79,17 @@ fun HistoryView(
         mutableStateOf(0)
     }
 
+    val prompt = currentHistory.prompt
+    val negativePrompt = currentHistory.negativePrompt
+    var isPromptTranslateDialogOpen by remember {
+        mutableStateOf(false)
+    }
+    var isNegativePromptTranslateDialogOpen by remember {
+        mutableStateOf(false)
+    }
+    var onlyDisplayTranslated by remember {
+        mutableStateOf(false)
+    }
     if (isImage2ImageInputPreviewOpen) {
         currentHistory.savedImg2ImgParam?.let {
             ImageUriPreviewDialog(
@@ -97,6 +114,40 @@ fun HistoryView(
     }
 
     PromptAction(promptActionState)
+
+    if (isPromptTranslateDialogOpen) {
+        BatchTranslatePromptDialog(
+            onDismiss = {
+                isPromptTranslateDialogOpen = false
+            },
+            inputPrompts = prompt
+        ) { updatedPrompt ->
+            onPromptUpdate(
+                currentHistory.prompt.map {
+                    val needToUpdateItem =
+                        updatedPrompt.find { updatedPromptItem -> updatedPromptItem.promptId == it.promptId }
+                    needToUpdateItem ?: it
+                }
+            )
+        }
+    }
+    if (isNegativePromptTranslateDialogOpen) {
+        BatchTranslatePromptDialog(
+            onDismiss = {
+                isNegativePromptTranslateDialogOpen = false
+            },
+            inputPrompts = negativePrompt
+        ) { updatedPrompt ->
+            onNegativePromptUpdate(
+                currentHistory.negativePrompt.map {
+                    val needToUpdateItem =
+                        updatedPrompt.find { updatedPromptItem -> updatedPromptItem.promptId == it.promptId }
+                    needToUpdateItem ?: it
+                }
+            )
+        }
+    }
+
     @Composable
     fun firstGroup() {
         if (currentHistory.regionEnable == true) {
@@ -129,7 +180,26 @@ fun HistoryView(
                             )
                         )
                     },
-                    canScroll = false
+                    canScroll = false,
+                    onlyShowTranslation = onlyDisplayTranslated,
+                    toolbar = {
+                        IconButton(onClick = {
+                            onlyDisplayTranslated = !onlyDisplayTranslated
+                        }) {
+                            Icon(
+                                ImageVector.vectorResource(id = R.drawable.ic_translate_mode),
+                                contentDescription = null
+                            )
+                        }
+                        IconButton(onClick = {
+                            isPromptTranslateDialogOpen = true
+                        }) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.ic_translate),
+                                contentDescription = null
+                            )
+                        }
+                    }
                 ) {
                     promptActionState.onOpenActionBottomSheet(it, "prompt")
                 }
@@ -141,14 +211,34 @@ fun HistoryView(
                 titleComponent = {
                     SectionTitle(title = stringResource(R.string.param_negative_prompt))
                 },
-                canScroll = false
+                canScroll = false,
+                onlyShowTranslation = onlyDisplayTranslated,
+                toolbar = {
+                    IconButton(onClick = {
+                        onlyDisplayTranslated = !onlyDisplayTranslated
+                    }) {
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.ic_translate_mode),
+                            contentDescription = null
+                        )
+                    }
+                    IconButton(onClick = {
+                        isNegativePromptTranslateDialogOpen = true
+                    }) {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.ic_translate),
+                            contentDescription = null
+                        )
+                    }
+                }
             ) {
                 promptActionState.onOpenActionBottomSheet(it, "negativePrompt")
             }
         }
     }
+
     @Composable
-    fun secondGroup(){
+    fun secondGroup() {
         currentHistory.loraPrompt.takeIf { it.isNotEmpty() }?.let {
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(title = stringResource(R.string.param_lora))
