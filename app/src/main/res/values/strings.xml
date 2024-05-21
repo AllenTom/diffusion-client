@@ -372,4 +372,5 @@
     <string name="styles_library">Styles Library</string>
     <string name="update_selected_prompts">Update selected %1$s prompts</string>
     <string name="only_translate_without_translated">Only translate without translated</string>
+    <string name="caption_score_threshold">Caption score threshold</string>
 </resources>

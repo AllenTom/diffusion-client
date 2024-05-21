@@ -74,18 +74,18 @@ fun TabTools(navController: NavController) {
             )
         }
 
-        ListItem(
-            modifier = Modifier.clickable {
-                navController.navigate(Screens.Tagger.route)
-            },
-            headlineContent = { Text(text = stringResource(id = R.string.tools_caption)) },
-            leadingContent = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_caption),
-                    contentDescription = "Caption"
-                )
-            }
-        )
+//        ListItem(
+//            modifier = Modifier.clickable {
+//                navController.navigate(Screens.Tagger.route)
+//            },
+//            headlineContent = { Text(text = stringResource(id = R.string.tools_caption)) },
+//            leadingContent = {
+//                Icon(
+//                    imageVector = ImageVector.vectorResource(R.drawable.ic_caption),
+//                    contentDescription = "Caption"
+//                )
+//            }
+//        )
         Divider()
         ListItem(
             modifier = Modifier.clickable {

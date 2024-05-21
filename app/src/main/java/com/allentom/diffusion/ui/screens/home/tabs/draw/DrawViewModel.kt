@@ -56,6 +56,7 @@ import com.allentom.diffusion.store.prompt.PromptStore
 import com.allentom.diffusion.store.SaveControlNet
 import com.allentom.diffusion.store.history.SaveHistory
 import com.allentom.diffusion.store.history.SaveHrParam
+import com.allentom.diffusion.ui.DrawBarViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1275,6 +1276,7 @@ object DrawViewModel {
         Log.d("initViewModel", "Call time for getOptions: ${endTime - startTime} ms")
         useModelName = options?.sdModelCheckpoint
         useVae = options?.sdVae
+        DrawBarViewModel.danbooruCaptionThreshold = options?.interrogateDeepbooruScoreThreshold ?: 0.7f
     }
 
     suspend fun switchModel(modelName: String) {

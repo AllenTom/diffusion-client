@@ -62,6 +62,7 @@ fun DrawBar(
 ) {
     val deviceType = DetectDeviceType()
     val isTablet = deviceType == DeviceType.Tablet
+    val isPhone = deviceType == DeviceType.Phone
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isParamsModalShow by remember { mutableStateOf(false) }
@@ -89,7 +90,7 @@ fun DrawBar(
     if (isParamOpen) {
         ModalBottomSheet(
             modifier = Modifier.thenIf(
-                isTablet,
+                isPhone,
                 Modifier.fillMaxWidth()
             ),
             onDismissRequest = {
@@ -108,6 +109,18 @@ fun DrawBar(
                     onValueChange = {
                         DrawBarViewModel.useTaggerName = it
                     })
+                if (DrawBarViewModel.useTaggerName == "deepdanbooru") {
+                    SliderOptionItem(
+                        label = stringResource(R.string.caption_score_threshold),
+                        valueRange = 0f..1f,
+                        value = DrawBarViewModel.danbooruCaptionThreshold,
+                        onValueChangeFloat = {
+                            DrawBarViewModel.danbooruCaptionThreshold = it
+                        },
+                        baseFloat = 0.01f
+                    )
+                }
+
             }
         }
     }

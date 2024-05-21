@@ -541,6 +541,7 @@ data class InterrogateRequest(
 data class OptionsRequestBody(
     @SerializedName("sd_model_checkpoint") val sdModelCheckpoint: String? = null,
     @SerializedName("sd_vae") val sdVae: String? = null,
+    @SerializedName("interrogate_deepbooru_score_threshold") val interrogateDeepbooruScoreThreshold: Float? = null,
 )
 
 data class ExtraImageRequest(
